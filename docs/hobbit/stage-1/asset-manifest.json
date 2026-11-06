@@ -1,0 +1,71 @@
+{
+  "pathBase": "repository root",
+  "characters": [
+    {
+      "id": "narion",
+      "name": "Narion",
+      "portrait": "docs/hobbit/heroes/elf/Narion.png",
+      "companion": "fox",
+      "observerCard": "docs/hobbit/UML/1.5.png",
+      "mediatorCard": "docs/hobbit/UML/2.6.png"
+    },
+    {
+      "id": "elvir",
+      "name": "Elvir",
+      "portrait": "docs/hobbit/heroes/elf/Elbir.png",
+      "companion": "raven",
+      "observerCard": "docs/hobbit/UML/1.2.png",
+      "mediatorCard": "docs/hobbit/UML/2.3.png"
+    },
+    {
+      "id": "dre-kaar",
+      "name": "Dre’Kaar",
+      "portrait": "docs/hobbit/heroes/elf/DRE.png",
+      "companion": "commander beetle",
+      "observerCard": "docs/hobbit/UML/1.1.png",
+      "mediatorCard": "docs/hobbit/UML/2.2.png"
+    },
+    {
+      "id": "faelina",
+      "name": "Faelina",
+      "portrait": "docs/hobbit/heroes/elf/Faelina.png",
+      "companion": "spiders",
+      "observerCard": "docs/hobbit/UML/1.3.png",
+      "mediatorCard": "docs/hobbit/UML/2.4.png"
+    },
+    {
+      "id": "latve",
+      "name": "Latve",
+      "portrait": "docs/hobbit/heroes/elf/Latve.png",
+      "companion": "jellyfish",
+      "observerCard": "docs/hobbit/UML/1.4.png",
+      "mediatorCard": "docs/hobbit/UML/2.5.png"
+    },
+    {
+      "id": "saerenn",
+      "name": "Saerenn",
+      "portrait": "docs/hobbit/heroes/elf/Saerenn.png",
+      "companion": "deer",
+      "observerCard": "docs/hobbit/UML/1.6.png",
+      "mediatorCard": "docs/hobbit/UML/2.7.png"
+    },
+    {
+      "id": "jararis",
+      "name": "Jararis",
+      "portrait": "docs/hobbit/heroes/elf/Jararis.png",
+      "companion": "snake",
+      "observerCard": "docs/hobbit/UML/1.7.png",
+      "mediatorCard": "docs/hobbit/UML/2.8.png"
+    }
+  ],
+  "scenes": {
+    "fox": "docs/hobbit/scenarios/1.1.png",
+    "raven": "docs/hobbit/scenarios/2.2.png",
+    "camp": "docs/hobbit/scenarios/6.png"
+  },
+  "specialCards": {
+    "fox": "docs/hobbit/UML/1.8.png",
+    "raven": "docs/hobbit/UML/2.1.png"
+  },
+  "map": "docs/map.jpg"
+}
