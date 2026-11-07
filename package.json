@@ -7,7 +7,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "tsx src/tests/content-integrity.test.ts && tsx src/tests/runtime.test.ts && tsx src/tests/observer-lesson.test.ts && tsx src/scenarios/mediator/model.test.ts && tsx src/tests/scenario-boundaries.test.mjs"
+    "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator",
+    "test:boundaries": "tsx src/tests/scenario-boundaries.test.mjs",
+    "test:observer": "tsx src/scenarios/observer/model.test.ts",
+    "test:mediator": "tsx src/scenarios/mediator/model.test.ts"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

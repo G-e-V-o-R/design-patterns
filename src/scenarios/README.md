@@ -26,8 +26,8 @@ The order and visual treatment can vary, but learners must be able to move from 
 ## Implementation boundaries
 
 - Keep all scenario content and behavior in its own `src/scenarios/<id>/` directory: public component, model, validation, simulation, styles, and tests.
-- Give each scenario its own state and model. Do not import from sibling scenarios, `src/app/`, or the legacy Observer compatibility module. The shell should know only the scenario's registry metadata and public component.
-- Keep the initial activity understandable and safe to explore. Do not read or write legacy saves; a page reload starts a fresh scenario.
+- Give each scenario its own state and model. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or any other `src/` module. The only allowed external relative imports are scenario artwork in `docs/`.
+- Keep the initial activity understandable and safe to explore. A page reload starts a fresh scenario.
 - Keep pattern-specific logic in the scenario. Do not add pattern-specific branches to the application shell or make a scenario depend on another scenario's internals.
 - Scope styles to a scenario root class. Keep class names, animation names, and visual changes local; shared shell or base-style changes need regression checks for all scenarios.
 - Use the existing scenario conventions and helpers where appropriate. Extract shared UI only when its contract is stable and all consumers can be regression-tested.
@@ -49,12 +49,12 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Adding a scenario
 
-1. Create `src/scenarios/<id>/` with the scenario component, model, scoped styles, and model tests.
+1. Create `src/scenarios/<id>/` with the scenario component, model, scoped styles, and `model.test.ts`.
 2. Adapt the scenario idea from `docs/hobbit/Russian Scenarios.md` into a clear A2-level description. Explain the problem and how the pattern solves it, then build the task, diagram activity, targeted checking, hints or solution, and a pattern-specific demonstration.
-3. Register a unique ID and the public component in `src/scenarios/registry.ts`; keep `src/scenarios/types.ts` limited to the shell contract.
-4. Add the model test to `package.json`.
-5. Run `npm test` and `npm run build`.
-6. Check the scenario in a browser: initial state, incomplete and incorrect models, solution, every demo case, reset, undo if present, keyboard use, narrow layouts, and switching between scenarios. Confirm that switching preserves the scenario's state and reset affects only that scenario.
+3. Register a unique ID and the public component import in `src/scenarios/registry.ts`; keep `src/scenarios/types.ts` limited to the shell contract. The registry uses static imports so problems are reported at build time.
+4. Add a `test:<id>` script to `package.json` and include it in the aggregate `test` script. The boundary test verifies this wiring.
+5. Run `npm test`, `npm run typecheck`, and `npm run build`.
+6. Check the scenario in a browser: initial state, incomplete and incorrect models, solution, every demo case, reset, undo if present, keyboard use, narrow layouts, and switching between scenarios. Confirm that switching preserves the scenario's state, the hidden scenario does not run visibility-dependent behavior, and reset affects only that scenario.
 
 ## Observer as the reference
 

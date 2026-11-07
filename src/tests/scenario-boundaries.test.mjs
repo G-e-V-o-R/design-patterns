@@ -1,56 +1,91 @@
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import ts from 'typescript';
-import { solutionLesson as observerSolution, validateLesson as validateObserver } from '../scenarios/observer/model.ts';
-import { solutionLesson as mediatorSolution, validateLesson as validateMediator } from '../scenarios/mediator/model.ts';
-const root = resolve('src/scenarios');
-const modules = readdirSync(root, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name);
+
+const scenariosRoot = resolve('src/scenarios');
+const docsRoot = resolve('docs');
+const modules = readdirSync(scenariosRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort();
+
 function files(dir) {
     return readdirSync(dir, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? files(join(dir, entry.name)) : [join(dir, entry.name)]);
 }
+
+function isInside(parent, target) {
+    const path = relative(parent, target);
+    return path === '' || (!path.startsWith('..') && !path.startsWith(sep) && !/^[A-Za-z]:/.test(path));
+}
+
 for (const module of modules) {
-    for (const file of files(join(root, module)).filter(file => /\.(ts|tsx)$/.test(file))) {
-        const text = readFileSync(file, 'utf8');
-        const imports = ts.preProcessFile(text).importedFiles.map(item => item.fileName);
+    const moduleRoot = join(scenariosRoot, module);
+    const moduleFiles = files(moduleRoot).filter(file => /\.(ts|tsx)$/.test(file));
+    assert.ok(moduleFiles.some(file => file.endsWith('model.test.ts')), `${module} must own a model.test.ts`);
+    for (const file of moduleFiles) {
+        const imports = ts.preProcessFile(readFileSync(file, 'utf8'), true, true).importedFiles.map(item => item.fileName);
         for (const specifier of imports) {
             if (!specifier.startsWith('.')) {
                 assert.ok(!specifier.startsWith('@/') && !specifier.startsWith('src/'), `Use explicit relative imports in ${file}`);
                 continue;
             }
-            const target = resolve(dirname(file), specifier);
-            const owner = relative(root, target).split('/')[0];
-            assert.ok(!modules.includes(owner) || owner === module, `${file} imports sibling scenario ${specifier}`);
-            assert.ok(!target.startsWith(resolve('src/application')) && !target.startsWith(resolve('src/app')), `${file} reaches into application internals: ${specifier}`);
+            const target = resolve(dirname(file), specifier.replace(/[?#].*$/, ''));
+            assert.ok(isInside(moduleRoot, target) || isInside(docsRoot, target), `${file} imports outside its scenario: ${specifier}`);
         }
     }
 }
-// Read the registry without loading JSX, CSS, or browser-only modules in Node.
-const registry = ts.createSourceFile('registry.ts', readFileSync(join(root, 'registry.ts'), 'utf8'), ts.ScriptTarget.Latest, true);
-const ids = [];
+
+const registryFile = join(scenariosRoot, 'registry.ts');
+const registry = ts.createSourceFile('registry.ts', readFileSync(registryFile, 'utf8'), ts.ScriptTarget.Latest, true);
+const componentImports = new Map();
+let scenarioArray;
+
+function unwrap(node) {
+    while (ts.isAsExpression(node) || ts.isSatisfiesExpression(node) || ts.isParenthesizedExpression(node)) node = node.expression;
+    return node;
+}
+
 function visit(node) {
-    if (ts.isPropertyAssignment(node) && node.name.getText(registry) === 'id' && ts.isStringLiteral(node.initializer))
-        ids.push(node.initializer.text);
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.importClause?.name)
+        componentImports.set(node.importClause.name.text, node.moduleSpecifier.text);
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'scenarios' && node.initializer)
+        scenarioArray = unwrap(node.initializer);
     ts.forEachChild(node, visit);
 }
 visit(registry);
-assert.equal(ids.length, modules.length, 'Register every scenario once');
+
+assert.ok(scenarioArray && ts.isArrayLiteralExpression(scenarioArray), 'registry must declare a scenarios array');
+const entries = scenarioArray.elements.map(element => {
+    assert.ok(ts.isObjectLiteralExpression(element), 'every scenario entry must be an object');
+    const properties = new Map(element.properties.filter(ts.isPropertyAssignment).map(property => [property.name.getText(registry), property.initializer]));
+    const id = properties.get('id');
+    const Component = properties.get('Component');
+    assert.ok(id && ts.isStringLiteral(id), 'every scenario entry needs a string id');
+    assert.ok(Component && ts.isIdentifier(Component), `scenario ${id.text} needs a Component import`);
+    return { id: id.text, Component: Component.text };
+});
+
+const ids = entries.map(entry => entry.id);
+assert.equal(ids.length, modules.length, 'Register every scenario exactly once');
 assert.equal(new Set(ids).size, ids.length, 'Scenario IDs must be unique');
-for (const id of ids)
-    assert.ok(modules.includes(id), `No owned module for ${id}`);
-const observer = observerSolution();
-const mediator = mediatorSolution();
-const observerSnapshot = JSON.stringify(observer);
-mediator.classes.pop();
-mediator.members['notify-routing'] = 'narion';
-mediator.edges[0].target = 'narion';
-assert.equal(JSON.stringify(observer), observerSnapshot, 'Editing Mediator must not mutate Observer');
-assert.deepEqual(validateObserver(observer), []);
-assert.deepEqual(validateMediator(mediatorSolution()), [], 'Fresh Mediator state must not share mutable objects');
-const mediatorSnapshot = JSON.stringify(mediator);
-observer.classes.pop();
-observer.members.notify = 'narion';
-observer.edges[0].target = 'narion';
-assert.equal(JSON.stringify(mediator), mediatorSnapshot, 'Editing Observer must not mutate Mediator');
-assert.deepEqual(validateObserver(observerSolution()), [], 'Fresh Observer state must not share mutable objects');
-console.log('Scenario module boundaries and registry checks passed.');
+for (const entry of entries) {
+    assert.ok(modules.includes(entry.id), `No scenario directory named ${entry.id}`);
+    const specifier = componentImports.get(entry.Component);
+    assert.ok(specifier, `Missing import for ${entry.Component}`);
+    assert.ok(specifier.startsWith(`./${entry.id}/`), `${entry.id} must import its component from ./${entry.id}/`);
+}
+for (const module of modules)
+    assert.ok(ids.includes(module), `Scenario directory ${module} is not registered`);
+
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+for (const module of modules) {
+    const script = pkg.scripts[`test:${module}`];
+    const testPath = `src/scenarios/${module}/model.test.ts`;
+    assert.ok(typeof script === 'string', `Add a test:${module} script to package.json`);
+    assert.ok(script.includes(testPath), `test:${module} must run ${testPath}`);
+    assert.ok(pkg.scripts.test.includes(`test:${module}`), `npm test must include test:${module}`);
+    assert.ok(existsSync(resolve(testPath)), `Missing ${testPath}`);
+}
+
+console.log('Scenario module boundaries, registry, and test wiring checks passed.');

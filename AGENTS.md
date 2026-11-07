@@ -1,6 +1,6 @@
 # Design Patterns agent guidance
 
-This repository currently contains design pattern reference material in `docs/` and no web application code in `src/`. Inspect the live repository before assuming an application stack.
+This repository contains design pattern reference material in `docs/` and a Vite/React app in `src/`. The app is a small shell (`src/app/`) that renders independently owned scenarios from `src/scenarios/<id>/`. Each scenario owns its model, validation, simulation, UI, styles, and tests; the registry uses static imports so missing modules fail at build time. Inspect the live repository before assuming a stack or module layout.
 
 ## Project agents
 
@@ -11,4 +11,4 @@ This repository currently contains design pattern reference material in `docs/` 
 
 For every requested web application code change, ask `architecture_planner` for a plan and wait for its result before editing code. Give it the task and relevant constraints. The plan should name affected files, design choices, and verification; a small fix can have a short plan. The main agent reviews the plan and passes it to `web_implementer` or implements it directly. If new facts change the approach, update the plan before continuing.
 
-Delegate independent browser checks when useful. Use `security_reviewer` when the user explicitly requests a security review. Keep edits to a given file with one agent at a time. The main agent coordinates work and verifies the combined result.
+Delegate independent browser checks when useful. Use `security_reviewer` when the user explicitly requests a security review. Keep edits to a given file with one agent at a time. The main agent coordinates work and verifies the combined result. Run `npm test`, `npm run typecheck`, and `npm run build` before finishing.

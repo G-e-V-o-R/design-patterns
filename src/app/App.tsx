@@ -18,7 +18,7 @@ export default function App() {
     </nav>
     <main id="lesson-main" tabIndex={-1}>
       {scenarios.filter(scenario => visited.includes(scenario.id)).map(({id, title, Component}) => <section key={id} id={`scenario-${id}`} hidden={id !== activeId} aria-label={title}>
-        <ScenarioBoundary name={title}><Component/></ScenarioBoundary>
+        <ScenarioBoundary name={title}><Component active={id === activeId}/></ScenarioBoundary>
       </section>)}
     </main>
     <footer className="workshop-footer"><span>One situation. One pattern. Build the idea.</span><span>Switch freely. Progress resets when you reload.</span></footer>
