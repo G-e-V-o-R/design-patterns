@@ -4,11 +4,13 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import ts from 'typescript';
 
 const scenariosRoot = resolve('src/scenarios');
+const sharedRoot = join(scenariosRoot, 'shared');
 const docsRoot = resolve('docs');
 const modules = readdirSync(scenariosRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory())
+    .filter(entry => entry.isDirectory() && entry.name !== 'shared')
     .map(entry => entry.name)
     .sort();
+assert.ok(!modules.includes('shared'), 'shared resources must not be registered as a scenario');
 
 function files(dir) {
     return readdirSync(dir, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? files(join(dir, entry.name)) : [join(dir, entry.name)]);
@@ -31,7 +33,10 @@ for (const module of modules) {
                 continue;
             }
             const target = resolve(dirname(file), specifier.replace(/[?#].*$/, ''));
-            assert.ok(isInside(moduleRoot, target) || isInside(docsRoot, target), `${file} imports outside its scenario: ${specifier}`);
+            assert.ok(
+                isInside(moduleRoot, target) || isInside(sharedRoot, target) || isInside(docsRoot, target),
+                `${file} imports outside its scenario or shared resources: ${specifier}`,
+            );
         }
     }
 }

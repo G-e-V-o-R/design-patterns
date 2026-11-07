@@ -27,11 +27,12 @@ export function ObserverDemo({
       <DemoHeading />
       <SubscriberSummary narionSubscribed={narionSubscribed} />
       {!ready && <DiagramReadinessMessage />}
-      <DiscoveryControls ready={ready} onRun={onRun} />
       <DiscoveryScene
         key={getSceneKey(run)}
+        ready={ready}
         run={run}
         narionSubscribed={narionSubscribed}
+        onRun={onRun}
         onToggleBracelet={onToggleBracelet}
       />
     </section>
@@ -104,16 +105,20 @@ function getSceneKey(run: DemoRun | null)
 }
 
 type DiscoverySceneProps = {
+  ready: boolean;
   run: DemoRun | null;
   narionSubscribed: boolean;
+  onRun: (danger: boolean) => void;
   onToggleBracelet: () => void;
 };
 
 type DiscoveryPhase = 'idle' | 'checking' | 'sending' | 'finished';
 
 function DiscoveryScene({
+  ready,
   run,
   narionSubscribed,
+  onRun,
   onToggleBracelet,
 }: DiscoverySceneProps)
 {
@@ -172,6 +177,15 @@ function DiscoveryScene({
 
   return (
     <>
+      <p
+        className="demo-status"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {statusMessage}
+      </p>
+      <DiscoveryControls ready={ready} onRun={onRun} />
       <div className="demo-stage" data-phase={shownPhase}>
         <FoxCard phase={shownPhase} result={result} isFinished={isFinished} />
         {(['narion', 'dre-kaar'] as const).map(subscriberId => (
@@ -186,14 +200,6 @@ function DiscoveryScene({
           />
         ))}
       </div>
-      <p
-        className="demo-status"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {statusMessage}
-      </p>
       {isFinished && result && <DiscoveryTrace result={result} />}
     </>
   );

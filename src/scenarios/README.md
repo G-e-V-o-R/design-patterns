@@ -25,9 +25,9 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Implementation boundaries
 
-- Keep all scenario content and behavior in its own `src/scenarios/<id>/` directory: public component, model, validation, simulation, styles, and tests.
+- Keep each scenario's content and behavior in its own `src/scenarios/<id>/` directory: public component, model, validation, simulation, styles, and tests. Put reusable scenario-neutral resources used by multiple scenarios in `src/scenarios/shared/`.
 - Keep the public entry and lesson orchestrator thin. Decompose content, presentational UI, and stateful logic into focused files rather than building a monolith.
-- Give each scenario its own state and model. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or any other `src/` module. The only allowed external relative imports are scenario artwork in `docs/`.
+- Give each scenario its own state and model. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or `src/app/`. Reusable scenario-neutral resources belong in `src/scenarios/shared/`; artwork may be imported from `docs/`.
 - Keep the initial activity understandable and safe to explore. A page reload starts a fresh scenario.
 - Keep pattern-specific logic in the scenario. Do not add pattern-specific branches to the application shell or make a scenario depend on another scenario's internals.
 - Scope styles to a scenario root class. Keep class names, animation names, and visual changes local; shared shell or base-style changes need regression checks for all scenarios.

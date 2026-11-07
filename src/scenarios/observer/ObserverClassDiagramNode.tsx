@@ -114,7 +114,7 @@ export function ObserverClassDiagramNode({ data }: NodeProps<ObserverClassNode>)
         onEndMemberDrag={data.onEndMemberDrag}
       />
       {data.artwork && (
-        <div className="lesson-class-artwork">
+        <div className="lesson-class-artwork scenario-class-artwork">
           <img src={data.artwork.src} alt={data.artwork.alt} draggable={false}/>
         </div>
       )}

@@ -43,7 +43,7 @@
 .mediator-scenario .med-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 .mediator-scenario .med-board-heading button { padding:7px 12px; }
 .mediator-scenario .med-worked { padding:10px 20px; background:#4e452a; color:#e8d3a1; font-size:11px; margin:0; }
-.mediator-scenario .med-canvas { height:690px; position:relative; background:#102019; border-block:1px solid #aec79d26; }
+.mediator-scenario .med-canvas { height:920px; position:relative; background:#102019; border-block:1px solid #aec79d26; }
 .mediator-scenario .med-canvas .react-flow { --xy-background-color-default:#102019; --xy-edge-label-background-color-default:#20352a; --xy-edge-label-color-default:#f1e3c3; --xy-edge-label-background-color:#20352a; }
 .mediator-scenario .med-canvas .react-flow__edge-text { font-size:11px; }
 .mediator-scenario .med-canvas .react-flow__handle { width:12px; height:12px; background:#ddc18d; border:2px solid #102019; }
@@ -58,8 +58,6 @@
 .mediator-scenario .med-class-members small { font-size:9px; color:#c4c0a0; margin-bottom:7px; }
 .mediator-scenario .med-class-members code { display:block; font-size:11px; line-height:1.7; margin:4px 0; }
 .mediator-scenario .med-class-members p { font-size:10px; color:#a5b89b; margin:0; }
-.mediator-scenario .med-class-artwork { overflow:hidden; border-top:1px solid #c3ceab35; border-radius:0 0 6px 6px; background:#102019; }
-.mediator-scenario .med-class-artwork img { display:block; width:100%; height:auto; object-fit:contain; pointer-events:none; user-select:none; }
 .mediator-scenario .med-class.med-drop-target { border-color:#f2d393; outline:3px solid #e6c17f; outline-offset:3px; background:#3b5033; box-shadow:0 0 24px #e6c17f40; }
 .mediator-scenario .med-class.med-drop-target .med-class-members p { color:#f4dfb4; }
 .mediator-scenario .med-member-card.is-dragging { opacity:.55; }
@@ -115,7 +113,7 @@
   .mediator-scenario .med-tray { padding:15px; }
   .mediator-scenario .med-connect-fields { grid-template-columns:1fr 1fr; }
   .mediator-scenario .med-intro { grid-template-columns:minmax(0,1fr) 200px; }
-  .mediator-scenario .med-canvas { height:620px; }
+  .mediator-scenario .med-canvas { height:825px; }
 }
 @media(max-width:720px) {
   .mediator-scenario { padding:27px 12px; }
@@ -133,7 +131,7 @@
   .mediator-scenario .med-board-heading,.mediator-scenario .med-connections,.mediator-scenario .med-check { padding:15px; }
   .mediator-scenario .med-board-heading h2 { font-size:16px; }
   .mediator-scenario .med-board-heading button { font-size:11px; padding:6px 9px; }
-  .mediator-scenario .med-canvas { height:490px; }
+  .mediator-scenario .med-canvas { height:655px; }
   .mediator-scenario .med-demo { padding:14px; margin:0 15px 15px; }
   .mediator-scenario .med-demo h2 { font-size:20px; }
   .mediator-scenario .med-route { grid-template-columns:1fr; gap:6px; }

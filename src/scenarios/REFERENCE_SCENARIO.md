@@ -2,6 +2,8 @@
 
 Observer is the reference implementation. Mediator is the second example. Copy the structure, not the story or vocabulary.
 
+Shared class-card artwork styling lives in `src/scenarios/shared/artwork.css`. Scenario-specific styles stay in each scenario directory.
+
 ## Agent workflow
 
 Shortest reliable path:
@@ -60,7 +62,7 @@ Rules:
 - The scenario owns its mutable state.
 - Pass `active` to visibility-dependent effects such as React Flow `fitView`.
 - Use one root class for scoped styles, e.g. `pattern-scenario`.
-- Do not import from `src/app/`, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or another scenario.
+- Import shared scenario resources only from `src/scenarios/shared/`. Do not import from `src/app/`, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or another scenario.
 
 ## Model contract
 
@@ -147,7 +149,7 @@ Add scripts to `package.json`:
 The boundary test enforces:
 
 - every scenario directory owns `model.test.ts`;
-- scenario imports stay inside that directory or `docs/`;
+- scenario imports stay inside that directory, `src/scenarios/shared/`, or `docs/`;
 - every directory has exactly one registry entry;
 - every registry entry imports from its own directory;
 - every scenario has a `test:<id>` script included in `npm test`.

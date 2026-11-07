@@ -39,7 +39,7 @@ export function DiagramClass({ data }: NodeProps<ClassNode>) {
     <Handle type="target" position={Position.Top}/>
     <header><small>{data.kind}</small><strong>{data.label}</strong><button className="nodrag" aria-label={`Remove ${data.label}`} onClick={data.onRemove}>×</button>{data.needsFix && <span className="med-fix">Fix this</span>}</header>
     {(['field', 'method'] as const).map(kind => <div className="med-class-members" key={kind}><small>{kind === 'field' ? 'Fields' : 'Methods'}</small>{data.members.filter(member => member.kind === kind).map(member => <code key={member.id} className={data.issueMembers.has(member.id) ? 'med-fix' : ''}>{member.label}</code>)}{!data.members.some(member => member.kind === kind) && <p>Assign {kind}s from your cards</p>}</div>)}
-    {data.artwork && <div className="med-class-artwork"><img src={data.artwork.src} alt={data.artwork.alt} draggable={false}/></div>}
+    {data.artwork && <div className="med-class-artwork scenario-class-artwork"><img src={data.artwork.src} alt={data.artwork.alt} draggable={false}/></div>}
     <Handle type="source" position={Position.Bottom}/>
   </div>;
 }

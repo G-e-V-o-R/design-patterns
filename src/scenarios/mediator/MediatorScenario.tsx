@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { emptyLesson } from './model';
 import { MediatorLesson } from './MediatorLesson';
+import '../shared/artwork.css';
 import './mediator.css';
 
 export default function MediatorScenario({ active = true }: { active?: boolean }) {

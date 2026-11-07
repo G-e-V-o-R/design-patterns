@@ -1,0 +1,20 @@
+.scenario-class-artwork
+{
+  height: 350px;
+  overflow: hidden;
+  border-top: 1px solid #c3ceab35;
+  border-radius: 0 0 6px 6px;
+  background: #102019;
+}
+
+.scenario-class-artwork img
+{
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: -15px;
+  object-fit: contain;
+  object-position: center top;
+  pointer-events: none;
+  user-select: none;
+}

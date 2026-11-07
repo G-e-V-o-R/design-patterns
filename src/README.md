@@ -4,16 +4,17 @@ The app contains independently owned learning scenarios: **Observer — the fox�
 
 ## Module ownership
 
-Each directory in `scenarios/` owns its content, graph model, validation, simulation, UI, styles, and tests. Change a scenario inside its own folder:
+Each scenario directory in `scenarios/` owns its content, graph model, validation, simulation, UI, styles, and tests. Shared scenario-neutral resources live in `scenarios/shared/`; scenarios may import from their own directory, `shared/`, or `docs/`, but never from sibling scenarios or `app/`. Change a scenario inside its own folder:
 
 - `scenarios/observer/`: the fox lesson and bracelet demo.
 - `scenarios/mediator/`: the raven lesson and targeted request routing.
+- `scenarios/shared/`: reusable, pattern-neutral resources used by multiple scenarios.
 - `scenarios/registry.ts`: presentation metadata and each scenario’s public component import.
 - `scenarios/types.ts`: the small shell contract; no shared graph or simulation model.
 - `app/App.tsx`, `app/shell.css`, `app/ScenarioBoundary.tsx`: navigation, page chrome, and per-scenario rendering error containment.
 - `app/styles.css`: pattern-neutral base reset and typography shared by the shell and every scenario.
 
-Scenarios must not import sibling scenarios, the shell contract, or application internals. They may use third-party UI libraries and existing art in `docs/`. Observer CSS is nested under `.observer-scenario`; Mediator CSS is scoped to `.mediator-scenario`. Keep any new rules and animation names local to the scenario. Shared base styles in `app/styles.css` and shell styles affect all scenarios and require checking both lessons when changed.
+Scenarios must not import sibling scenarios, the shell contract, or application internals. Shared functionality used by multiple scenarios belongs in `scenarios/shared/`; scenario-specific behavior stays in its own directory. Scenarios may also use third-party UI libraries and existing art in `docs/`. Observer CSS is nested under `.observer-scenario`; Mediator CSS is scoped to `.mediator-scenario`. Keep any new rules and animation names local to the scenario unless they are genuinely shared. Shared resources and base styles in `app/styles.css` affect multiple scenarios and require checking all lessons when changed.
 
 ## State and new scenarios
 
