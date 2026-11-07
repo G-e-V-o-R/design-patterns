@@ -1,49 +1,171 @@
 export const connectionHandles = ['top', 'bottom', 'left', 'right'] as const;
 export type ConnectionHandle = typeof connectionHandles[number];
-export function isConnectionHandle(value: unknown): value is ConnectionHandle {
-  return typeof value === 'string' && connectionHandles.some(handle => handle === value);
+
+export function isConnectionHandle(value: unknown): value is ConnectionHandle
+{
+  return typeof value === 'string'
+    && connectionHandles.some(handle => handle === value);
 }
 
-export function normalizeConnectionHandle(value: unknown): ConnectionHandle | undefined {
-  if (isConnectionHandle(value)) return value;
-  if (typeof value !== 'string') return undefined;
-  const match = /^(top|bottom|left|right)-(start|end)$/.exec(value);
-  return match && isConnectionHandle(match[1]) ? match[1] : undefined;
+export function normalizeConnectionHandle(value: unknown): ConnectionHandle | undefined
+{
+  if (isConnectionHandle(value))
+  {
+    return value;
+  }
+
+  if (typeof value !== 'string')
+  {
+    return undefined;
+  }
+
+  // Старые сохранения содержат точки вида side-start/end; приводим их к стороне.
+  const matchedHandle = /^(top|bottom|left|right)-(start|end)$/.exec(value);
+  if (!matchedHandle || !isConnectionHandle(matchedHandle[1]))
+  {
+    return undefined;
+  }
+
+  return matchedHandle[1];
 }
 
-/** The first lesson models class structure; runtime subscription is shown in the trace. */
+/** Урок моделирует структуру классов; выполнение подписки показано в трассе. */
 export type LessonGraph = {
   classes: string[];
   members: Record<string, string>;
-  edges: { source: string; target: string; type: string; sourceHandle?: ConnectionHandle; targetHandle?: ConnectionHandle }[];
+  edges: {
+    source: string;
+    target: string;
+    type: string;
+    sourceHandle?: ConnectionHandle;
+    targetHandle?: ConnectionHandle;
+  }[];
 };
+
 export const classCards = [
-  { id: 'publisher', label: 'FoxPublisher', kind: 'class · Publisher', description: 'Looks for danger and keeps a list of subscribers. Sends what it sees through the Subscriber interface only when there is danger.' },
-  { id: 'subscriber', label: 'Subscriber', kind: 'interface', description: 'An interface with update(discovery). Every subscriber must implement this method to get messages.' },
-  { id: 'narion', label: 'NarionSubscriber', kind: 'class · Concrete subscriber', description: 'Implements Subscriber. Gets the message and helps Narion plan a safer path.' },
-  { id: 'dre-kaar', label: 'DreKaarSubscriber', kind: 'class · Concrete subscriber', description: 'Implements Subscriber. Gets the same message and helps Dre’Kaar protect the group.' },
+  {
+    id: 'publisher',
+    label: 'FoxPublisher',
+    kind: 'class · Publisher',
+    description: 'Looks for danger and keeps a list of subscribers. Sends what it sees through the Subscriber interface only when there is danger.',
+  },
+  {
+    id: 'subscriber',
+    label: 'Subscriber',
+    kind: 'interface',
+    description: 'An interface with update(discovery). Every subscriber must implement this method to get messages.',
+  },
+  {
+    id: 'narion',
+    label: 'NarionSubscriber',
+    kind: 'class · Concrete subscriber',
+    description: 'Implements Subscriber. Gets the message and helps Narion plan a safer path.',
+  },
+  {
+    id: 'dre-kaar',
+    label: 'DreKaarSubscriber',
+    kind: 'class · Concrete subscriber',
+    description: 'Implements Subscriber. Gets the same message and helps Dre’Kaar protect the group.',
+  },
 ];
+
 export const memberCards = [
-  { kind: 'field', id: 'subscribers', label: 'subscribers: Subscriber[]', description: 'The list of active subscribers who get the fox’s messages.' },
-  { kind: 'method', id: 'subscribe', label: 'subscribe(s: Subscriber)', description: 'Add a subscriber to the subscribers field so they can get messages.' },
-  { kind: 'method', id: 'unsubscribe', label: 'unsubscribe(s: Subscriber)', description: 'Remove a subscriber from the subscribers field so they get no more messages.' },
-  { kind: 'method', id: 'notify', label: 'notify()', description: 'Read the subscribers field and call update(discovery) on each subscriber.' },
-  { kind: 'method', id: 'discover', label: 'discoverDanger() · business logic', description: 'When the fox finds danger, save what it sees and call notify(). Send no message when the path is safe.' },
-  { kind: 'method', id: 'update-contract', label: 'update(discovery) · contract', description: 'Put this method in the interface. Each subscriber must implement it. The interface has no code for the method.' },
-  { kind: 'method', id: 'narion-update', label: 'update(discovery) · Narion', description: 'Get the message and call planRoute() for Narion.' },
-  { kind: 'method', id: 'narion-logic', label: 'planRoute() · business logic', description: 'Narion uses the message to choose a safer path.' },
-  { kind: 'method', id: 'dre-update', label: 'update(discovery) · Dre’Kaar', description: 'Get the message and call prepareDefense() for Dre’Kaar.' },
-  { kind: 'method', id: 'dre-logic', label: 'prepareDefense() · business logic', description: 'Dre’Kaar gets ready to protect the group.' },
+  {
+    kind: 'field',
+    id: 'subscribers',
+    label: 'subscribers: Subscriber[]',
+    description: 'The list of active subscribers who get the fox’s messages.',
+  },
+  {
+    kind: 'method',
+    id: 'subscribe',
+    label: 'subscribe(s: Subscriber)',
+    description: 'Add a subscriber to the subscribers field so they can get messages.',
+  },
+  {
+    kind: 'method',
+    id: 'unsubscribe',
+    label: 'unsubscribe(s: Subscriber)',
+    description: 'Remove a subscriber from the subscribers field so they get no more messages.',
+  },
+  {
+    kind: 'method',
+    id: 'notify',
+    label: 'notify()',
+    description: 'Read the subscribers field and call update(discovery) on each subscriber.',
+  },
+  {
+    kind: 'method',
+    id: 'discover',
+    label: 'discoverDanger() · business logic',
+    description: 'When the fox finds danger, save what it sees and call notify(). Send no message when the path is safe.',
+  },
+  {
+    kind: 'method',
+    id: 'update-contract',
+    label: 'update(discovery) · contract',
+    description: 'Put this method in the interface. Each subscriber must implement it. The interface has no code for the method.',
+  },
+  {
+    kind: 'method',
+    id: 'narion-update',
+    label: 'update(discovery) · Narion',
+    description: 'Get the message and call planRoute() for Narion.',
+  },
+  {
+    kind: 'method',
+    id: 'narion-logic',
+    label: 'planRoute() · business logic',
+    description: 'Narion uses the message to choose a safer path.',
+  },
+  {
+    kind: 'method',
+    id: 'dre-update',
+    label: 'update(discovery) · Dre’Kaar',
+    description: 'Get the message and call prepareDefense() for Dre’Kaar.',
+  },
+  {
+    kind: 'method',
+    id: 'dre-logic',
+    label: 'prepareDefense() · business logic',
+    description: 'Dre’Kaar gets ready to protect the group.',
+  },
 ];
+
 export const relationshipKinds = [
-  { id: 'stores', label: 'stores subscribers: Subscriber[]', description: 'Stores: the fox keeps a list of Subscriber. Draw from FoxPublisher to Subscriber.' },
-  { id: 'implements', label: 'implements interface', description: 'Implements: this class follows the Subscriber interface. Draw from each concrete subscriber to Subscriber.' },
+  {
+    id: 'stores',
+    label: 'stores subscribers: Subscriber[]',
+    description: 'Stores: the fox keeps a list of Subscriber. Draw from FoxPublisher to Subscriber.',
+  },
+  {
+    id: 'implements',
+    label: 'implements interface',
+    description: 'Implements: this class follows the Subscriber interface. Draw from each concrete subscriber to Subscriber.',
+  },
 ];
-export function emptyLesson(): LessonGraph { return { classes: [], members: {}, edges: [] }; }
-export function solutionLesson(): LessonGraph {
+
+export function emptyLesson(): LessonGraph
+{
+  return { classes: [], members: {}, edges: [] };
+}
+
+export function solutionLesson(): LessonGraph
+{
   return {
-    classes: classCards.map(c => c.id),
-    members: { subscribers: 'publisher', subscribe: 'publisher', unsubscribe: 'publisher', notify: 'publisher', discover: 'publisher', 'update-contract': 'subscriber', 'narion-update': 'narion', 'narion-logic': 'narion', 'dre-update': 'dre-kaar', 'dre-logic': 'dre-kaar' },
+    classes: classCards.map(classCard => classCard.id),
+    members: {
+      subscribers: 'publisher',
+      subscribe: 'publisher',
+      unsubscribe: 'publisher',
+      notify: 'publisher',
+      discover: 'publisher',
+      'update-contract': 'subscriber',
+      'narion-update': 'narion',
+      'narion-logic': 'narion',
+      'dre-update': 'dre-kaar',
+      'dre-logic': 'dre-kaar',
+    },
     edges: [
       { source: 'publisher', target: 'subscriber', type: 'stores' },
       { source: 'narion', target: 'subscriber', type: 'implements' },
@@ -51,42 +173,175 @@ export function solutionLesson(): LessonGraph {
     ],
   };
 }
-const edgeKey = (e: LessonGraph['edges'][number]) => `${e.source}:${e.type}:${e.target}`;
-const label = (id: string) => classCards.find(c => c.id === id)?.label ?? id;
-export type LessonIssue = { message: string; classIds: string[]; memberIds: string[]; edgeIndices: number[] };
-export function getLessonIssues(graph: LessonGraph): LessonIssue[] {
-  const expected = solutionLesson();
+
+function getEdgeKey(edge: LessonGraph['edges'][number])
+{
+  return `${edge.source}:${edge.type}:${edge.target}`;
+}
+
+function getClassLabel(classId: string)
+{
+  const matchingCard = classCards.find(classCard => classCard.id === classId);
+  if (matchingCard)
+  {
+    return matchingCard.label;
+  }
+
+  return classId;
+}
+
+export type LessonIssue = {
+  message: string;
+  classIds: string[];
+  memberIds: string[];
+  edgeIndices: number[];
+};
+
+export function getLessonIssues(graph: LessonGraph): LessonIssue[]
+{
+  const expectedGraph = solutionLesson();
   const issues: LessonIssue[] = [];
-  const add = (message: string, classIds: string[] = [], memberIds: string[] = [], edgeIndices: number[] = []) => issues.push({message, classIds, memberIds, edgeIndices});
-  for (const card of classCards) if (!graph.classes.includes(card.id)) add(`Add the ${card.label} ${card.id === 'subscriber' ? 'interface' : 'class'} card.`, [card.id]);
-  if (new Set(graph.classes).size !== graph.classes.length || graph.classes.some(id => !expected.classes.includes(id))) add('Use each class card once.', graph.classes);
-  for (const card of memberCards) {
-    const owner = graph.members[card.id];
-    const expectedOwner = expected.members[card.id]!;
-    if (!owner) add(`Place ${card.label} in a class or interface.`, [expectedOwner], [card.id]);
-    else if (owner !== expectedOwner) add(`${card.label} belongs in ${label(expectedOwner)}. ${card.description}`, [owner, expectedOwner], [card.id]);
+
+  function addIssue(
+    message: string,
+    classIds: string[] = [],
+    memberIds: string[] = [],
+    edgeIndices: number[] = [],
+  )
+  {
+    issues.push({ message, classIds, memberIds, edgeIndices });
   }
-  for (const [id, owner] of Object.entries(graph.members)) {
-    if (!memberCards.some(c => c.id === id)) add('Remove the unknown member card.', [owner], [id]);
-    if (!graph.classes.includes(owner)) add(`Add ${label(owner)} before adding its fields or methods.`, [owner], [id]);
+
+  for (const classCard of classCards)
+  {
+    if (!graph.classes.includes(classCard.id))
+    {
+      let classType = 'class';
+      if (classCard.id === 'subscriber')
+      {
+        classType = 'interface';
+      }
+
+      addIssue(`Add the ${classCard.label} ${classType} card.`, [classCard.id]);
+    }
   }
-  for (const edge of expected.edges) if (!graph.edges.some(e => edgeKey(e) === edgeKey(edge))) {
-    add(edge.type === 'stores' ? 'FoxPublisher must keep a list of Subscriber. Connect it to the Subscriber interface.' : `${label(edge.source)} must implement the Subscriber interface.`, [edge.source, edge.target]);
+
+  const uniqueClassIds = new Set(graph.classes);
+  const hasUnknownClass = graph.classes.some(classId =>
+    !expectedGraph.classes.includes(classId));
+  if (uniqueClassIds.size !== graph.classes.length || hasUnknownClass)
+  {
+    addIssue('Use each class card once.', graph.classes);
   }
-  const seen = new Map<string, number>();
-  graph.edges.forEach((edge, index) => {
-    const key = edgeKey(edge);
-    if (!expected.edges.some(e => edgeKey(e) === key)) add(`Review ${label(edge.source)} → ${label(edge.target)}: the publisher keeps a list of Subscriber. Concrete subscribers implement that interface.`, [edge.source, edge.target], [], [index]);
-    const previous = seen.get(key);
-    if (previous !== undefined) add('This relationship is here twice. Remove one copy.', [edge.source, edge.target], [], [previous, index]);
-    seen.set(key, index);
+
+  for (const memberCard of memberCards)
+  {
+    const assignedClassId = graph.members[memberCard.id];
+    const expectedClassId = expectedGraph.members[memberCard.id]!;
+
+    if (!assignedClassId)
+    {
+      addIssue(
+        `Place ${memberCard.label} in a class or interface.`,
+        [expectedClassId],
+        [memberCard.id],
+      );
+    }
+    else if (assignedClassId !== expectedClassId)
+    {
+      addIssue(
+        `${memberCard.label} belongs in ${getClassLabel(expectedClassId)}. ${memberCard.description}`,
+        [assignedClassId, expectedClassId],
+        [memberCard.id],
+      );
+    }
+  }
+
+  for (const [memberId, assignedClassId] of Object.entries(graph.members))
+  {
+    const isKnownMember = memberCards.some(memberCard => memberCard.id === memberId);
+    if (!isKnownMember)
+    {
+      addIssue('Remove the unknown member card.', [assignedClassId], [memberId]);
+    }
+
+    if (!graph.classes.includes(assignedClassId))
+    {
+      addIssue(
+        `Add ${getClassLabel(assignedClassId)} before adding its fields or methods.`,
+        [assignedClassId],
+        [memberId],
+      );
+    }
+  }
+
+  for (const expectedEdge of expectedGraph.edges)
+  {
+    const relationshipIsPresent = graph.edges.some(edge =>
+      getEdgeKey(edge) === getEdgeKey(expectedEdge));
+    if (relationshipIsPresent)
+    {
+      continue;
+    }
+
+    if (expectedEdge.type === 'stores')
+    {
+      addIssue(
+        'FoxPublisher must keep a list of Subscriber. Connect it to the Subscriber interface.',
+        [expectedEdge.source, expectedEdge.target],
+      );
+    }
+    else
+    {
+      addIssue(
+        `${getClassLabel(expectedEdge.source)} must implement the Subscriber interface.`,
+        [expectedEdge.source, expectedEdge.target],
+      );
+    }
+  }
+
+  const seenEdges = new Map<string, number>();
+  graph.edges.forEach((edge, edgeIndex) =>
+  {
+    const edgeKey = getEdgeKey(edge);
+    const isExpectedEdge = expectedGraph.edges.some(expectedEdge =>
+      getEdgeKey(expectedEdge) === edgeKey);
+    if (!isExpectedEdge)
+    {
+      addIssue(
+        `Review ${getClassLabel(edge.source)} → ${getClassLabel(edge.target)}: the publisher keeps a list of Subscriber. Concrete subscribers implement that interface.`,
+        [edge.source, edge.target],
+        [],
+        [edgeIndex],
+      );
+    }
+
+    const previousEdgeIndex = seenEdges.get(edgeKey);
+    if (previousEdgeIndex !== undefined)
+    {
+      addIssue(
+        'This relationship is here twice. Remove one copy.',
+        [edge.source, edge.target],
+        [],
+        [previousEdgeIndex, edgeIndex],
+      );
+    }
+    seenEdges.set(edgeKey, edgeIndex);
   });
+
   return issues;
 }
-export function validateLesson(graph: LessonGraph): string[] {
+
+export function validateLesson(graph: LessonGraph): string[]
+{
   return getLessonIssues(graph).map(issue => issue.message);
 }
-export type DiscoveryOptions = { danger: boolean; narionSubscribed: boolean };
+
+export type DiscoveryOptions = {
+  danger: boolean;
+  narionSubscribed: boolean;
+};
+
 export type DiscoveryResult = {
   danger: boolean;
   recipients: ('narion' | 'dre-kaar')[];
@@ -94,40 +349,204 @@ export type DiscoveryResult = {
   summary: string;
   trace: string[];
 };
-export function discoverPath({ danger, narionSubscribed }: DiscoveryOptions): DiscoveryResult {
-  const subscriptions = narionSubscribed
-    ? 'Call fox.subscribe(narion) and fox.subscribe(dreKaar). Both are in the subscribers field.'
-    : 'Call fox.unsubscribe(narion). Only Dre’Kaar is in the subscribers field.';
-  if (!danger) return {
-    danger, recipients: [], responses: { narion: 'No message. The path is safe.', 'dre-kaar': 'No message. The path is safe.' },
-    summary: 'The path is safe. The fox sends no messages and keeps looking.',
-    trace: [subscriptions, 'The fox checks the path and finds no danger.', 'The fox does not call notify(). No Subscriber gets a message.'],
-  };
+
+export function discoverPath({
+  danger,
+  narionSubscribed,
+}: DiscoveryOptions): DiscoveryResult
+{
+  let subscriptionDescription: string;
+  if (narionSubscribed)
+  {
+    subscriptionDescription = 'Call fox.subscribe(narion) and fox.subscribe(dreKaar). Both are in the subscribers field.';
+  }
+  else
+  {
+    subscriptionDescription = 'Call fox.unsubscribe(narion). Only Dre’Kaar is in the subscribers field.';
+  }
+
+  if (!danger)
+  {
+    return {
+      danger,
+      recipients: [],
+      responses: {
+        narion: 'No message. The path is safe.',
+        'dre-kaar': 'No message. The path is safe.',
+      },
+      summary: 'The path is safe. The fox sends no messages and keeps looking.',
+      trace: [
+        subscriptionDescription,
+        'The fox checks the path and finds no danger.',
+        'The fox does not call notify(). No Subscriber gets a message.',
+      ],
+    };
+  }
+
+  let recipients: ('narion' | 'dre-kaar')[];
+  let narionResponse: string;
+  let summary: string;
+  const trace = [
+    subscriptionDescription,
+    'The fox sees danger. discoverDanger() saves “Danger ahead” and calls notify().',
+    'notify() reads the subscribers field and calls update(discovery) on each active Subscriber.',
+  ];
+
+  if (narionSubscribed)
+  {
+    recipients = ['narion', 'dre-kaar'];
+    narionResponse = 'Message received. Narion plans a safer path.';
+    summary = 'Danger ahead! Narion and Dre’Kaar get the same message.';
+    trace.push(
+      'NarionSubscriber.update(discovery) calls planRoute(): Narion chooses a safer route.',
+    );
+  }
+  else
+  {
+    recipients = ['dre-kaar'];
+    narionResponse = 'No message. Narion’s bracelet is off.';
+    summary = 'Danger ahead! Only Dre’Kaar gets the message. Narion’s bracelet is off.';
+  }
+
+  trace.push(
+    'DreKaarSubscriber.update(discovery) calls prepareDefense(): Dre’Kaar gets ready to protect the group.',
+  );
+
   return {
-    danger, recipients: narionSubscribed ? ['narion', 'dre-kaar'] : ['dre-kaar'],
-    responses: { narion: narionSubscribed ? 'Message received. Narion plans a safer path.' : 'No message. Narion’s bracelet is off.', 'dre-kaar': 'Message received. Dre’Kaar gets ready to protect the group.' },
-    summary: narionSubscribed ? 'Danger ahead! Narion and Dre’Kaar get the same message.' : 'Danger ahead! Only Dre’Kaar gets the message. Narion’s bracelet is off.',
-    trace: [subscriptions, 'The fox sees danger. discoverDanger() saves “Danger ahead” and calls notify().', 'notify() reads the subscribers field and calls update(discovery) on each active Subscriber.', ...(narionSubscribed ? ['NarionSubscriber.update(discovery) calls planRoute(): Narion chooses a safer route.'] : []), 'DreKaarSubscriber.update(discovery) calls prepareDefense(): Dre’Kaar gets ready to protect the group.'],
+    danger,
+    recipients,
+    responses: {
+      narion: narionResponse,
+      'dre-kaar': 'Message received. Dre’Kaar gets ready to protect the group.',
+    },
+    summary,
+    trace,
   };
 }
-export function simulateLesson(graph: LessonGraph, options: DiscoveryOptions = { danger: true, narionSubscribed: true }): string[] {
-  if (validateLesson(graph).length) return ['The diagram is not ready. Read the messages and fix the diagram. Then run the discovery again.'];
+
+export function simulateLesson(
+  graph: LessonGraph,
+  options: DiscoveryOptions = { danger: true, narionSubscribed: true },
+): string[]
+{
+  if (validateLesson(graph).length > 0)
+  {
+    return ['The diagram is not ready. Read the messages and fix the diagram. Then run the discovery again.'];
+  }
+
   return discoverPath(options).trace;
 }
-/** Accept incomplete learning attempts, but reject malformed or foreign saved data. */
-export function parseLesson(raw: string | null): LessonGraph {
-  if (!raw || raw.length > 50000) return emptyLesson();
-  try {
-    const g: unknown = JSON.parse(raw);
-    if (!g || typeof g !== 'object') return emptyLesson();
-    const v = g as Record<string, unknown>;
-    if (!Array.isArray(v.classes) || !v.classes.every(id => typeof id === 'string' && classCards.some(c => c.id === id)) || new Set(v.classes).size !== v.classes.length) return emptyLesson();
-    if (!v.members || typeof v.members !== 'object' || Array.isArray(v.members)) return emptyLesson();
-    if (!Object.entries(v.members).every(([id, owner]) => memberCards.some(c => c.id === id) && typeof owner === 'string' && (v.classes as string[]).includes(owner))) return emptyLesson();
-    if (!Array.isArray(v.edges) || v.edges.length > 24 || !v.edges.every(e => e && typeof e === 'object' && v.classes instanceof Array && v.classes.includes(e.source) && v.classes.includes(e.target) && e.source !== e.target && relationshipKinds.some(k => k.id === e.type))) return emptyLesson();
-    if (!v.edges.every(e => [e.sourceHandle, e.targetHandle].every(handle => handle === undefined || normalizeConnectionHandle(handle) !== undefined))) return emptyLesson();
-    const graph = v as unknown as LessonGraph;
-    if (new Set(graph.edges.map(edgeKey)).size !== graph.edges.length) return emptyLesson();
-    return { classes: [...graph.classes], members: { ...graph.members }, edges: graph.edges.map(({source,target,type,sourceHandle,targetHandle}) => ({source,target,type,...(sourceHandle ? {sourceHandle: normalizeConnectionHandle(sourceHandle)} : {}),...(targetHandle ? {targetHandle: normalizeConnectionHandle(targetHandle)} : {})})) };
-  } catch { return emptyLesson(); }
+
+function isRecord(value: unknown): value is Record<string, unknown>
+{
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Принимает незавершённые попытки, но отклоняет повреждённые или чужие данные. */
+export function parseLesson(raw: string | null): LessonGraph
+{
+  if (!raw || raw.length > 50000)
+  {
+    return emptyLesson();
+  }
+
+  try
+  {
+    const parsedValue: unknown = JSON.parse(raw);
+    if (!isRecord(parsedValue))
+    {
+      return emptyLesson();
+    }
+
+    const savedClasses = parsedValue.classes;
+    if (
+      !Array.isArray(savedClasses)
+      || !savedClasses.every(classId =>
+        typeof classId === 'string'
+        && classCards.some(classCard => classCard.id === classId))
+      || new Set(savedClasses).size !== savedClasses.length
+    )
+    {
+      return emptyLesson();
+    }
+
+    const savedMembers = parsedValue.members;
+    if (!isRecord(savedMembers))
+    {
+      return emptyLesson();
+    }
+
+    const membersAreValid = Object.entries(savedMembers).every(([memberId, owner]) =>
+      memberCards.some(memberCard => memberCard.id === memberId)
+      && typeof owner === 'string'
+      && savedClasses.includes(owner));
+    if (!membersAreValid)
+    {
+      return emptyLesson();
+    }
+
+    const savedEdges = parsedValue.edges;
+    if (
+      !Array.isArray(savedEdges)
+      || savedEdges.length > 24
+      || !savedEdges.every(edge =>
+        isRecord(edge)
+        && typeof edge.source === 'string'
+        && typeof edge.target === 'string'
+        && edge.source !== edge.target
+        && savedClasses.includes(edge.source)
+        && savedClasses.includes(edge.target)
+        && relationshipKinds.some(kind => kind.id === edge.type))
+    )
+    {
+      return emptyLesson();
+    }
+
+    const edgesHaveValidHandles = savedEdges.every(edge =>
+      isRecord(edge)
+      && [edge.sourceHandle, edge.targetHandle].every(handle =>
+        handle === undefined || normalizeConnectionHandle(handle) !== undefined));
+    if (!edgesHaveValidHandles)
+    {
+      return emptyLesson();
+    }
+
+    const savedGraph = parsedValue as unknown as LessonGraph;
+    const uniqueEdgeKeys = new Set(savedGraph.edges.map(getEdgeKey));
+    if (uniqueEdgeKeys.size !== savedGraph.edges.length)
+    {
+      return emptyLesson();
+    }
+
+    return {
+      classes: [...savedGraph.classes],
+      members: { ...savedGraph.members },
+      edges: savedGraph.edges.map(edge =>
+      {
+        const normalizedSourceHandle = normalizeConnectionHandle(edge.sourceHandle);
+        const normalizedTargetHandle = normalizeConnectionHandle(edge.targetHandle);
+        const normalizedEdge: LessonGraph['edges'][number] = {
+          source: edge.source,
+          target: edge.target,
+          type: edge.type,
+        };
+
+        if (edge.sourceHandle)
+        {
+          normalizedEdge.sourceHandle = normalizedSourceHandle;
+        }
+
+        if (edge.targetHandle)
+        {
+          normalizedEdge.targetHandle = normalizedTargetHandle;
+        }
+
+        return normalizedEdge;
+      }),
+    };
+  }
+  catch
+  {
+    return emptyLesson();
+  }
 }

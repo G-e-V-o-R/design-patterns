@@ -1,96 +1,337 @@
+import {
+  connectionHandles,
+  discoverPath,
+  emptyLesson,
+  getLessonIssues,
+  parseLesson,
+  simulateLesson,
+  solutionLesson,
+  validateLesson,
+} from './model';
+
 const assert = {
-  ok(value: unknown, message = 'Expected a truthy value') { if (!value) throw new Error(message); },
-  equal(actual: unknown, expected: unknown, message = 'Values differ') { if (actual !== expected) throw new Error(message); },
-  deepEqual(actual: unknown, expected: unknown, message = 'Structures differ') { if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(message); },
+  ok(value: unknown, message = 'Expected a truthy value')
+  {
+    if (!value)
+    {
+      throw new Error(message);
+    }
+  },
+
+  equal(actual: unknown, expected: unknown, message = 'Values differ')
+  {
+    if (actual !== expected)
+    {
+      throw new Error(message);
+    }
+  },
+
+  deepEqual(actual: unknown, expected: unknown, message = 'Structures differ')
+  {
+    if (JSON.stringify(actual) !== JSON.stringify(expected))
+    {
+      throw new Error(message);
+    }
+  },
 };
-import { discoverPath, getLessonIssues, connectionHandles, emptyLesson, solutionLesson, validateLesson, simulateLesson, parseLesson } from './model';
-const solution = solutionLesson();
-assert.deepEqual(validateLesson(solution), []);
+
+const completeLessonGraph = solutionLesson();
+assert.deepEqual(validateLesson(completeLessonGraph), []);
 assert.ok(validateLesson(emptyLesson()).length > 0);
-assert.equal(solution.members.subscribers, 'publisher');
-const withoutField = {...solution, members: {...solution.members}};
-delete withoutField.members.subscribers;
-assert.deepEqual(parseLesson(JSON.stringify(withoutField)), withoutField, 'keep older diagrams without the new field');
-assert.ok(validateLesson(withoutField).some(s => s.includes('Place subscribers: Subscriber[]')));
-const wrongFieldOwner = {...solution, members: {...solution.members, subscribers: 'narion'}};
-assert.ok(validateLesson(wrongFieldOwner).some(s => s.includes('subscribers: Subscriber[] belongs in FoxPublisher')));
-assert.equal(simulateLesson(wrongFieldOwner).length, 1);
-const misplaced = {...solution, members: {...solution.members, notify: 'subscriber'}};
-assert.ok(validateLesson(misplaced).some(s => s.includes('notify() belongs in FoxPublisher')));
-assert.equal(simulateLesson(misplaced).length, 1);
-assert.ok(!simulateLesson(misplaced).some(s => s.includes('chooses a safer route')));
-for (const edge of solution.edges) {
-  const missing = {...solution, edges: solution.edges.filter(e => e !== edge)};
-  assert.ok(validateLesson(missing).length);
-  const reversed = {...missing, edges: [...missing.edges, {...edge, source: edge.target, target: edge.source}]};
-  assert.ok(validateLesson(reversed).length);
+assert.equal(completeLessonGraph.members.subscribers, 'publisher');
+
+const graphWithoutSubscribersField = {
+  ...completeLessonGraph,
+  members: { ...completeLessonGraph.members },
+};
+delete graphWithoutSubscribersField.members.subscribers;
+assert.deepEqual(
+  parseLesson(JSON.stringify(graphWithoutSubscribersField)),
+  graphWithoutSubscribersField,
+  'keep older diagrams without the new field',
+);
+assert.ok(
+  validateLesson(graphWithoutSubscribersField)
+    .some(message => message.includes('Place subscribers: Subscriber[]')),
+);
+
+const graphWithMisplacedSubscribersField = {
+  ...completeLessonGraph,
+  members: { ...completeLessonGraph.members, subscribers: 'narion' },
+};
+assert.ok(
+  validateLesson(graphWithMisplacedSubscribersField)
+    .some(message => message.includes('subscribers: Subscriber[] belongs in FoxPublisher')),
+);
+assert.equal(simulateLesson(graphWithMisplacedSubscribersField).length, 1);
+
+const graphWithMisplacedNotifyMethod = {
+  ...completeLessonGraph,
+  members: { ...completeLessonGraph.members, notify: 'subscriber' },
+};
+assert.ok(
+  validateLesson(graphWithMisplacedNotifyMethod)
+    .some(message => message.includes('notify() belongs in FoxPublisher')),
+);
+assert.equal(simulateLesson(graphWithMisplacedNotifyMethod).length, 1);
+assert.ok(
+  !simulateLesson(graphWithMisplacedNotifyMethod)
+    .some(message => message.includes('chooses a safer route')),
+);
+
+for (const expectedEdge of completeLessonGraph.edges)
+{
+  const graphWithoutEdge = {
+    ...completeLessonGraph,
+    edges: completeLessonGraph.edges.filter(edge => edge !== expectedEdge),
+  };
+  assert.ok(validateLesson(graphWithoutEdge).length);
+
+  const reversedEdge = {
+    ...expectedEdge,
+    source: expectedEdge.target,
+    target: expectedEdge.source,
+  };
+  const graphWithReversedEdge = {
+    ...graphWithoutEdge,
+    edges: [...graphWithoutEdge.edges, reversedEdge],
+  };
+  assert.ok(validateLesson(graphWithReversedEdge).length);
 }
-assert.ok(validateLesson({...solution, edges: [...solution.edges, {source:'publisher',target:'narion',type:'stores'}]}).length);
-assert.ok(validateLesson({...solution, edges: [...solution.edges, solution.edges[0]!]}).length);
-assert.ok(validateLesson({...solution, classes: solution.classes.filter(c => c !== 'subscriber')}).length);
-const trace = simulateLesson(solution);
-assert.ok(trace.some(s => s.includes('fox.subscribe(narion)')));
-assert.ok(trace.some(s => s.includes('NarionSubscriber.update')));
-assert.ok(trace.some(s => s.includes('DreKaarSubscriber.update')));
-assert.ok(!trace.some(s => s.includes('fox.unsubscribe(narion)')));
-assert.ok(simulateLesson(solution, {danger: true, narionSubscribed: false}).some(s => s.includes('fox.unsubscribe(narion)')));
-assert.deepEqual(parseLesson(JSON.stringify(solution)), solution);
-assert.deepEqual(parseLesson(JSON.stringify(misplaced)), misplaced, 'retain structurally safe but incorrect attempts');
-const partial = {classes: ['publisher'], members: {subscribe: 'publisher'}, edges: []};
-assert.deepEqual(parseLesson(JSON.stringify(partial)), partial);
-for (const raw of [null, '{', 'null', '[]', '{}', JSON.stringify({classes:['raven'],members:{},edges:[]}), JSON.stringify({...solution,members:{notify:'unknown'}}), JSON.stringify({...solution,edges:[null]}), JSON.stringify({...solution,edges:[{source:'publisher',target:'subscriber',type:'unknown'}]}), JSON.stringify({...solution,classes:['publisher','publisher']}), ' '.repeat(50001)]) {
-  assert.deepEqual(parseLesson(raw), emptyLesson());
+
+assert.ok(validateLesson({
+  ...completeLessonGraph,
+  edges: [
+    ...completeLessonGraph.edges,
+    { source: 'publisher', target: 'narion', type: 'stores' },
+  ],
+}).length);
+assert.ok(validateLesson({
+  ...completeLessonGraph,
+  edges: [...completeLessonGraph.edges, completeLessonGraph.edges[0]!],
+}).length);
+assert.ok(validateLesson({
+  ...completeLessonGraph,
+  classes: completeLessonGraph.classes.filter(classId => classId !== 'subscriber'),
+}).length);
+
+const lessonTrace = simulateLesson(completeLessonGraph);
+assert.ok(lessonTrace.some(step => step.includes('fox.subscribe(narion)')));
+assert.ok(lessonTrace.some(step => step.includes('NarionSubscriber.update')));
+assert.ok(lessonTrace.some(step => step.includes('DreKaarSubscriber.update')));
+assert.ok(!lessonTrace.some(step => step.includes('fox.unsubscribe(narion)')));
+assert.ok(
+  simulateLesson(completeLessonGraph, {
+    danger: true,
+    narionSubscribed: false,
+  }).some(step => step.includes('fox.unsubscribe(narion)')),
+);
+assert.deepEqual(parseLesson(JSON.stringify(completeLessonGraph)), completeLessonGraph);
+assert.deepEqual(
+  parseLesson(JSON.stringify(graphWithMisplacedNotifyMethod)),
+  graphWithMisplacedNotifyMethod,
+  'retain structurally safe but incorrect attempts',
+);
+
+const partialLessonGraph = {
+  classes: ['publisher'],
+  members: { subscribe: 'publisher' },
+  edges: [],
+};
+assert.deepEqual(parseLesson(JSON.stringify(partialLessonGraph)), partialLessonGraph);
+
+const malformedSavedDiagrams = [
+  null,
+  '{',
+  'null',
+  '[]',
+  '{}',
+  JSON.stringify({ classes: ['raven'], members: {}, edges: [] }),
+  JSON.stringify({ ...completeLessonGraph, members: { notify: 'unknown' } }),
+  JSON.stringify({ ...completeLessonGraph, edges: [null] }),
+  JSON.stringify({
+    ...completeLessonGraph,
+    edges: [{ source: 'publisher', target: 'subscriber', type: 'unknown' }],
+  }),
+  JSON.stringify({ ...completeLessonGraph, classes: ['publisher', 'publisher'] }),
+  ' '.repeat(50001),
+];
+
+for (const rawDiagram of malformedSavedDiagrams)
+{
+  assert.deepEqual(parseLesson(rawDiagram), emptyLesson());
 }
-for (const sourceHandle of connectionHandles) {
-  for (const targetHandle of connectionHandles) {
-    const withPorts = {...solution, edges: solution.edges.map(edge => ({...edge, sourceHandle, targetHandle}))};
-    assert.deepEqual(parseLesson(JSON.stringify(withPorts)), withPorts, 'preserve both selected ports');
-    assert.deepEqual(validateLesson(withPorts), [], 'port placement does not change relationship meaning');
+
+for (const sourceHandle of connectionHandles)
+{
+  for (const targetHandle of connectionHandles)
+  {
+    const graphWithSelectedPorts = {
+      ...completeLessonGraph,
+      edges: completeLessonGraph.edges.map(edge => ({
+        ...edge,
+        sourceHandle,
+        targetHandle,
+      })),
+    };
+    assert.deepEqual(
+      parseLesson(JSON.stringify(graphWithSelectedPorts)),
+      graphWithSelectedPorts,
+      'preserve both selected ports',
+    );
+    assert.deepEqual(
+      validateLesson(graphWithSelectedPorts),
+      [],
+      'port placement does not change relationship meaning',
+    );
   }
 }
-for (const side of connectionHandles) {
-  for (const suffix of ['start', 'end']) {
-    const oldPorts = {...solution, edges: solution.edges.map(edge => ({...edge, sourceHandle: `${side}-${suffix}`, targetHandle: `${side}-${suffix}`}))};
-    const centered = {...solution, edges: solution.edges.map(edge => ({...edge, sourceHandle: side, targetHandle: side}))};
-    assert.deepEqual(parseLesson(JSON.stringify(oldPorts)), centered, 'move old points to the center of the same side');
+
+for (const handleSide of connectionHandles)
+{
+  for (const endpointSuffix of ['start', 'end'])
+  {
+    const graphWithOldPorts = {
+      ...completeLessonGraph,
+      edges: completeLessonGraph.edges.map(edge => ({
+        ...edge,
+        sourceHandle: `${handleSide}-${endpointSuffix}`,
+        targetHandle: `${handleSide}-${endpointSuffix}`,
+      })),
+    };
+    const graphWithCenteredPorts = {
+      ...completeLessonGraph,
+      edges: completeLessonGraph.edges.map(edge => ({
+        ...edge,
+        sourceHandle: handleSide,
+        targetHandle: handleSide,
+      })),
+    };
+    assert.deepEqual(
+      parseLesson(JSON.stringify(graphWithOldPorts)),
+      graphWithCenteredPorts,
+      'move old points to the center of the same side',
+    );
   }
 }
-for (const field of ['sourceHandle', 'targetHandle']) {
-  for (const value of ['unknown', 'top-middle', 'left-end-extra', '', null, 42, {}]) {
-    assert.deepEqual(parseLesson(JSON.stringify({...solution, edges: [{...solution.edges[0], [field]: value}]})), emptyLesson(), 'reject malformed ports');
+
+for (const handleField of ['sourceHandle', 'targetHandle'])
+{
+  for (const malformedHandle of ['unknown', 'top-middle', 'left-end-extra', '', null, 42, {}])
+  {
+    const graphWithMalformedPort = {
+      ...completeLessonGraph,
+      edges: [{
+        ...completeLessonGraph.edges[0],
+        [handleField]: malformedHandle,
+      }],
+    };
+    assert.deepEqual(
+      parseLesson(JSON.stringify(graphWithMalformedPort)),
+      emptyLesson(),
+      'reject malformed ports',
+    );
   }
 }
-solution.members.notify = 'narion';
-assert.equal(solutionLesson().members.notify, 'publisher', 'solution must not share mutable state');
+
+completeLessonGraph.members.notify = 'narion';
+assert.equal(
+  solutionLesson().members.notify,
+  'publisher',
+  'solution must not share mutable state',
+);
 console.log('Observer lesson: validation, simulation, and saved-attempt checks passed.');
 
-// The same event goes only to active subscribers; a safe path sends nothing.
-for (const narionSubscribed of [true, false]) {
-  const options = { danger: true, narionSubscribed };
-  const before = JSON.stringify(options);
-  const danger = discoverPath(options);
-  assert.deepEqual(danger.recipients, narionSubscribed ? ['narion', 'dre-kaar'] : ['dre-kaar']);
-  assert.equal(JSON.stringify(options), before, 'discovery does not change subscription choices');
-  assert.equal(danger.trace.some(step => step.includes('NarionSubscriber.update')), narionSubscribed);
-  const safe = discoverPath({ danger: false, narionSubscribed });
-  assert.deepEqual(safe.recipients, []);
-  assert.ok(safe.summary.includes('no messages'));
-  assert.ok(!safe.trace.some(step => step.includes('calls planRoute') || step.includes('calls prepareDefense')));
+// Одно событие получает только активная подписка; безопасный путь ничего не отправляет.
+for (const narionSubscribed of [true, false])
+{
+  const discoveryOptions = { danger: true, narionSubscribed };
+  const optionsBeforeDiscovery = JSON.stringify(discoveryOptions);
+  const dangerousPath = discoverPath(discoveryOptions);
+  let expectedRecipients: string[];
+  if (narionSubscribed)
+  {
+    expectedRecipients = ['narion', 'dre-kaar'];
+  }
+  else
+  {
+    expectedRecipients = ['dre-kaar'];
+  }
+
+  assert.deepEqual(dangerousPath.recipients, expectedRecipients);
+  assert.equal(
+    JSON.stringify(discoveryOptions),
+    optionsBeforeDiscovery,
+    'discovery does not change subscription choices',
+  );
+  assert.equal(
+    dangerousPath.trace.some(step => step.includes('NarionSubscriber.update')),
+    narionSubscribed,
+  );
+
+  const safePath = discoverPath({ danger: false, narionSubscribed });
+  assert.deepEqual(safePath.recipients, []);
+  assert.ok(safePath.summary.includes('no messages'));
+  assert.ok(!safePath.trace.some(step =>
+    step.includes('calls planRoute') || step.includes('calls prepareDefense')));
 }
-const validGraph = solutionLesson();
-assert.deepEqual(getLessonIssues(validGraph), []);
-const missingFieldIssues = getLessonIssues(withoutField);
-assert.ok(missingFieldIssues.some(issue => issue.memberIds.includes('subscribers') && issue.classIds.includes('publisher')));
-const wrongFieldIssues = getLessonIssues(wrongFieldOwner);
-assert.ok(wrongFieldIssues.some(issue => issue.memberIds.includes('subscribers') && issue.classIds.includes('publisher') && issue.classIds.includes('narion')));
-const missingClassIssues = getLessonIssues({...validGraph, classes:validGraph.classes.filter(id => id !== 'publisher')});
-assert.ok(missingClassIssues.some(issue => issue.message.startsWith('Add the FoxPublisher') && issue.classIds.includes('publisher')));
-const missingRelationship = {...validGraph, edges:validGraph.edges.slice(1)};
-assert.ok(getLessonIssues(missingRelationship).some(issue => issue.classIds.includes('publisher') && issue.classIds.includes('subscriber') && !issue.edgeIndices.length));
-const reversedRelationship = {...validGraph, edges:[{source:'subscriber', target:'publisher', type:'stores'}, ...validGraph.edges.slice(1)]};
-assert.ok(getLessonIssues(reversedRelationship).some(issue => issue.edgeIndices.includes(0) && issue.classIds.includes('publisher')));
-const extraRelationship = {...validGraph, edges:[...validGraph.edges, {source:'publisher', target:'narion', type:'stores'}]};
-assert.ok(getLessonIssues(extraRelationship).some(issue => issue.edgeIndices.includes(3)));
-const duplicateRelationship = {...validGraph, edges:[...validGraph.edges, validGraph.edges[0]!]};
-assert.ok(getLessonIssues(duplicateRelationship).some(issue => issue.edgeIndices.includes(0) && issue.edgeIndices.includes(3)));
+
+const validLessonGraph = solutionLesson();
+assert.deepEqual(getLessonIssues(validLessonGraph), []);
+
+const missingFieldIssues = getLessonIssues(graphWithoutSubscribersField);
+assert.ok(missingFieldIssues.some(issue =>
+  issue.memberIds.includes('subscribers')
+  && issue.classIds.includes('publisher')));
+
+const misplacedFieldIssues = getLessonIssues(graphWithMisplacedSubscribersField);
+assert.ok(misplacedFieldIssues.some(issue =>
+  issue.memberIds.includes('subscribers')
+  && issue.classIds.includes('publisher')
+  && issue.classIds.includes('narion')));
+
+const graphMissingPublisher = {
+  ...validLessonGraph,
+  classes: validLessonGraph.classes.filter(classId => classId !== 'publisher'),
+};
+assert.ok(getLessonIssues(graphMissingPublisher).some(issue =>
+  issue.message.startsWith('Add the FoxPublisher')
+  && issue.classIds.includes('publisher')));
+
+const graphMissingRelationship = {
+  ...validLessonGraph,
+  edges: validLessonGraph.edges.slice(1),
+};
+assert.ok(getLessonIssues(graphMissingRelationship).some(issue =>
+  issue.classIds.includes('publisher')
+  && issue.classIds.includes('subscriber')
+  && !issue.edgeIndices.length));
+
+const graphWithReversedRelationship = {
+  ...validLessonGraph,
+  edges: [
+    { source: 'subscriber', target: 'publisher', type: 'stores' },
+    ...validLessonGraph.edges.slice(1),
+  ],
+};
+assert.ok(getLessonIssues(graphWithReversedRelationship).some(issue =>
+  issue.edgeIndices.includes(0)
+  && issue.classIds.includes('publisher')));
+
+const graphWithExtraRelationship = {
+  ...validLessonGraph,
+  edges: [
+    ...validLessonGraph.edges,
+    { source: 'publisher', target: 'narion', type: 'stores' },
+  ],
+};
+assert.ok(getLessonIssues(graphWithExtraRelationship).some(issue =>
+  issue.edgeIndices.includes(3)));
+
+const graphWithDuplicateRelationship = {
+  ...validLessonGraph,
+  edges: [...validLessonGraph.edges, validLessonGraph.edges[0]!],
+};
+assert.ok(getLessonIssues(graphWithDuplicateRelationship).some(issue =>
+  issue.edgeIndices.includes(0) && issue.edgeIndices.includes(3)));
 console.log('Observer discovery and targeted feedback checks passed.');

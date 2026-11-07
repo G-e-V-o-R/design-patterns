@@ -12,3 +12,9 @@ This repository contains design pattern reference material in `docs/` and a Vite
 For every requested web application code change, ask `architecture_planner` for a plan and wait for its result before editing code. Give it the task and relevant constraints. The plan should name affected files, design choices, and verification; a small fix can have a short plan. The main agent reviews the plan and passes it to `web_implementer` or implements it directly. If new facts change the approach, update the plan before continuing.
 
 Delegate independent browser checks when useful. Use `security_reviewer` when the user explicitly requests a security review. Keep edits to a given file with one agent at a time. The main agent coordinates work and verifies the combined result. Run `npm test`, `npm run typecheck`, and `npm run build` before finishing.
+
+When adding a scenario, start with `src/scenarios/REFERENCE_SCENARIO.md`.
+
+## Code style
+
+- In TypeScript and TSX, put the opening `{` of function bodies and `if`/`else` blocks on its own line. Put `else` on its own line as well; do not combine it with the closing brace or its opening brace.

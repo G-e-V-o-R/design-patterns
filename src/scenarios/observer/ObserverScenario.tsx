@@ -2,7 +2,20 @@ import { useState } from 'react';
 import { emptyLesson } from './model';
 import { ObserverLesson } from './ObserverLesson';
 import './observer.css';
-export default function ObserverScenario({ active = true }: { active?: boolean }) {
-  const [graph, setGraph] = useState(emptyLesson);
-  return <div className="observer-scenario"><ObserverLesson active={active} graph={graph} onChange={setGraph}/></div>;
+
+export default function ObserverScenario({ active = true }: { active?: boolean })
+{
+  const [lessonGraph, setLessonGraph] = useState(emptyLesson);
+
+  // Сценарий владеет графом и передаёт уроку и текущее значение, и способ его
+  // обновить. Так дочерние компоненты остаются отдельными представлениями урока.
+  return (
+    <div className="observer-scenario">
+      <ObserverLesson
+        active={active}
+        graph={lessonGraph}
+        onChange={setLessonGraph}
+      />
+    </div>
+  );
 }

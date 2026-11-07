@@ -26,6 +26,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 ## Implementation boundaries
 
 - Keep all scenario content and behavior in its own `src/scenarios/<id>/` directory: public component, model, validation, simulation, styles, and tests.
+- Keep the public entry and lesson orchestrator thin. Decompose content, presentational UI, and stateful logic into focused files rather than building a monolith.
 - Give each scenario its own state and model. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or any other `src/` module. The only allowed external relative imports are scenario artwork in `docs/`.
 - Keep the initial activity understandable and safe to explore. A page reload starts a fresh scenario.
 - Keep pattern-specific logic in the scenario. Do not add pattern-specific branches to the application shell or make a scenario depend on another scenario's internals.
@@ -58,7 +59,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Observer as the reference
 
-Use [ObserverScenario.tsx](./observer/ObserverScenario.tsx) as the public-entry example and [ObserverLesson.tsx](./observer/ObserverLesson.tsx) as the full lesson example. The Observer reference is valuable because it combines:
+Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [ObserverScenario.tsx](./observer/ObserverScenario.tsx) as the public-entry example and [ObserverLesson.tsx](./observer/ObserverLesson.tsx) as the full lesson example. The Observer reference is valuable because it combines:
 
 - A memorable story with a specific, testable learning goal.
 - A build sequence and clear descriptions for class, member, and relationship cards, with scenario artwork on the concrete class cards.

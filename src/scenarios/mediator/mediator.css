@@ -58,6 +58,11 @@
 .mediator-scenario .med-class-members small { font-size:9px; color:#c4c0a0; margin-bottom:7px; }
 .mediator-scenario .med-class-members code { display:block; font-size:11px; line-height:1.7; margin:4px 0; }
 .mediator-scenario .med-class-members p { font-size:10px; color:#a5b89b; margin:0; }
+.mediator-scenario .med-class-artwork { overflow:hidden; border-top:1px solid #c3ceab35; border-radius:0 0 6px 6px; background:#102019; }
+.mediator-scenario .med-class-artwork img { display:block; width:100%; height:auto; object-fit:contain; pointer-events:none; user-select:none; }
+.mediator-scenario .med-class.med-drop-target { border-color:#f2d393; outline:3px solid #e6c17f; outline-offset:3px; background:#3b5033; box-shadow:0 0 24px #e6c17f40; }
+.mediator-scenario .med-class.med-drop-target .med-class-members p { color:#f4dfb4; }
+.mediator-scenario .med-member-card.is-dragging { opacity:.55; }
 .mediator-scenario .med-empty { position:absolute; inset:35% 10% auto; text-align:center; color:#a0b298; pointer-events:none; }
 .mediator-scenario .med-empty>span { font-size:36px; color:#c1b07d; }
 .mediator-scenario .med-empty h3 { font-size:20px; margin:16px 0 10px; color:#dbe2cc; }
