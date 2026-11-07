@@ -7,7 +7,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "tsx src/tests/content-integrity.test.ts && tsx src/tests/runtime.test.ts && tsx src/tests/observer-lesson.test.ts"
+    "test": "tsx src/tests/content-integrity.test.ts && tsx src/tests/runtime.test.ts && tsx src/tests/observer-lesson.test.ts && tsx src/scenarios/mediator/model.test.ts && tsx src/tests/scenario-boundaries.test.mjs"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

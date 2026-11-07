@@ -1,0 +1,140 @@
+/* All lesson styling is contained by this scenario boundary. */
+.mediator-scenario { padding:40px 16px; color:#e7ecdf; }
+.mediator-scenario h1,.mediator-scenario h2,.mediator-scenario h3 { font-family:'Manrope',system-ui,sans-serif; font-weight:600; letter-spacing:-.035em; }
+.mediator-scenario h2 { font-size:19px; margin-bottom:14px; }
+.mediator-scenario h3 { font-size:15px; margin-bottom:10px; }
+.mediator-scenario button { border-radius:6px; font-size:12px; }
+.mediator-scenario code { font-family:ui-monospace,monospace; overflow-wrap:anywhere; }
+.mediator-scenario .med-intro { display:grid; grid-template-columns:minmax(0,1fr) 240px; gap:32px; align-items:center; margin-bottom:28px; }
+.mediator-scenario .med-kicker { color:#d2b980; font-size:10px; letter-spacing:1.8px; font-weight:700; margin-bottom:16px; }
+.mediator-scenario h1 { font-size:clamp(28px,3vw,43px); line-height:1.2; margin-bottom:18px; }
+.mediator-scenario h1 span { display:inline-block; font-size:12px; letter-spacing:0; vertical-align:middle; border:1px solid #b0c19f44; padding:6px 12px; border-radius:30px; color:#d5c398; margin:8px 0 0 12px; }
+.mediator-scenario .med-intro p:not(.med-kicker) { font-size:14px; line-height:1.8; color:#bbc6b6; }
+.mediator-scenario .med-task strong { color:#e1c38d; margin-right:8px; }
+.mediator-scenario .med-intro figure { margin:0; height:200px; position:relative; border:1px solid #aec79d26; border-radius:12px; overflow:hidden; }
+.mediator-scenario .med-intro img { width:100%; height:100%; object-fit:cover; }
+.mediator-scenario .med-intro figcaption { position:absolute; bottom:0; inset-inline:0; padding:24px 10px 10px; background:linear-gradient(transparent,#12231c); text-align:center; font-size:11px; }
+.mediator-scenario .med-steps { display:flex; gap:35px; padding:18px 0; border-top:1px solid #aec79d26; color:#bccab5; font-size:12px; }
+.mediator-scenario .med-workspace { display:grid; grid-template-columns:295px minmax(0,1fr); gap:22px; align-items:start; }
+.mediator-scenario .med-tray { padding:20px; background:#1b2b23; border:1px solid #aec79d26; border-radius:10px; }
+.mediator-scenario .med-tray h2 { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.mediator-scenario .med-tray h2 small { font-size:10px; font-weight:400; letter-spacing:0; }
+.mediator-scenario .med-tabs { display:flex; gap:3px; background:#122019; border-radius:7px; padding:4px; }
+.mediator-scenario .med-tabs button { flex:1; font-size:10px; padding:9px 4px; border:0; background:transparent; }
+.mediator-scenario .med-tabs button[aria-pressed=true] { background:#344635; color:#f3e9cf; }
+.mediator-scenario .med-help { font-size:11px; color:#b0bda8; line-height:1.8; margin:14px 0; }
+.mediator-scenario .med-card-list { display:grid; gap:10px; max-height:780px; overflow:auto; padding:3px; }
+.mediator-scenario .med-tray-card,.mediator-scenario .med-member-card { background:#213327; border:1px solid #829d7040; border-radius:7px; padding:14px; }
+.mediator-scenario .med-tray-card small,.mediator-scenario .med-member-card small { color:#d0bd91; text-transform:uppercase; font-size:9px; letter-spacing:1px; margin-bottom:7px; }
+.mediator-scenario .med-tray-card h3 { font-family:ui-monospace,monospace; font-size:14px; overflow-wrap:anywhere; }
+.mediator-scenario .med-tray-card p,.mediator-scenario .med-member-card p { font-size:11px; line-height:1.8; color:#adbea6; margin:9px 0 12px; }
+.mediator-scenario .med-tray-card button { width:100%; font-size:11px; padding:8px; }
+.mediator-scenario .med-member-card { cursor:grab; }
+.mediator-scenario .med-member-card code { font-size:11px; color:#ead8ad; }
+.mediator-scenario label { font-size:10px; color:#b9c7b0; display:grid; gap:5px; min-width:0; }
+.mediator-scenario select { width:100%; min-width:0; max-width:100%; border:1px solid #829d7066; background:#15271c; color:#e7ecdf; border-radius:5px; padding:8px; font-size:11px; }
+.mediator-scenario .med-hints { border-top:1px solid #aec79d26; margin-top:18px; padding-top:16px; }
+.mediator-scenario .med-hints p { font-size:12px; color:#ddc795; line-height:1.8; margin:14px 0; }
+.mediator-scenario .med-text-button { display:block; background:transparent; border:0; color:#d1bc8e; padding:14px 0 0; }
+.mediator-scenario .med-board { min-width:0; border:1px solid #aec79d26; background:#18271f; border-radius:10px; overflow:hidden; }
+.mediator-scenario .med-board-heading { padding:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mediator-scenario .med-board-heading h2 { margin-bottom:7px; }
+.mediator-scenario .med-board-heading p { font-size:11px; color:#a8b79f; margin:0; }
+.mediator-scenario .med-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.mediator-scenario .med-board-heading button { padding:7px 12px; }
+.mediator-scenario .med-worked { padding:10px 20px; background:#4e452a; color:#e8d3a1; font-size:11px; margin:0; }
+.mediator-scenario .med-canvas { height:690px; position:relative; background:#102019; border-block:1px solid #aec79d26; }
+.mediator-scenario .med-canvas .react-flow { --xy-background-color-default:#102019; --xy-edge-label-background-color-default:#20352a; --xy-edge-label-color-default:#f1e3c3; --xy-edge-label-background-color:#20352a; }
+.mediator-scenario .med-canvas .react-flow__edge-text { font-size:11px; }
+.mediator-scenario .med-canvas .react-flow__handle { width:12px; height:12px; background:#ddc18d; border:2px solid #102019; }
+.mediator-scenario .med-class { width:280px; border:1px solid #899d71; border-radius:7px; background:#243b2c; box-shadow:0 6px 18px #0004; }
+.mediator-scenario .med-interface { border-color:#c4ac78; background:#34412b; }
+.mediator-scenario .med-class header { padding:17px 15px; position:relative; border-bottom:1px solid #c3ceab35; }
+.mediator-scenario .med-class header small { font-size:9px; text-transform:uppercase; color:#c4c0a0; letter-spacing:1px; margin-bottom:5px; }
+.mediator-scenario .med-class header strong { font-family:ui-monospace,monospace; font-size:16px; }
+.mediator-scenario .med-class header button { position:absolute; top:7px; right:7px; padding:0 5px; background:none; border:0; font-size:17px; }
+.mediator-scenario .med-class-members { padding:12px 15px; }
+.mediator-scenario .med-class-members + .med-class-members { border-top:1px solid #c3ceab35; }
+.mediator-scenario .med-class-members small { font-size:9px; color:#c4c0a0; margin-bottom:7px; }
+.mediator-scenario .med-class-members code { display:block; font-size:11px; line-height:1.7; margin:4px 0; }
+.mediator-scenario .med-class-members p { font-size:10px; color:#a5b89b; margin:0; }
+.mediator-scenario .med-empty { position:absolute; inset:35% 10% auto; text-align:center; color:#a0b298; pointer-events:none; }
+.mediator-scenario .med-empty>span { font-size:36px; color:#c1b07d; }
+.mediator-scenario .med-empty h3 { font-size:20px; margin:16px 0 10px; color:#dbe2cc; }
+.mediator-scenario .med-empty p { font-size:12px; }
+.mediator-scenario .med-connections { padding:20px; border-bottom:1px solid #aec79d26; }
+.mediator-scenario .med-connections>p { font-size:11px; color:#b0bda8; line-height:1.7; }
+.mediator-scenario .med-connect-fields { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; }
+.mediator-scenario .med-connect-fields button { font-size:11px; padding:9px 10px; }
+.mediator-scenario .med-arrow-help { margin-top:14px; }
+.mediator-scenario .med-arrow-help p { font-size:11px; color:#becdb3; margin:5px 0; }
+.mediator-scenario .med-relations { list-style:none; padding:0 20px; }
+.mediator-scenario .med-relations li { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid #aec79d26; font-size:11px; }
+.mediator-scenario .med-relations em { font-style:normal; color:#d3bd8b; margin:0 5px; }
+.mediator-scenario .med-relations button { padding:0 7px; font-size:17px; }
+.mediator-scenario .med-check { padding:20px; }
+.mediator-scenario .med-check span { font-size:11px; color:#a8b79f; }
+.mediator-scenario .med-primary { background:#ceb17a; color:#18251d; font-weight:700; }
+.mediator-scenario .med-primary:hover { background:#e8ca91; }
+.mediator-scenario .med-needs-fix { outline:2px solid #f0a28e; outline-offset:1px; }
+.mediator-scenario .med-fix { display:block; color:#ffd4c6; font-size:10px; padding:2px 5px; margin-top:5px; background:#55372e; width:fit-content; max-width:100%; border-radius:3px; }
+.mediator-scenario .med-feedback { margin:0 20px; font-size:12px; color:#e0c58d; }
+.mediator-scenario .med-feedback>div { border-left:2px solid #c3a56a; padding:14px 18px; background:#293526; margin-bottom:20px; }
+.mediator-scenario .med-feedback ul { padding-left:18px; font-size:11px; line-height:1.9; margin:0; }
+.mediator-scenario .med-feedback p { line-height:1.8; }
+.mediator-scenario .med-feedback .med-success { border-color:#b4cc8d; background:#263c2c; }
+.mediator-scenario .med-demo { margin:0 20px 20px; padding:22px; border:1px solid #829d7055; border-radius:10px; background:#12221b; }
+.mediator-scenario .med-demo>p:not(.med-kicker) { font-size:12px; color:#b8c6af; line-height:1.8; }
+.mediator-scenario .med-demo .med-kicker { margin-bottom:10px; }
+.mediator-scenario .med-demo h2 { font-size:22px; line-height:1.3; }
+.mediator-scenario .med-demo .med-notice { color:#e2c992!important; }
+.mediator-scenario .med-route { display:grid; grid-template-columns:1fr 20px 1fr 20px 1fr; gap:8px; align-items:center; margin:22px 0; }
+.mediator-scenario .med-route article { border:1px solid #829d7055; background:#203427; border-radius:8px; padding:16px 10px; text-align:center; min-width:0; }
+.mediator-scenario .med-route small { font-size:8px; letter-spacing:1px; margin-bottom:12px; }
+.mediator-scenario .med-route h3 { margin-bottom:9px; overflow-wrap:anywhere; }
+.mediator-scenario .med-route p { font-size:11px; line-height:1.7; margin:0; color:#bccab5; }
+.mediator-scenario .med-route>span { color:#d8be80; font-size:22px; text-align:center; }
+.mediator-scenario .med-route .med-raven { background:#2b3826; border-color:#d7be7a55; }
+.mediator-scenario .med-route .med-received { border-color:#d8be80; background:#30432b; }
+.mediator-scenario .med-demo-status { border-left:3px solid #b5c38c; padding:10px 12px; background:#223728; }
+.mediator-scenario .med-trace { font-size:11px; line-height:1.8; color:#becbb2; }
+.mediator-scenario .med-trace summary { cursor:pointer; color:#e0c58d; }
+.mediator-scenario .med-trace ol { padding-left:20px; }
+.mediator-scenario .med-trace li { margin:8px 0; }
+.mediator-scenario .med-comparison { padding-top:16px; border-top:1px solid #829d7055; margin-bottom:0; }
+.mediator-scenario .med-concept { display:flex; gap:35px; padding-top:28px; color:#a8b9a0; font-size:12px; }
+.mediator-scenario .med-concept strong { color:#d6c295; white-space:nowrap; }
+.mediator-scenario .med-concept p { line-height:1.9; margin:0; }
+@media(max-width:1050px) {
+  .mediator-scenario .med-workspace { grid-template-columns:250px minmax(0,1fr); gap:16px; }
+  .mediator-scenario .med-tray { padding:15px; }
+  .mediator-scenario .med-connect-fields { grid-template-columns:1fr 1fr; }
+  .mediator-scenario .med-intro { grid-template-columns:minmax(0,1fr) 200px; }
+  .mediator-scenario .med-canvas { height:620px; }
+}
+@media(max-width:720px) {
+  .mediator-scenario { padding:27px 12px; }
+  .mediator-scenario .med-intro { display:block; }
+  .mediator-scenario .med-intro figure { display:none; }
+  .mediator-scenario h1 { font-size:30px; }
+  .mediator-scenario h1 span { display:table; margin-left:0; }
+  .mediator-scenario .med-intro p:not(.med-kicker) { font-size:12px; }
+  .mediator-scenario .med-steps { gap:12px; font-size:10px; justify-content:space-between; }
+  .mediator-scenario .med-workspace { display:flex; flex-direction:column; }
+  .mediator-scenario .med-tray,.mediator-scenario .med-board { width:100%; }
+  .mediator-scenario .med-card-list { grid-template-columns:1fr 1fr; max-height:420px; }
+  .mediator-scenario .med-tray-card,.mediator-scenario .med-member-card { padding:10px; }
+  .mediator-scenario .med-tray-card h3 { font-size:12px; }
+  .mediator-scenario .med-board-heading,.mediator-scenario .med-connections,.mediator-scenario .med-check { padding:15px; }
+  .mediator-scenario .med-board-heading h2 { font-size:16px; }
+  .mediator-scenario .med-board-heading button { font-size:11px; padding:6px 9px; }
+  .mediator-scenario .med-canvas { height:490px; }
+  .mediator-scenario .med-demo { padding:14px; margin:0 15px 15px; }
+  .mediator-scenario .med-demo h2 { font-size:20px; }
+  .mediator-scenario .med-route { grid-template-columns:1fr; gap:6px; }
+  .mediator-scenario .med-route>span { transform:rotate(90deg); }
+  .mediator-scenario .med-route article { padding:12px; }
+  .mediator-scenario .med-route small { margin-bottom:6px; }
+  .mediator-scenario .med-concept { display:block; }
+  .mediator-scenario .med-concept strong { display:block; margin-bottom:8px; }
+}

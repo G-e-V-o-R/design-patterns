@@ -1,0 +1,20 @@
+.workshop-app{--lesson-border:#aec79d26;background:#14221d;color:#e7ecdf;min-height:100vh;font-family:'Manrope',system-ui,sans-serif}
+.workshop-app h1,.workshop-app h2,.workshop-app h3{font-family:'Manrope',system-ui,sans-serif;font-weight:600;letter-spacing:-.035em}
+.workshop-app button{font-size:12px;border-radius:6px}
+.workshop-app code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.workshop-header{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--lesson-border);padding:22px 16px}
+.workshop-brand{display:flex;align-items:center;gap:12px;font-size:17px}
+.workshop-brand>span{color:#ddc18d;font-size:29px}
+.workshop-header>span{font-size:9px;letter-spacing:2.5px;color:#a0af9f}
+.workshop-number{color:#e4c38d;font-size:13px}
+.workshop-number span{color:#aebba7;margin-left:10px}
+.scenario-navigation{display:flex;flex-wrap:wrap;gap:10px;padding:16px;border-bottom:1px solid var(--lesson-border);align-items:center}
+.scenario-navigation button{display:grid;gap:5px;text-align:left;padding:12px 18px;border:1px solid #aec79d30;background:#1b2b23;color:#bac9b1;min-width:210px}
+.scenario-navigation button[aria-current]{border:1px solid #d9bd80;background:#30412c;color:#f0dfba}
+.scenario-navigation button span{font-size:10px;letter-spacing:1px}
+.scenario-navigation button strong{font-weight:500;font-size:13px}
+.scenario-navigation p{margin:0 0 0 auto;font-size:11px;color:#a5b59d}
+.workshop-app [hidden]{display:none!important}
+.workshop-footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--lesson-border);padding:22px 16px;font-size:10px;color:#8fa187}
+.scenario-error{padding:40px 20px}
+@media(max-width:720px){.workshop-header{padding:16px 12px}.workshop-header>span{display:none}.workshop-brand{font-size:14px}.workshop-number{font-size:10px}.scenario-navigation{padding:12px}.scenario-navigation button{min-width:0;flex:1;padding:10px}.scenario-navigation button strong{font-size:11px}.scenario-navigation p{flex-basis:100%;margin:0}.workshop-footer{font-size:9px;padding-inline:12px}}
