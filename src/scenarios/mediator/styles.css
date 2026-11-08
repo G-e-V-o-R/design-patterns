@@ -331,6 +331,63 @@
   border: 2px solid #102019;
 }
 
+.mediator-scenario .med-connection-source .med-class {
+  outline: 3px solid #e6c17f;
+  outline-offset: 4px;
+}
+
+.mediator-scenario .med-arrow-tools {
+  max-width: calc(100% - 65px);
+  padding: 8px;
+  background: #1b2b23;
+  border: 1px solid #829d7066;
+  border-radius: 9px;
+  box-shadow: 0 4px 18px #0005;
+}
+
+.mediator-scenario .med-arrow-tools > div {
+  display: flex;
+  gap: 5px;
+}
+
+.mediator-scenario .med-arrow-tools button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 52px;
+  min-width: 58px;
+  padding: 7px 10px;
+  background: #243b2c;
+  color: #c8d5bb;
+  border: 1px solid transparent;
+}
+
+.mediator-scenario .med-arrow-tools button[aria-pressed=true] {
+  background: #405038;
+  border-color: #ddc18d;
+  color: #f4dfb4;
+}
+
+.mediator-scenario .med-arrow-tools button:focus-visible {
+  outline: 2px solid #f4dfb4;
+  outline-offset: 2px;
+}
+
+.mediator-scenario .med-arrow-tools button span {
+  font-size: 10px;
+}
+
+.mediator-scenario .med-arrow-tools p {
+  font-size: 10px;
+  color: #c2ceb7;
+  max-width: 240px;
+  margin: 7px 2px 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .mediator-scenario .med-class {
   width: 280px;
   border: 1px solid #899d71;
@@ -437,39 +494,6 @@
 
 .mediator-scenario .med-empty p {
   font-size: 12px;
-}
-
-.mediator-scenario .med-connections {
-  padding: 20px;
-  border-bottom: 1px solid #aec79d26;
-}
-
-.mediator-scenario .med-connections > p {
-  font-size: 11px;
-  color: #b0bda8;
-  line-height: 1.7;
-}
-
-.mediator-scenario .med-connect-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.mediator-scenario .med-connect-fields button {
-  font-size: 11px;
-  padding: 9px 10px;
-}
-
-.mediator-scenario .med-arrow-help {
-  margin-top: 14px;
-}
-
-.mediator-scenario .med-arrow-help p {
-  font-size: 11px;
-  color: #becdb3;
-  margin: 5px 0;
 }
 
 .mediator-scenario .med-relations {
@@ -590,55 +614,215 @@
   color: #e2c992 !important;
 }
 
-.mediator-scenario .med-route {
+.mediator-scenario .med-before {
   display: grid;
-  grid-template-columns: 1fr 20px 1fr 20px 1fr;
-  gap: 8px;
-  align-items: center;
-  margin: 22px 0;
-}
-
-.mediator-scenario .med-route article {
-  border: 1px solid #829d7055;
-  background: #203427;
+  grid-template-columns: minmax(150px, .7fr) minmax(0, 1fr);
+  min-height: 150px;
+  margin: 20px 0;
+  overflow: hidden;
+  border: 1px solid #bd8c6b77;
   border-radius: 8px;
-  padding: 16px 10px;
-  text-align: center;
-  min-width: 0;
+  background: #2b261f;
 }
 
-.mediator-scenario .med-route small {
+.mediator-scenario .med-before img {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  object-fit: cover;
+  object-position: center 53%;
+  filter: saturate(.78) brightness(.78);
+}
+
+.mediator-scenario .med-before > div {
+  align-self: center;
+  padding: 18px;
+}
+
+.mediator-scenario .med-before small {
+  color: #e1ae80;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.mediator-scenario .med-before h3 {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.mediator-scenario .med-before p {
+  margin: 0;
+  color: #c9b9a7;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.mediator-scenario .med-actor-scene {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-areas:
+    "dre raven narion"
+    "faelina raven saerenn";
+  gap: 24px 28px;
+  margin: 22px 0 14px;
+  padding: 8px 4px;
+}
+
+.mediator-scenario .med-message-route,
+.mediator-scenario .med-message-packet-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.mediator-scenario .med-message-route {
+  z-index: 0;
+}
+
+.mediator-scenario .med-message-packet-overlay {
+  z-index: 2;
+}
+
+.mediator-scenario .med-message-route-line {
+  fill: none;
+  stroke: #e5ca87;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.mediator-scenario .med-actor {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #829d7055;
+  border-radius: 8px;
+  background: #203427;
+  transition: opacity .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.mediator-scenario .med-actor-dre-kaar {
+  grid-area: dre;
+}
+
+.mediator-scenario .med-actor-raven {
+  grid-area: raven;
+  align-self: center;
+  border-color: #d7be7a88;
+  background: #2b3826;
+}
+
+.mediator-scenario .med-actor-narion {
+  grid-area: narion;
+}
+
+.mediator-scenario .med-actor-faelina {
+  grid-area: faelina;
+}
+
+.mediator-scenario .med-actor-saerenn {
+  grid-area: saerenn;
+}
+
+.mediator-scenario .med-actor img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.45;
+  object-fit: cover;
+  object-position: center 25%;
+  background: #15241b;
+}
+
+.mediator-scenario .med-actor-dre-kaar img {
+  object-position: 70% 28%;
+}
+
+.mediator-scenario .med-actor-narion img {
+  object-position: center 12%;
+}
+
+.mediator-scenario .med-actor-faelina img {
+  object-position: center 8%;
+}
+
+.mediator-scenario .med-actor-saerenn img {
+  object-position: center 5%;
+}
+
+.mediator-scenario .med-actor-raven img {
+  aspect-ratio: 1.35;
+  object-position: center 18%;
+}
+
+.mediator-scenario .med-actor-copy {
+  padding: 10px;
+}
+
+.mediator-scenario .med-actor small {
+  color: #d8be80;
   font-size: 8px;
   letter-spacing: 1px;
-  margin-bottom: 12px;
 }
 
-.mediator-scenario .med-route h3 {
-  margin-bottom: 9px;
+.mediator-scenario .med-actor h3 {
+  margin: 5px 0;
+  font-size: 13px;
   overflow-wrap: anywhere;
 }
 
-.mediator-scenario .med-route p {
-  font-size: 11px;
-  line-height: 1.7;
+.mediator-scenario .med-actor p {
   margin: 0;
   color: #bccab5;
+  font-size: 10px;
+  line-height: 1.5;
 }
 
-.mediator-scenario .med-route > span {
+.mediator-scenario .med-actor-sender,
+.mediator-scenario .med-actor-recipient {
+  border-color: #e5ca87;
+  box-shadow: 0 0 0 2px #e5ca8755, 0 8px 24px #0005;
+}
+
+.mediator-scenario .med-actor-inactive {
+  opacity: .58;
+}
+
+.mediator-scenario .med-route-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #d8be8055;
+  border-radius: 7px;
+  background: #203427;
+  color: #e5d7af !important;
+}
+
+.mediator-scenario .med-route-summary span {
   color: #d8be80;
-  font-size: 22px;
-  text-align: center;
 }
 
-.mediator-scenario .med-route .med-raven {
-  background: #2b3826;
-  border-color: #d7be7a55;
+.mediator-scenario .med-message-packet circle {
+  fill: #8d7442;
+  stroke: #f4dfb4;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
-.mediator-scenario .med-route .med-received {
-  border-color: #d8be80;
-  background: #30432b;
+.mediator-scenario .med-message-envelope {
+  fill: none;
+  stroke: #fff3d4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
 
 .mediator-scenario .med-demo-status {
@@ -698,10 +882,6 @@
 
   .mediator-scenario .med-tray {
     padding: 15px;
-  }
-
-  .mediator-scenario .med-connect-fields {
-    grid-template-columns: 1fr 1fr;
   }
 
   .mediator-scenario .med-intro {
@@ -770,9 +950,23 @@
   }
 
   .mediator-scenario .med-board-heading,
-  .mediator-scenario .med-connections,
   .mediator-scenario .med-check {
     padding: 15px;
+  }
+
+  .mediator-scenario .med-arrow-tools {
+    margin: 8px;
+    padding: 6px;
+  }
+
+  .mediator-scenario .med-arrow-tools button {
+    min-width: 50px;
+    padding: 6px;
+  }
+
+  .mediator-scenario .med-arrow-tools p {
+    max-width: 190px;
+    font-size: 9px;
   }
 
   .mediator-scenario .med-board-heading h2 {
@@ -797,21 +991,44 @@
     font-size: 20px;
   }
 
-  .mediator-scenario .med-route {
-    grid-template-columns: 1fr;
-    gap: 6px;
+  .mediator-scenario .med-actor-scene {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "raven raven"
+      "dre narion"
+      "faelina saerenn";
+    gap: 16px;
+    padding: 6px 2px;
   }
 
-  .mediator-scenario .med-route > span {
-    transform: rotate(90deg);
+  .mediator-scenario .med-actor-scene-shelter {
+    grid-template-areas:
+      "raven raven"
+      "faelina saerenn"
+      "dre narion";
   }
 
-  .mediator-scenario .med-route article {
+  .mediator-scenario .med-actor-raven {
+    width: min(100%, 300px);
+    justify-self: center;
+  }
+
+  .mediator-scenario .med-actor img,
+  .mediator-scenario .med-actor-raven img {
+    aspect-ratio: 1.25;
+  }
+
+  .mediator-scenario .med-before {
+    grid-template-columns: minmax(100px, .7fr) minmax(0, 1fr);
+  }
+
+  .mediator-scenario .med-before > div {
     padding: 12px;
   }
 
-  .mediator-scenario .med-route small {
-    margin-bottom: 6px;
+  .mediator-scenario .med-route-summary {
+    gap: 6px;
+    font-size: 11px;
   }
 
   .mediator-scenario .med-concept {
@@ -821,5 +1038,11 @@
   .mediator-scenario .med-concept strong {
     display: block;
     margin-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mediator-scenario .med-actor {
+    transition: none;
   }
 }

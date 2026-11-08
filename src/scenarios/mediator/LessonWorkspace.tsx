@@ -1,4 +1,10 @@
-import { useState, type DragEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type DragEvent,
+  type MouseEvent as ReactMouseEvent,
+} from 'react';
 import {
   applyNodeChanges,
   MarkerType,
@@ -18,7 +24,11 @@ import { MediatorDemo } from './RoutingDemo';
 import { MediatorDiagram } from './ClassDiagramCanvas';
 import { MediatorRelations } from './RelationshipList';
 import { MediatorTray } from './DiagramBuilderPanel';
-import { classArtwork, mediatorDragType, positions } from './lessonContent';
+import {
+  getClassArtwork,
+  mediatorDragType,
+  positions,
+} from './lessonContent';
 import { useMediatorLesson } from './useLessonEditor';
 import type { ClassNode } from './ClassDiagramNode';
 import './styles.css';
@@ -59,12 +69,40 @@ export function MediatorLesson({
   } = useMediatorLesson(graph, onChange);
 
   const [tab, setTab] = useState<'classes' | 'members'>('classes');
-  const [source, setSource] = useState('');
-  const [target, setTarget] = useState('');
   const [relationship, setRelationship] = useState('uses');
+  const [drawing, setDrawing] = useState(false);
+  const [connectionSource, setConnectionSource] = useState<string | null>(null);
+  const portConnectionSource = useRef<string | null>(null);
   const [nodeState, setNodeState] = useState<Record<string, Partial<ClassNode>>>({});
   const [draggedMember, setDraggedMember] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  function selectRelationship(type: string)
+  {
+    setRelationship(type);
+    setConnectionSource(null);
+    setDrawing(true);
+  }
+
+  useEffect(() =>
+  {
+    function cancelRelationshipDrawing(event: KeyboardEvent)
+    {
+      if (event.key === 'Escape')
+      {
+        setConnectionSource(null);
+        setDrawing(false);
+      }
+    }
+
+    window.addEventListener('keydown', cancelRelationshipDrawing);
+    return () => window.removeEventListener('keydown', cancelRelationshipDrawing);
+  }, []);
+
+  useEffect(() =>
+  {
+    setConnectionSource(null);
+  }, [graph]);
 
   function startDrag(event: DragEvent, id: string)
   {
@@ -83,8 +121,6 @@ export function MediatorLesson({
   {
     resetLesson();
     setNodeState({});
-    setSource('');
-    setTarget('');
   }
 
   function removeEdge(index: number)
@@ -102,6 +138,7 @@ export function MediatorLesson({
       type: 'mediatorClass',
       position: positions[card.id]!,
       ...nodeState[card.id],
+      className: connectionSource === card.id ? 'med-connection-source' : '',
       data: {
         ...card,
         members: memberCards.filter(member =>
@@ -109,7 +146,7 @@ export function MediatorLesson({
         needsFix: issueClassIds.has(card.id),
         issueMembers: issueMemberIds,
         isDropTarget: dropTarget === card.id,
-        artwork: classArtwork[card.id],
+        artwork: getClassArtwork(card.id),
         onRemove: () => removeClasses([card.id]),
         onAssign: id => assign(id, card.id),
         onDragHover: hovered =>
@@ -179,7 +216,54 @@ export function MediatorLesson({
 
   function handleConnect(connection: Connection)
   {
-    connect(connection.source, connection.target, relationship);
+    const startsAtTarget = portConnectionSource.current === connection.target;
+    let source = connection.source;
+    let target = connection.target;
+
+    if (startsAtTarget)
+    {
+      source = connection.target;
+      target = connection.source;
+    }
+
+    connect(source, target, relationship);
+    portConnectionSource.current = null;
+    setConnectionSource(null);
+  }
+
+  function handleConnectStart(nodeId: string | null)
+  {
+    portConnectionSource.current = nodeId;
+  }
+
+  function handleConnectEnd()
+  {
+    portConnectionSource.current = null;
+  }
+
+  function handleNodeClick(event: ReactMouseEvent, node: ClassNode)
+  {
+    const clickedInteractiveElement = event.target instanceof Element
+      && event.target.closest('button, .react-flow__handle');
+    if (!drawing || clickedInteractiveElement)
+    {
+      return;
+    }
+
+    if (!connectionSource)
+    {
+      setConnectionSource(node.id);
+      return;
+    }
+
+    connect(connectionSource, node.id, relationship);
+    setConnectionSource(null);
+  }
+
+  function handleMoveMode()
+  {
+    setDrawing(false);
+    setConnectionSource(null);
   }
 
   return (
@@ -238,18 +322,20 @@ export function MediatorLesson({
             onNodesDelete={handleNodesDelete}
             onEdgesDelete={handleEdgesDelete}
             onConnect={handleConnect}
+            drawing={drawing}
+            relationship={relationship}
+            connectionSource={connectionSource}
+            onConnectStart={handleConnectStart}
+            onConnectEnd={handleConnectEnd}
+            onNodeClick={handleNodeClick}
+            onPaneClick={() => setConnectionSource(null)}
+            onSelectRelationship={selectRelationship}
+            onMoveMode={handleMoveMode}
           />
 
           <MediatorRelations
             graph={graph}
-            source={source}
-            target={target}
-            relationship={relationship}
             issueEdgeIndices={issueEdgeIndices}
-            onSourceChange={setSource}
-            onTargetChange={setTarget}
-            onRelationshipChange={setRelationship}
-            onConnect={() => connect(source, target, relationship)}
             onRemoveEdge={removeEdge}
           />
 

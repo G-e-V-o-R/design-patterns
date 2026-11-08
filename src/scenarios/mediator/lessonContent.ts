@@ -10,7 +10,7 @@ export const introArt = {
   alt: 'The raven coordinating the companions',
 };
 
-export const classArtwork: Record<string, { src: string; alt: string }> = {
+export const classArtwork = {
   raven: {
     src: ravenCard,
     alt: 'RavenMediator — the concrete mediator',
@@ -31,7 +31,22 @@ export const classArtwork: Record<string, { src: string; alt: string }> = {
     src: saerennCard,
     alt: 'Saerenn — provides shelter when asked',
   },
-};
+} satisfies Record<string, { src: string; alt: string }>;
+
+function isClassArtworkKey(id: string): id is keyof typeof classArtwork
+{
+  return id in classArtwork;
+}
+
+export function getClassArtwork(id: string)
+{
+  if (isClassArtworkKey(id))
+  {
+    return classArtwork[id];
+  }
+
+  return undefined;
+}
 
 export const positions: Record<string, { x: number; y: number }> = {
   mediator: {
