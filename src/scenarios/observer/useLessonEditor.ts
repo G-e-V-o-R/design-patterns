@@ -12,7 +12,7 @@ import {
   type LessonIssue,
 } from './model';
 import { hints, label } from './lessonContent';
-import type { DemoRun } from './ObserverDemo';
+import type { DemoRun } from './NotificationDemo';
 
 export function useObserverLesson(
   graph: LessonGraph,
@@ -30,6 +30,12 @@ export function useObserverLesson(
 
   const issueClassIds = new Set(issues?.flatMap(issue => issue.classIds));
   const issueMemberIds = [...new Set(issues?.flatMap(issue => issue.memberIds))];
+  const expectedMembers = solutionLesson().members;
+  const misplacedMemberIds = Object.entries(graph.members)
+    .filter(([memberId, ownerClassId]) =>
+      expectedMembers[memberId] !== undefined
+      && expectedMembers[memberId] !== ownerClassId)
+    .map(([memberId]) => memberId);
   const issueEdgeIndices = new Set(issues?.flatMap(issue => issue.edgeIndices));
   const demoReady = validateLesson(graph).length === 0;
 
@@ -73,17 +79,6 @@ export function useObserverLesson(
     }
 
     edit({ ...graph, members: updatedMembers });
-
-    let resultMessage: string;
-    if (ownerClassId)
-    {
-      resultMessage = `${memberCard.label} added to ${label(ownerClassId)}.`;
-    }
-    else
-    {
-      resultMessage = `${memberCard.label} is no longer in a class.`;
-    }
-    setMessage(resultMessage);
   }
 
   function removeClasses(classIdsToRemove: string[])
@@ -252,6 +247,7 @@ export function useObserverLesson(
     demoReady,
     issueClassIds,
     issueMemberIds,
+    misplacedMemberIds,
     issueEdgeIndices,
     canUndo: history.length > 0,
     edit,

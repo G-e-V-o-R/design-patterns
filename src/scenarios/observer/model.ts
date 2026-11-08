@@ -136,12 +136,10 @@ export const relationshipKinds = [
   {
     id: 'stores',
     label: 'stores subscribers: Subscriber[]',
-    description: 'Stores: the fox keeps a list of Subscriber. Draw from FoxPublisher to Subscriber.',
   },
   {
     id: 'implements',
     label: 'implements interface',
-    description: 'Implements: this class follows the Subscriber interface. Draw from each concrete subscriber to Subscriber.',
   },
 ];
 
@@ -176,7 +174,25 @@ export function solutionLesson(): LessonGraph
 
 function getEdgeKey(edge: LessonGraph['edges'][number])
 {
-  return `${edge.source}:${edge.type}:${edge.target}`;
+  return JSON.stringify([edge.source, edge.type, edge.target]);
+}
+
+export function removeLessonEdgesAtIndices(
+  graph: LessonGraph,
+  edgeIndices: number[],
+): LessonGraph
+{
+  const indicesToRemove = new Set(edgeIndices);
+  if (indicesToRemove.size === 0)
+  {
+    return graph;
+  }
+
+  return {
+    ...graph,
+    edges: graph.edges.filter((_, edgeIndex) =>
+      !indicesToRemove.has(edgeIndex)),
+  };
 }
 
 function getClassLabel(classId: string)
@@ -306,7 +322,39 @@ export function getLessonIssues(graph: LessonGraph): LessonIssue[]
     const edgeKey = getEdgeKey(edge);
     const isExpectedEdge = expectedGraph.edges.some(expectedEdge =>
       getEdgeKey(expectedEdge) === edgeKey);
-    if (!isExpectedEdge)
+    const sourceExists = graph.classes.includes(edge.source);
+    const targetExists = graph.classes.includes(edge.target);
+    const relationshipIsKnown = relationshipKinds.some(kind =>
+      kind.id === edge.type);
+
+    if (!sourceExists || !targetExists)
+    {
+      addIssue(
+        'Add both endpoint classes before keeping this arrow.',
+        [edge.source, edge.target],
+        [],
+        [edgeIndex],
+      );
+    }
+    else if (edge.source === edge.target)
+    {
+      addIssue(
+        'An arrow must connect two different classes.',
+        [edge.source],
+        [],
+        [edgeIndex],
+      );
+    }
+    else if (!relationshipIsKnown)
+    {
+      addIssue(
+        `Choose a known relationship type for ${getClassLabel(edge.source)} → ${getClassLabel(edge.target)}.`,
+        [edge.source, edge.target],
+        [],
+        [edgeIndex],
+      );
+    }
+    else if (!isExpectedEdge)
     {
       addIssue(
         `Review ${getClassLabel(edge.source)} → ${getClassLabel(edge.target)}: the publisher keeps a list of Subscriber. Concrete subscribers implement that interface.`,
@@ -489,14 +537,11 @@ export function parseLesson(raw: string | null): LessonGraph
     if (
       !Array.isArray(savedEdges)
       || savedEdges.length > 24
-      || !savedEdges.every(edge =>
+      ||       !savedEdges.every(edge =>
         isRecord(edge)
         && typeof edge.source === 'string'
         && typeof edge.target === 'string'
-        && edge.source !== edge.target
-        && savedClasses.includes(edge.source)
-        && savedClasses.includes(edge.target)
-        && relationshipKinds.some(kind => kind.id === edge.type))
+        && typeof edge.type === 'string')
     )
     {
       return emptyLesson();
@@ -512,12 +557,6 @@ export function parseLesson(raw: string | null): LessonGraph
     }
 
     const savedGraph = parsedValue as unknown as LessonGraph;
-    const uniqueEdgeKeys = new Set(savedGraph.edges.map(getEdgeKey));
-    if (uniqueEdgeKeys.size !== savedGraph.edges.length)
-    {
-      return emptyLesson();
-    }
-
     return {
       classes: [...savedGraph.classes],
       members: { ...savedGraph.members },

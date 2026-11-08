@@ -398,10 +398,11 @@
   .lesson-relations strong {
     font-weight: 500;
   }
-  .lesson-relations em {
-    font-style: normal;
-    color: #acbc9f;
-    margin: 0 7px;
+  .lesson-relations .lesson-fix-label {
+    display: block;
+    color: #f0a28e;
+    font-size: 9px;
+    margin-bottom: 4px;
   }
   .lesson-relations button {
     padding: 0 7px;
@@ -707,6 +708,10 @@
   .lesson-assigned-method:hover {
     background: #ffffff0a;
   }
+  .lesson-assigned-method.is-misplaced,
+  .lesson-assigned-method.is-misplaced:hover {
+    background: #3b2b2b;
+  }
   .lesson-assigned-method.is-dragging {
     opacity: .55;
   }
@@ -791,20 +796,7 @@
   .lesson-tabs button:first-child {
     flex: 1.6;
   }
-  /*Explain relationships and mark the exact parts that need work.*/
-  .lesson-arrow-help {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--lesson-border);
-    display: grid;
-    gap: 7px;
-    background: #1b2b23;
-  }
-  .lesson-arrow-help p {
-    margin: 0;
-    font-size: 11px;
-    line-height: 1.7;
-    color: #becdb3;
-  }
+
   .lesson-fix-label {
     display: block !important;
     width: max-content;
@@ -842,6 +834,9 @@
   }
   .lesson-edge-error .react-flow__edge-text {
     fill: #ffd4c6;
+  }
+  .observer-lesson .react-flow__edge.selected .react-flow__edge-path {
+    filter: drop-shadow(0 0 2px #fff0a8) drop-shadow(0 0 6px #f4c95d);
   }
   .observer-demo {
     margin: 0 20px 20px;
@@ -1062,9 +1057,6 @@
     margin: 8px 0;
   }
   @media (max-width:720px) {
-    .lesson-arrow-help {
-      padding: 12px 15px;
-    }
     .observer-demo {
       margin: 0 15px 15px;
       padding: 14px;

@@ -8,8 +8,8 @@ Shared class-card artwork styling lives in `src/scenarios/shared/artwork.css`. S
 
 Shortest reliable path:
 
-1. Read `observer/ObserverScenario.tsx`, `observer/model.ts`, and `observer/model.test.ts`.
-2. Read `observer/ObserverLesson.tsx`, `observer/useObserverLesson.ts`, and the extracted components to see the expected decomposition.
+1. Read `observer/Scenario.tsx`, `observer/model.ts`, and `observer/model.test.ts`.
+2. Read `observer/LessonWorkspace.tsx`, `observer/useLessonEditor.ts`, and the extracted components to see the expected decomposition.
 3. Write the new model and its tests first.
 4. Build the UI against the tested model.
 5. Register the scenario and add its test script.
@@ -22,7 +22,7 @@ Do not read every component before starting. The model and tests define the beha
 ```text
 src/scenarios/<id>/
   <Pattern>Scenario.tsx   thin public entry point; owns scenario state
-  <Pattern>Lesson.tsx     lesson orchestrator; composes the UI
+  <Pattern>LessonWorkspace.tsx     lesson orchestrator; composes the UI
   model.ts                cards, solutions, validation, simulation
   model.test.ts           standalone model tests
   <pattern>.css           styles scoped to the scenario root
@@ -33,13 +33,13 @@ Decompose the lesson further by responsibility. Observer is the reference:
 ```text
   use<Pattern>Lesson.ts   stateful editor logic and handlers
   <Pattern>ClassDiagramNode.tsx React Flow node renderer with a descriptive name
-  <Pattern>Diagram.tsx    React Flow canvas and diagram controls
-  <Pattern>Demo.tsx       pattern-specific demonstration
-  <Pattern>Intro.tsx      story and instructions
+  <Pattern>ClassDiagramCanvas.tsx    React Flow canvas and diagram controls
+  <Pattern>NotificationDemo.tsx       pattern-specific demonstration
+  <Pattern>StoryIntro.tsx      story and instructions
   <Pattern>Tray.tsx       card tray
 ```
 
-Do not keep the whole lesson in one component. `<Pattern>Lesson.tsx` should read as composition and view wiring, not contain the full UI and all behavior. Extract content, node rendering, presentational sections, and stateful logic into focused files. The exact boundaries can vary, but a monolith is not acceptable.
+Do not keep the whole lesson in one component. `<Pattern>LessonWorkspace.tsx` should read as composition and view wiring, not contain the full UI and all behavior. Extract content, node rendering, presentational sections, and stateful logic into focused files. The exact boundaries can vary, but a monolith is not acceptable.
 
 ## Public entry contract
 

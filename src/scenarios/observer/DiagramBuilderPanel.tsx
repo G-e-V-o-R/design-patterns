@@ -71,6 +71,7 @@ export function ObserverDiagramBuilderPanel({
   {
     cardContent = (
       <MemberCards
+        lessonGraph={lessonGraph}
         selectedCategory={selectedCategory}
         draggedMemberId={draggedMemberId}
         memberIdsWithIssues={memberIdsWithIssues}
@@ -239,6 +240,7 @@ function ClassCards({
 // Показывает поля или методы; карточку можно перетащить на класс на диаграмме.
 // draggedMemberId содержит ID перетаскиваемой карточки или null, если перетаскивания нет.
 type MemberCardsInputs = {
+  lessonGraph: LessonGraph;
   selectedCategory: CardCategory;
   draggedMemberId: string | null;
   memberIdsWithIssues: string[];
@@ -246,6 +248,7 @@ type MemberCardsInputs = {
 };
 
 function MemberCards({
+  lessonGraph,
   selectedCategory,
   draggedMemberId,
   memberIdsWithIssues,
@@ -255,6 +258,11 @@ function MemberCards({
   // Оставляем только карточки выбранной категории: поля либо методы.
   const visibleMembers = memberCards.filter(member =>
   {
+    if (lessonGraph.members[member.id])
+    {
+      return false;
+    }
+
     if (selectedCategory === 'fields')
     {
       return member.kind === 'field';
@@ -265,8 +273,13 @@ function MemberCards({
 
   return (
     <div className="lesson-card-list">
-      {/* Как и выше, каждая запись модели превращается в отдельный DOM-элемент. */}
-      {visibleMembers.map(member =>
+      {visibleMembers.length === 0
+        ? <p className="lesson-method-description">
+            {selectedCategory === 'fields'
+              ? 'All fields are already in the diagram.'
+              : 'All methods are already in the diagram.'}
+          </p>
+        : visibleMembers.map(member =>
       {
         const isBeingDragged = draggedMemberId === member.id;
         const hasValidationIssue = memberIdsWithIssues.includes(member.id);

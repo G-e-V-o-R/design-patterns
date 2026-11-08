@@ -3,7 +3,9 @@ import {
   discoverPath,
   emptyLesson,
   getLessonIssues,
+  memberCards,
   parseLesson,
+  removeLessonEdgesAtIndices,
   simulateLesson,
   solutionLesson,
   validateLesson,
@@ -39,6 +41,9 @@ const completeLessonGraph = solutionLesson();
 assert.deepEqual(validateLesson(completeLessonGraph), []);
 assert.ok(validateLesson(emptyLesson()).length > 0);
 assert.equal(completeLessonGraph.members.subscribers, 'publisher');
+assert.ok(memberCards.some(card =>
+  card.id === 'dre-logic' && card.label === 'prepareDefense() · business logic'));
+assert.equal(completeLessonGraph.members['dre-logic'], 'dre-kaar');
 
 const graphWithoutSubscribersField = {
   ...completeLessonGraph,
@@ -110,6 +115,36 @@ assert.ok(validateLesson({
   ...completeLessonGraph,
   edges: [...completeLessonGraph.edges, completeLessonGraph.edges[0]!],
 }).length);
+
+const repairableEdgesGraph = {
+  ...completeLessonGraph,
+  edges: [
+    ...completeLessonGraph.edges,
+    { source: 'missing-class', target: 'subscriber', type: 'stores' },
+    { source: 'publisher', target: 'subscriber', type: 'unknown' },
+    completeLessonGraph.edges[0]!,
+    { source: 'publisher', target: 'publisher', type: 'stores' },
+  ],
+};
+const repairableEdgeIssues = getLessonIssues(repairableEdgesGraph);
+assert.deepEqual(
+  [...new Set(repairableEdgeIssues.flatMap(issue => issue.edgeIndices))].sort((a, b) => a - b),
+  [0, 3, 4, 5, 6],
+  'identify orphan, unknown, duplicate, and self-referencing arrows by index',
+);
+assert.ok(repairableEdgeIssues.some(issue => issue.message.includes('endpoint classes')));
+assert.ok(repairableEdgeIssues.some(issue => issue.message.includes('relationship type')));
+
+assert.deepEqual(
+  removeLessonEdgesAtIndices(repairableEdgesGraph, [5]).edges,
+  repairableEdgesGraph.edges.filter((_, edgeIndex) => edgeIndex !== 5),
+  'remove only the selected duplicate by its current graph index',
+);
+assert.deepEqual(
+  removeLessonEdgesAtIndices(repairableEdgesGraph, [3, 6]).edges,
+  repairableEdgesGraph.edges.filter((_, edgeIndex) => edgeIndex !== 3 && edgeIndex !== 6),
+  'remove multiple canvas edges using their original graph indices',
+);
 assert.ok(validateLesson({
   ...completeLessonGraph,
   classes: completeLessonGraph.classes.filter(classId => classId !== 'subscriber'),
@@ -119,6 +154,7 @@ const lessonTrace = simulateLesson(completeLessonGraph);
 assert.ok(lessonTrace.some(step => step.includes('fox.subscribe(narion)')));
 assert.ok(lessonTrace.some(step => step.includes('NarionSubscriber.update')));
 assert.ok(lessonTrace.some(step => step.includes('DreKaarSubscriber.update')));
+assert.ok(lessonTrace.some(step => step.includes('prepareDefense')));
 assert.ok(!lessonTrace.some(step => step.includes('fox.unsubscribe(narion)')));
 assert.ok(
   simulateLesson(completeLessonGraph, {
@@ -151,7 +187,11 @@ const malformedSavedDiagrams = [
   JSON.stringify({ ...completeLessonGraph, edges: [null] }),
   JSON.stringify({
     ...completeLessonGraph,
-    edges: [{ source: 'publisher', target: 'subscriber', type: 'unknown' }],
+    edges: [{ source: 'publisher', target: 'subscriber', type: {} }],
+  }),
+  JSON.stringify({
+    ...completeLessonGraph,
+    edges: [{ source: 'publisher', target: 42, type: 'stores' }],
   }),
   JSON.stringify({ ...completeLessonGraph, classes: ['publisher', 'publisher'] }),
   ' '.repeat(50001),
@@ -161,6 +201,22 @@ for (const rawDiagram of malformedSavedDiagrams)
 {
   assert.deepEqual(parseLesson(rawDiagram), emptyLesson());
 }
+
+const savedRepairableEdges = {
+  ...completeLessonGraph,
+  edges: [
+    ...completeLessonGraph.edges,
+    { source: 'missing-class', target: 'subscriber', type: 'stores' },
+    { source: 'publisher', target: 'subscriber', type: 'unknown' },
+    completeLessonGraph.edges[0]!,
+    { source: 'publisher', target: 'publisher', type: 'stores' },
+  ],
+};
+assert.deepEqual(
+  parseLesson(JSON.stringify(savedRepairableEdges)),
+  savedRepairableEdges,
+  'retain readable arrows with invalid endpoints, types, duplicates, or direction',
+);
 
 for (const sourceHandle of connectionHandles)
 {

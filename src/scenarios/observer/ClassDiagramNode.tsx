@@ -10,6 +10,7 @@ type MemberKind = 'field' | 'method';
 export type ObserverClassNodeData = {
   classHasValidationIssue: boolean;
   memberIdsWithIssues: string[];
+  misplacedMemberIds: string[];
   draggedMemberId: string | null;
   onStartMemberDrag: (event: DragEvent, id: string) => void;
   onEndMemberDrag: () => void;
@@ -251,11 +252,13 @@ function ClassMemberCard({
 {
   const isBeingDragged = data.draggedMemberId === member.id;
   const hasValidationIssue = data.memberIdsWithIssues.includes(member.id);
+  const isMisplaced = data.misplacedMemberIds.includes(member.id);
   const className = [
     'lesson-assigned-method',
     'nodrag',
     'nopan',
     isBeingDragged && 'is-dragging',
+    isMisplaced && 'is-misplaced',
     hasValidationIssue && 'needs-fix',
   ].filter(Boolean).join(' ');
 

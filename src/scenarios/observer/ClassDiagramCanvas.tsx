@@ -8,13 +8,14 @@ import {
   ReactFlow,
   type Connection,
   type Edge,
+  type EdgeChange,
   type NodeChange,
   type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { relationshipKinds } from './model';
 import { label } from './lessonContent';
-import { nodeTypes, type ObserverClassNode } from './ObserverClassDiagramNode';
+import { nodeTypes, type ObserverClassNode } from './ClassDiagramNode';
 
 type ObserverDiagramProps = {
   nodes: ObserverClassNode[];
@@ -25,6 +26,7 @@ type ObserverDiagramProps = {
   relationship: string;
   connectionSource: string | null;
   onNodesChange: (changes: NodeChange<ObserverClassNode>[]) => void;
+  onEdgesChange: (changes: EdgeChange<Edge>[]) => void;
   onNodesDelete: (nodes: ObserverClassNode[]) => void;
   onEdgesDelete: (edges: Edge[]) => void;
   onConnect: (connection: Connection) => void;
@@ -47,6 +49,7 @@ export function ObserverDiagram({
   relationship,
   connectionSource,
   onNodesChange,
+  onEdgesChange,
   onNodesDelete,
   onEdgesDelete,
   onConnect,
@@ -95,8 +98,10 @@ export function ObserverDiagram({
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onNodesDelete={onNodesDelete}
         nodesDraggable={!drawing}
+        deleteKeyCode={['Backspace', 'Delete']}
         onPaneClick={onPaneClick}
         onNodeClick={onNodeClick}
         onConnectStart={(_, connectionState) =>
@@ -148,6 +153,22 @@ function ArrowMarker()
             fill="#102019"
             stroke="#b6c9b1"
             strokeWidth="1"
+          />
+        </marker>
+        <marker
+          id="lesson-implements-arrow-error"
+          viewBox="0 0 12 12"
+          refX="11"
+          refY="6"
+          markerWidth="12"
+          markerHeight="12"
+          orient="auto"
+        >
+          <path
+            d="M1,1 L11,6 L1,11 Z"
+            fill="#102019"
+            stroke="#ff6b5c"
+            strokeWidth="1.5"
           />
         </marker>
       </defs>
@@ -225,8 +246,6 @@ function RelationshipToolButton({
       type="button"
       aria-label={`Draw ${kind.label}`}
       aria-pressed={isSelected}
-      title={kind.description}
-      aria-describedby={`arrow-help-${kind.id}`}
       onClick={() => onSelect(kind.id)}
     >
       <RelationshipIcon kindId={kind.id} />

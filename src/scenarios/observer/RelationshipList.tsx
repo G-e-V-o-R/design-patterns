@@ -1,4 +1,4 @@
-import { relationshipKinds, type LessonGraph } from './model';
+import type { LessonGraph } from './model';
 import { label } from './lessonContent';
 
 type ObserverRelationsProps = {
@@ -15,7 +15,6 @@ export function ObserverRelations({
 {
   return (
     <>
-      <RelationshipLegend />
       {edges.length > 0 && (
         <ul className="lesson-relations" aria-label="Diagram relationships">
           {edges.map((edge, edgeIndex) => (
@@ -33,19 +32,6 @@ export function ObserverRelations({
   );
 }
 
-function RelationshipLegend()
-{
-  return (
-    <div className="lesson-arrow-help" aria-label="What the arrows mean">
-      {relationshipKinds.map(kind => (
-        <p id={`arrow-help-${kind.id}`} key={kind.id}>
-          {kind.description}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 function RelationshipRow({
   edge,
   edgeIndex,
@@ -58,14 +44,8 @@ function RelationshipRow({
   onRemove: (index: number) => void;
 })
 {
-  const relationshipKind = relationshipKinds.find(kind =>
-    kind.id === edge.type);
-  let relationshipLabel = '';
-  if (relationshipKind)
-  {
-    relationshipLabel = relationshipKind.label;
-  }
-
+  const sourceLabel = label(edge.source) || '(unnamed endpoint)';
+  const targetLabel = label(edge.target) || '(unnamed endpoint)';
   let rowClassName: string | undefined;
   if (hasValidationIssue)
   {
@@ -78,12 +58,13 @@ function RelationshipRow({
         {hasValidationIssue && (
           <b className="lesson-fix-label">Fix this arrow</b>
         )}
-        <strong>{label(edge.source)}</strong>
-        <em>{relationshipLabel}</em>
-        <strong>{label(edge.target)}</strong>
+        <strong>{sourceLabel}</strong>
+        <strong>{targetLabel}</strong>
       </span>
       <button
-        aria-label={`Remove relationship ${edgeIndex + 1}`}
+        type="button"
+        aria-label={`Remove arrow ${edgeIndex + 1}`}
+        title={`Remove arrow ${edgeIndex + 1}`}
         onClick={() => onRemove(edgeIndex)}
       >
         ×

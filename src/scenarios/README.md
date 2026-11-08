@@ -59,7 +59,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Observer as the reference
 
-Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [ObserverScenario.tsx](./observer/ObserverScenario.tsx) as the public-entry example and [ObserverLesson.tsx](./observer/ObserverLesson.tsx) as the full lesson example. The Observer reference is valuable because it combines:
+Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [Scenario.tsx](./observer/Scenario.tsx) as the public-entry example and [LessonWorkspace.tsx](./observer/LessonWorkspace.tsx) as the full lesson example. The Observer reference is valuable because it combines:
 
 - A memorable story with a specific, testable learning goal.
 - A build sequence and clear descriptions for class, member, and relationship cards, with scenario artwork on the concrete class cards.

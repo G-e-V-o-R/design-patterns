@@ -4,25 +4,28 @@ import {
   MarkerType,
   type Connection,
   type Edge,
+  type EdgeChange,
   type NodeChange,
 } from '@xyflow/react';
 import {
   classCards,
+  getLessonIssues,
   memberCards,
   normalizeConnectionHandle,
+  removeLessonEdgesAtIndices,
   relationshipKinds,
   type LessonGraph,
 } from './model';
-import { ObserverActions } from './ObserverActions';
-import { ObserverConcept, ObserverIntro } from './ObserverIntro';
-import { ObserverDemo } from './ObserverDemo';
-import { ObserverDiagram } from './ObserverDiagram';
-import { ObserverRelations } from './ObserverRelations';
-import { ObserverDiagramBuilderPanel } from './ObserverDiagramBuilderPanel';
+import { ObserverActions } from './DiagramActions';
+import { ObserverConcept, ObserverIntro } from './StoryIntro';
+import { ObserverDemo } from './NotificationDemo';
+import { ObserverDiagram } from './ClassDiagramCanvas';
+import { ObserverRelations } from './RelationshipList';
+import { ObserverDiagramBuilderPanel } from './DiagramBuilderPanel';
 import { classArtwork, methodDragType, positions } from './lessonContent';
-import { useObserverLesson } from './useObserverLesson';
-import type { ObserverClassNode } from './ObserverClassDiagramNode';
-import './observer.css';
+import { useObserverLesson } from './useLessonEditor';
+import type { ObserverClassNode } from './ClassDiagramNode';
+import './styles.css';
 
 type CardCategory = 'classes' | 'fields' | 'methods';
 
@@ -46,6 +49,7 @@ export function ObserverLesson({
     demoReady,
     issueClassIds,
     issueMemberIds,
+    misplacedMemberIds,
     issueEdgeIndices,
     canUndo,
     edit,
@@ -69,6 +73,9 @@ export function ObserverLesson({
   const [connectionSourceClassId, setConnectionSourceClassId] = useState<string | null>(null);
   const portConnectionSourceClassId = useRef<string | null>(null);
   const [nodeState, setNodeState] = useState<Record<string, Partial<ObserverClassNode>>>({});
+  const [selectedEdgeIndices, setSelectedEdgeIndices] = useState<Set<number>>(
+    () => new Set(),
+  );
   const demoContainer = useRef<HTMLDivElement>(null);
 
   function selectRelationship(type: string)
@@ -96,6 +103,7 @@ export function ObserverLesson({
   useEffect(() =>
   {
     setConnectionSourceClassId(null);
+    setSelectedEdgeIndices(new Set());
   }, [graph]);
 
   function endMemberDrag()
@@ -141,6 +149,7 @@ export function ObserverLesson({
           ...classCard,
           classHasValidationIssue: issueClassIds.has(classCard.id),
           memberIdsWithIssues: issueMemberIds,
+          misplacedMemberIds,
           draggedMemberId,
           onStartMemberDrag: startMemberDrag,
           onEndMemberDrag: endMemberDrag,
@@ -171,18 +180,23 @@ export function ObserverLesson({
       };
     });
 
+  const currentEdgeIssueIndices = new Set(
+    getLessonIssues(graph).flatMap(issue => issue.edgeIndices),
+  );
   const edges: Edge[] = graph.edges.map((lessonEdge, edgeIndex) =>
   {
     const sourceHandle = normalizeConnectionHandle(lessonEdge.sourceHandle) ?? 'bottom';
     const targetHandle = normalizeConnectionHandle(lessonEdge.targetHandle) ?? 'top';
-    const hasValidationIssue = issueEdgeIndices.has(edgeIndex);
+    const hasValidationIssue = issueEdgeIndices.has(edgeIndex)
+      || currentEdgeIssueIndices.has(edgeIndex);
+    const isSelected = selectedEdgeIndices.has(edgeIndex);
     let edgeLabel: string | undefined;
     let markerEnd: Edge['markerEnd'] = {
       type: MarkerType.ArrowClosed,
       color: '#b6c9b1',
     };
     let strokeColor = '#a7bba4';
-    let strokeWidth = 1.6;
+    let strokeWidth = isSelected ? 4 : 1.6;
     let strokeDasharray: string | undefined;
 
     if (lessonEdge.type === 'implements')
@@ -197,11 +211,28 @@ export function ObserverLesson({
     {
       edgeLabel = matchingRelationship.label;
     }
+    else
+    {
+      edgeLabel = lessonEdge.type
+        ? `Unknown relationship: ${lessonEdge.type}`
+        : 'Unknown relationship type';
+    }
 
     if (hasValidationIssue)
     {
-      strokeColor = '#f0a28e';
-      strokeWidth = 3;
+      strokeColor = '#ff6b5c';
+      strokeWidth = isSelected ? 4.5 : 3;
+      if (lessonEdge.type === 'implements')
+      {
+        markerEnd = 'lesson-implements-arrow-error';
+      }
+      else
+      {
+        markerEnd = {
+          type: MarkerType.ArrowClosed,
+          color: strokeColor,
+        };
+      }
     }
 
     let edgeClassName = '';
@@ -215,6 +246,7 @@ export function ObserverLesson({
       sourceHandle,
       targetHandle,
       id: String(edgeIndex),
+      selected: isSelected,
       type: 'smoothstep',
       className: edgeClassName,
       label: edgeLabel,
@@ -233,6 +265,39 @@ export function ObserverLesson({
     setNodeState(Object.fromEntries(changedNodes.map(node => [node.id, node])));
   }
 
+  function changeEdges(changes: EdgeChange<Edge>[])
+  {
+    const selectionChanges = changes.filter(change => change.type === 'select');
+    if (selectionChanges.length === 0)
+    {
+      return;
+    }
+
+    setSelectedEdgeIndices(current =>
+    {
+      const next = new Set(current);
+      for (const change of selectionChanges)
+      {
+        const edgeIndex = Number(change.id);
+        if (!Number.isInteger(edgeIndex) || String(edgeIndex) !== change.id)
+        {
+          continue;
+        }
+
+        if (change.selected)
+        {
+          next.add(edgeIndex);
+        }
+        else
+        {
+          next.delete(edgeIndex);
+        }
+      }
+
+      return next;
+    });
+  }
+
   function handleNodesDelete(deletedNodes: ObserverClassNode[])
   {
     removeClasses(deletedNodes.map(node => node.id));
@@ -240,9 +305,17 @@ export function ObserverLesson({
 
   function handleEdgesDelete(deletedEdges: Edge[])
   {
-    const remainingEdges = graph.edges.filter((_, edgeIndex) =>
-      !deletedEdges.some(edge => edge.id === String(edgeIndex)));
-    edit({ ...graph, edges: remainingEdges });
+    const edgeIndices = deletedEdges.flatMap(edge =>
+    {
+      const edgeIndex = Number(edge.id);
+      if (Number.isInteger(edgeIndex) && String(edgeIndex) === edge.id)
+      {
+        return [edgeIndex];
+      }
+
+      return [];
+    });
+    edit(removeLessonEdgesAtIndices(graph, edgeIndices));
   }
 
   function handleConnect(connection: Connection)
@@ -319,9 +392,7 @@ export function ObserverLesson({
 
   function removeEdge(edgeIndexToRemove: number)
   {
-    const remainingEdges = graph.edges.filter((_, edgeIndex) =>
-      edgeIndex !== edgeIndexToRemove);
-    edit({ ...graph, edges: remainingEdges });
+    edit(removeLessonEdgesAtIndices(graph, [edgeIndexToRemove]));
   }
 
   function handleCanvasDragOver(event: DragEvent<HTMLDivElement>)
@@ -408,6 +479,7 @@ export function ObserverLesson({
             relationship={relationshipType}
             connectionSource={connectionSourceClassId}
             onNodesChange={changeNodes}
+            onEdgesChange={changeEdges}
             onNodesDelete={handleNodesDelete}
             onEdgesDelete={handleEdgesDelete}
             onConnect={handleConnect}

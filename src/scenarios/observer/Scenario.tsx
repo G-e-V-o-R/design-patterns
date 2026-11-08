@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { emptyLesson } from './model';
-import { ObserverLesson } from './ObserverLesson';
+import { ObserverLesson } from './LessonWorkspace';
 import '../shared/artwork.css';
-import './observer.css';
+import './styles.css';
 
 export default function ObserverScenario({ active = true }: { active?: boolean })
 {
