@@ -15,7 +15,6 @@ This directory contains the standalone Mediator learning scenario. The learner a
 | `DiagramBuilderPanel.tsx` | Displays the available class, field, and method cards and builder actions. |
 | `ClassDiagramCanvas.tsx` | Renders the diagram canvas and its controls. |
 | `ClassDiagramNode.tsx` | Renders an individual class node and its members on the canvas. |
-| `RelationshipList.tsx` | Displays the diagram relationships and their controls. |
 | `DiagramActions.tsx` | Provides validation/demo actions and displays feedback. |
 | `RoutingDemo.tsx` | Demonstrates message flow routed between colleagues through the mediator. |
 | `lessonContent.ts` | Stores scenario-specific labels, hints, and diagram presentation data. |
@@ -29,7 +28,7 @@ This directory contains the standalone Mediator learning scenario. The learner a
 | Diagram classes, relationships, rules, or routing behavior | `model.ts` |
 | Hints, labels, or diagram presentation data | `lessonContent.ts` |
 | Diagram editing or lesson state | `useLessonEditor.ts` and `LessonWorkspace.tsx` |
-| Canvas, class node, or relationship list UI | `ClassDiagramCanvas.tsx`, `ClassDiagramNode.tsx`, or `RelationshipList.tsx` |
+| Canvas or class node UI | `ClassDiagramCanvas.tsx` or `ClassDiagramNode.tsx` |
 | Validation actions or feedback | `DiagramActions.tsx` |
 | Message-routing demonstration | `RoutingDemo.tsx` |
 | Scenario styling | `styles.css` |

@@ -22,7 +22,6 @@ import { MediatorActions } from './DiagramActions';
 import { MediatorConcept, MediatorIntro } from './StoryIntro';
 import { MediatorDemo } from './RoutingDemo';
 import { MediatorDiagram } from './ClassDiagramCanvas';
-import { MediatorRelations } from './RelationshipList';
 import { MediatorTray } from './DiagramBuilderPanel';
 import {
   getClassArtwork,
@@ -121,14 +120,6 @@ export function MediatorLesson({
   {
     resetLesson();
     setNodeState({});
-  }
-
-  function removeEdge(index: number)
-  {
-    edit({
-      ...graph,
-      edges: graph.edges.filter((_, edgeIndex) => edgeIndex !== index),
-    });
   }
 
   const nodes: ClassNode[] = classCards
@@ -331,12 +322,6 @@ export function MediatorLesson({
             onPaneClick={() => setConnectionSource(null)}
             onSelectRelationship={selectRelationship}
             onMoveMode={handleMoveMode}
-          />
-
-          <MediatorRelations
-            graph={graph}
-            issueEdgeIndices={issueEdgeIndices}
-            onRemoveEdge={removeEdge}
           />
 
           <MediatorActions

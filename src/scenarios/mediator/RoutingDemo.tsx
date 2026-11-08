@@ -16,6 +16,7 @@ type MediatorDemoProps = {
 export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
 {
   const [animationKey, setAnimationKey] = useState(0);
+  const [showDirectMesh, setShowDirectMesh] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(() =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
@@ -31,6 +32,7 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
 
   function runRequest(request: RequestKind)
   {
+    setShowDirectMesh(false);
     setAnimationKey(key => key + 1);
     onRun(request);
   }
@@ -61,47 +63,197 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
         </div>
       </div>
 
-      <div className="med-actions">
-        <button disabled={!ready} onClick={() => runRequest('cover')}>
-          Dre’Kaar requests cover
-        </button>
-        <button disabled={!ready} onClick={() => runRequest('shelter')}>
-          Faelina requests shelter
-        </button>
-      </div>
+      {showDirectMesh
+        ? (
+          <>
+            <div className="med-actions">
+              <button onClick={() => setShowDirectMesh(false)}>
+                Back to Mediator demo
+              </button>
+            </div>
+            <DirectConnectionsScene reducedMotion={reducedMotion} />
+          </>
+        )
+        : (
+          <>
+            <div className="med-actions">
+              <button disabled={!ready} onClick={() => runRequest('cover')}>
+                Dre’Kaar requests cover
+              </button>
+              <button disabled={!ready} onClick={() => runRequest('shelter')}>
+                Faelina requests shelter
+              </button>
+              <button
+                type="button"
+                className="med-contrast-button"
+                onClick={() => setShowDirectMesh(true)}
+              >
+                See without Mediator
+              </button>
+            </div>
 
-      <ActorScene
-        result={result}
-        animationKey={animationKey}
-        reducedMotion={reducedMotion}
-      />
+            <ActorScene
+              result={result}
+              animationKey={animationKey}
+              reducedMotion={reducedMotion}
+            />
 
-      {result && (
-        <p className="med-route-summary" aria-label="Active request route">
-          <strong>{classLabel(result.sender)}</strong>
-          <span aria-hidden="true">→</span>
-          <strong>RavenMediator</strong>
-          <span aria-hidden="true">→</span>
-          <strong>{classLabel(result.recipient)}</strong>
-        </p>
-      )}
+            {result && (
+              <p className="med-route-summary" aria-label="Active request route">
+                <strong>{classLabel(result.sender)}</strong>
+                <span aria-hidden="true">→</span>
+                <strong>RavenMediator</strong>
+                <span aria-hidden="true">→</span>
+                <strong>{classLabel(result.recipient)}</strong>
+              </p>
+            )}
 
-      <p className="med-demo-status" role="status" aria-live="polite">
-        {result?.summary ?? 'Choose a request to follow its route through the raven.'}
-      </p>
+            <p className="med-demo-status" role="status" aria-live="polite">
+              {result?.summary
+                ?? 'Choose a request to follow its route through the raven.'}
+            </p>
 
-      {result && (
-        <details className="med-trace" open>
-          <summary>See the method calls</summary>
-          <ol>
-            {result.trace.map(step => <li key={step}>{step}</li>)}
-          </ol>
-        </details>
-      )}
+            {result && (
+              <details className="med-trace" open>
+                <summary>See the method calls</summary>
+                <ol>
+                  {result.trace.map(step => <li key={step}>{step}</li>)}
+                </ol>
+              </details>
+            )}
+          </>
+        )}
 
       <p className="med-comparison">
         Observer shares an event with active subscribers. Here, Mediator
         coordinates a particular request and chooses the recipient.
+      </p>
+    </section>
+  );
+}
+
+type ParticipantId = Exclude<keyof typeof classArtwork, 'raven'>;
+
+const directConnections: [ParticipantId, ParticipantId][] = [
+  ['dre-kaar', 'narion'],
+  ['dre-kaar', 'faelina'],
+  ['dre-kaar', 'saerenn'],
+  ['narion', 'faelina'],
+  ['narion', 'saerenn'],
+  ['faelina', 'saerenn'],
+];
+
+function DirectConnectionsScene({ reducedMotion }: { reducedMotion: boolean })
+{
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const actorRefs = useRef<Record<ParticipantId, HTMLElement | null>>({
+    'dre-kaar': null,
+    narion: null,
+    faelina: null,
+    saerenn: null,
+  });
+  const [links, setLinks] = useState<string[]>([]);
+  const participants: {
+    id: ParticipantId;
+    description: string;
+  }[] = [
+    { id: 'dre-kaar', description: 'Requests cover' },
+    { id: 'narion', description: 'Provides covering fire' },
+    { id: 'faelina', description: 'Requests shelter' },
+    { id: 'saerenn', description: 'Guides the group to shelter' },
+  ];
+
+  useLayoutEffect(() =>
+  {
+    const scene = sceneRef.current;
+    if (!scene)
+    {
+      return;
+    }
+
+    function updateLinks()
+    {
+      const currentScene = sceneRef.current;
+      if (!currentScene)
+      {
+        return;
+      }
+
+      const sceneBounds = currentScene.getBoundingClientRect();
+      const nextLinks = directConnections.flatMap(([sourceId, targetId]) =>
+      {
+        const source = actorRefs.current[sourceId];
+        const target = actorRefs.current[targetId];
+        if (!source || !target)
+        {
+          return [];
+        }
+
+        const sourceBounds = source.getBoundingClientRect();
+        const targetBounds = target.getBoundingClientRect();
+        const start = getFacingPoint(sourceBounds, targetBounds, sceneBounds);
+        const end = getFacingPoint(targetBounds, sourceBounds, sceneBounds);
+        return [`M ${start.x} ${start.y} L ${end.x} ${end.y}`];
+      });
+
+      setLinks(nextLinks);
+    }
+
+    updateLinks();
+    const resizeObserver = new ResizeObserver(updateLinks);
+    resizeObserver.observe(scene);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  return (
+    <section
+      className="med-direct-demo"
+      aria-labelledby="med-direct-heading"
+    >
+      <header>
+        <p className="med-kicker">WITHOUT A MEDIATOR</p>
+        <h3 id="med-direct-heading">Everyone must coordinate with everyone</h3>
+        <p>
+          Each companion now needs a direct connection to the other three.
+          That creates six links to manage instead of one shared coordinator.
+        </p>
+      </header>
+      <div
+        className="med-direct-scene"
+        ref={sceneRef}
+        aria-label="Four companions with six direct connections"
+      >
+        {links.length > 0 && (
+          <svg
+            className="med-direct-links"
+            viewBox={`0 0 ${sceneRef.current?.clientWidth ?? 0} ${sceneRef.current?.clientHeight ?? 0}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {links.map((path, index) => (
+              <path
+                key={index}
+                d={path}
+                className={reducedMotion ? '' : 'med-direct-link'}
+              />
+            ))}
+          </svg>
+        )}
+        {participants.map(participant => (
+          <ActorCard
+            key={participant.id}
+            id={participant.id}
+            description={participant.description}
+            result={null}
+            actorRef={element =>
+            {
+              actorRefs.current[participant.id] = element;
+            }}
+          />
+        ))}
+      </div>
+      <p className="med-direct-summary" role="status" aria-live="polite">
+        Six direct connections: every companion must track three peers.
       </p>
     </section>
   );
