@@ -72,8 +72,7 @@ function DiagramReadinessMessage()
 {
   return (
     <p className="demo-help">
-      Finish the diagram first. Click Check diagram to find what to fix, or Show
-      solution to try the example.
+      Complete the diagram or show the solution to run discovery.
     </p>
   );
 }

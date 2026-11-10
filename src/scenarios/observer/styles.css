@@ -398,12 +398,6 @@
   .lesson-relations strong {
     font-weight: 500;
   }
-  .lesson-relations .lesson-fix-label {
-    display: block;
-    color: #f0a28e;
-    font-size: 9px;
-    margin-bottom: 4px;
-  }
   .lesson-relations button {
     padding: 0 7px;
     font-size: 16px;
@@ -437,34 +431,6 @@
     font-size: 12px;
     margin: 0;
     color: #e0c58d;
-  }
-  .lesson-feedback {
-    border-left: 2px solid #c3a56a;
-    margin: 0 20px 20px;
-    padding: 13px 18px;
-    background: #293526;
-  }
-  .lesson-feedback h3 {
-    font-size: 15px;
-    margin: 0 0 10px;
-    letter-spacing: 0;
-    color: #e6ce9b;
-  }
-  .lesson-feedback ul {
-    padding-left: 17px;
-    margin: 0;
-    font-size: 11px;
-    line-height: 1.9;
-    color: #cfceba;
-  }
-  .lesson-feedback p {
-    font-size: 12px;
-    line-height: 1.9;
-    margin: 0;
-  }
-  .lesson-feedback.success {
-    border-color: #b4cc8d;
-    background: #263c2c;
   }
   .lesson-trace {
     margin: 0 20px 20px;
@@ -641,7 +607,7 @@
     .lesson-result>p {
       padding: 0 15px 15px;
     }
-    .lesson-feedback,.lesson-trace {
+    .lesson-trace {
       margin: 0 15px 15px;
       padding: 13px;
     }
@@ -707,10 +673,6 @@
   }
   .lesson-assigned-method:hover {
     background: #ffffff0a;
-  }
-  .lesson-assigned-method.is-misplaced,
-  .lesson-assigned-method.is-misplaced:hover {
-    background: #3b2b2b;
   }
   .lesson-assigned-method.is-dragging {
     opacity: .55;
@@ -797,44 +759,6 @@
     flex: 1.6;
   }
 
-  .lesson-fix-label {
-    display: block !important;
-    width: max-content;
-    max-width: 100%;
-    margin: 6px 0;
-    padding: 2px 5px;
-    border: 1px solid #f0a28e80;
-    border-radius: 3px;
-    color: #ffd4c6 !important;
-    background: #55372e;
-    font-size: 9px !important;
-    font-weight: 600;
-    font-style: normal;
-    letter-spacing: 0;
-  }
-  .lesson-class.needs-fix,.lesson-tray-card.needs-fix,.lesson-member-card.needs-fix {
-    outline: 2px solid #f0a28e;
-    outline-offset: 1px;
-  }
-  .lesson-assigned-method.needs-fix {
-    background: #693e303d;
-    flex-wrap: wrap;
-  }
-  .lesson-assigned-method.needs-fix>.lesson-fix-label {
-    flex-basis: 100%;
-    width: auto;
-    margin: 0;
-  }
-  .lesson-relations li.needs-fix {
-    border-left: 3px solid #f0a28e;
-    padding-left: 10px;
-  }
-  .lesson-feedback>p {
-    margin-bottom: 10px;
-  }
-  .lesson-edge-error .react-flow__edge-text {
-    fill: #ffd4c6;
-  }
   .observer-lesson .react-flow__edge.selected .react-flow__edge-path {
     filter: drop-shadow(0 0 2px #fff0a8) drop-shadow(0 0 6px #f4c95d);
   }

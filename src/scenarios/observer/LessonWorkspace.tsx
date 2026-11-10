@@ -9,7 +9,6 @@ import {
 } from '@xyflow/react';
 import {
   classCards,
-  getLessonIssues,
   memberCards,
   normalizeConnectionHandle,
   removeLessonEdgesAtIndices,
@@ -40,23 +39,17 @@ export function ObserverLesson({
 })
 {
   const {
-    issues,
     message,
     hint,
     worked,
     narionSubscribed,
     demoRun,
     demoReady,
-    issueClassIds,
-    issueMemberIds,
-    misplacedMemberIds,
-    issueEdgeIndices,
     canUndo,
     edit,
     assignMethod,
     removeClasses,
     connect,
-    check,
     startDemo,
     toggleBracelet,
     showHint,
@@ -147,9 +140,6 @@ export function ObserverLesson({
         className: nodeClassName,
         data: {
           ...classCard,
-          classHasValidationIssue: issueClassIds.has(classCard.id),
-          memberIdsWithIssues: issueMemberIds,
-          misplacedMemberIds,
           draggedMemberId,
           onStartMemberDrag: startMemberDrag,
           onEndMemberDrag: endMemberDrag,
@@ -180,15 +170,10 @@ export function ObserverLesson({
       };
     });
 
-  const currentEdgeIssueIndices = new Set(
-    getLessonIssues(graph).flatMap(issue => issue.edgeIndices),
-  );
   const edges: Edge[] = graph.edges.map((lessonEdge, edgeIndex) =>
   {
     const sourceHandle = normalizeConnectionHandle(lessonEdge.sourceHandle) ?? 'bottom';
     const targetHandle = normalizeConnectionHandle(lessonEdge.targetHandle) ?? 'top';
-    const hasValidationIssue = issueEdgeIndices.has(edgeIndex)
-      || currentEdgeIssueIndices.has(edgeIndex);
     const isSelected = selectedEdgeIndices.has(edgeIndex);
     let edgeLabel: string | undefined;
     let markerEnd: Edge['markerEnd'] = {
@@ -218,29 +203,6 @@ export function ObserverLesson({
         : 'Unknown relationship type';
     }
 
-    if (hasValidationIssue)
-    {
-      strokeColor = '#ff6b5c';
-      strokeWidth = isSelected ? 4.5 : 3;
-      if (lessonEdge.type === 'implements')
-      {
-        markerEnd = 'lesson-implements-arrow-error';
-      }
-      else
-      {
-        markerEnd = {
-          type: MarkerType.ArrowClosed,
-          color: strokeColor,
-        };
-      }
-    }
-
-    let edgeClassName = '';
-    if (hasValidationIssue)
-    {
-      edgeClassName = 'lesson-edge-error';
-    }
-
     return {
       ...lessonEdge,
       sourceHandle,
@@ -248,7 +210,6 @@ export function ObserverLesson({
       id: String(edgeIndex),
       selected: isSelected,
       type: 'smoothstep',
-      className: edgeClassName,
       label: edgeLabel,
       markerEnd,
       style: {
@@ -375,10 +336,10 @@ export function ObserverLesson({
     setConnectionSourceClassId(null);
   }
 
-  function handleCheck(runDemo = false)
+  function handleRunDiscovery()
   {
-    const diagramIsReady = check(runDemo);
-    if (runDemo && diagramIsReady)
+    startDemo(true);
+    if (demoReady)
     {
       demoContainer.current?.scrollIntoView({ block: 'nearest' });
     }
@@ -448,8 +409,6 @@ export function ObserverLesson({
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
           draggedMemberId={draggedMemberId}
-          classIdsWithIssues={issueClassIds}
-          memberIdsWithIssues={issueMemberIds}
           hintIndex={hint}
           onAddClassToDiagram={addClassToDiagram}
           onStartMemberDrag={startMemberDrag}
@@ -495,16 +454,13 @@ export function ObserverLesson({
 
           <ObserverRelations
             edges={graph.edges}
-            issueEdgeIndices={issueEdgeIndices}
             onRemoveEdge={removeEdge}
           />
 
           <ObserverActions
-            onCheck={() => handleCheck()}
-            onRun={() => handleCheck(true)}
+            onRun={handleRunDiscovery}
             message={message}
-            issues={issues}
-            worked={worked}
+            ready={demoReady}
           />
 
           <div ref={demoContainer}>

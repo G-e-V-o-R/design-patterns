@@ -7,15 +7,14 @@ This directory contains the standalone Mediator learning scenario. The learner a
 | File | Responsibility |
 |---|---|
 | `Scenario.tsx` | Public entry point; initializes the scenario model and renders the lesson. |
-| `LessonWorkspace.tsx` | Composes the lesson UI and wires the diagram, editing state, feedback, and demo together. |
-| `model.ts` | Defines the diagram model, expected structure, validation, feedback, and routing simulation. |
+| `LessonWorkspace.tsx` | Composes the lesson UI and wires the diagram, editing state, status messages, and demo together. |
+| `model.ts` | Defines the diagram model, expected structure, readiness validation, and routing simulation. |
 | `model.test.ts` | Tests model validation, feedback, routing, and scenario state isolation. |
-| `useLessonEditor.ts` | Manages lesson editing state and actions such as validation, reset, undo, hints, and demo launch. |
+| `useLessonEditor.ts` | Manages lesson editing state, demo readiness, reset, undo, hints, and demo launch. |
 | `StoryIntro.tsx` | Presents the scenario story and explains the Mediator pattern. |
 | `DiagramBuilderPanel.tsx` | Displays the available class, field, and method cards and builder actions. |
 | `ClassDiagramCanvas.tsx` | Renders the diagram canvas and its controls. |
 | `ClassDiagramNode.tsx` | Renders an individual class node and its members on the canvas. |
-| `DiagramActions.tsx` | Provides validation/demo actions and displays feedback. |
 | `RoutingDemo.tsx` | Demonstrates message flow routed between colleagues through the mediator. |
 | `lessonContent.ts` | Stores scenario-specific labels, hints, and diagram presentation data. |
 | `styles.css` | Contains styles scoped to the Mediator scenario. |
@@ -29,6 +28,6 @@ This directory contains the standalone Mediator learning scenario. The learner a
 | Hints, labels, or diagram presentation data | `lessonContent.ts` |
 | Diagram editing or lesson state | `useLessonEditor.ts` and `LessonWorkspace.tsx` |
 | Canvas or class node UI | `ClassDiagramCanvas.tsx` or `ClassDiagramNode.tsx` |
-| Validation actions or feedback | `DiagramActions.tsx` |
+| Demo readiness or routing behavior | `useLessonEditor.ts` and `RoutingDemo.tsx` |
 | Message-routing demonstration | `RoutingDemo.tsx` |
 | Scenario styling | `styles.css` |

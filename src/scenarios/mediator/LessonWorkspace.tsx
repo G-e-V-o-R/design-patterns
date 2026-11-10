@@ -18,7 +18,6 @@ import {
   relationshipKinds,
   type MediatorGraph,
 } from './model';
-import { MediatorActions } from './DiagramActions';
 import { MediatorConcept, MediatorIntro } from './StoryIntro';
 import { MediatorDemo } from './RoutingDemo';
 import { MediatorDiagram } from './ClassDiagramCanvas';
@@ -45,22 +44,17 @@ export function MediatorLesson({
 }: MediatorLessonProps)
 {
   const {
-    issues,
     message,
     hint,
     worked,
     result,
     ready,
-    issueClassIds,
-    issueMemberIds,
-    issueEdgeIndices,
     canUndo,
     edit,
     assign,
     removeClasses,
     connect,
     run,
-    check,
     showHint,
     showSolution,
     undo,
@@ -134,8 +128,6 @@ export function MediatorLesson({
         ...card,
         members: memberCards.filter(member =>
           graph.members[member.id] === card.id),
-        needsFix: issueClassIds.has(card.id),
-        issueMembers: issueMemberIds,
         isDropTarget: dropTarget === card.id,
         artwork: getClassArtwork(card.id),
         onRemove: () => removeClasses([card.id]),
@@ -162,7 +154,6 @@ export function MediatorLesson({
 
   const edges: Edge[] = graph.edges.map((edge, index) =>
   {
-    const hasIssue = issueEdgeIndices.has(index);
     const relationshipKind = relationshipKinds.find(kind =>
       kind.id === edge.type);
 
@@ -175,11 +166,11 @@ export function MediatorLesson({
         ? 'mediator-implements-arrow'
         : {
           type: MarkerType.ArrowClosed,
-          color: hasIssue ? '#f0a28e' : '#c6bb8e',
+          color: '#c6bb8e',
         },
       style: {
-        stroke: hasIssue ? '#f0a28e' : '#a5b99e',
-        strokeWidth: hasIssue ? 3 : 1.6,
+        stroke: '#a5b99e',
+        strokeWidth: 1.6,
         strokeDasharray: edge.type === 'implements' ? '6 4' : undefined,
       },
     };
@@ -271,8 +262,6 @@ export function MediatorLesson({
           tab={tab}
           onTabChange={setTab}
           draggedMember={draggedMember}
-          issueClassIds={issueClassIds}
-          issueMemberIds={issueMemberIds}
           hint={hint}
           onAddClass={id => edit({ ...graph, classes: [...graph.classes, id] })}
           onAssign={assign}
@@ -324,11 +313,9 @@ export function MediatorLesson({
             onMoveMode={handleMoveMode}
           />
 
-          <MediatorActions
-            onCheck={check}
-            message={message}
-            issues={issues}
-          />
+          <div className="med-workspace-status" role="status" aria-live="polite">
+            {message}
+          </div>
           <MediatorDemo ready={ready} result={result} onRun={run} />
         </div>
       </div>

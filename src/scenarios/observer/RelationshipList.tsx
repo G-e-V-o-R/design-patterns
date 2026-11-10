@@ -3,13 +3,11 @@ import { label } from './lessonContent';
 
 type ObserverRelationsProps = {
   edges: LessonGraph['edges'];
-  issueEdgeIndices: Set<number>;
   onRemoveEdge: (index: number) => void;
 };
 
 export function ObserverRelations({
   edges,
-  issueEdgeIndices,
   onRemoveEdge,
 }: ObserverRelationsProps)
 {
@@ -22,7 +20,6 @@ export function ObserverRelations({
               key={edgeIndex}
               edge={edge}
               edgeIndex={edgeIndex}
-              hasValidationIssue={issueEdgeIndices.has(edgeIndex)}
               onRemove={onRemoveEdge}
             />
           ))}
@@ -35,29 +32,19 @@ export function ObserverRelations({
 function RelationshipRow({
   edge,
   edgeIndex,
-  hasValidationIssue,
   onRemove,
 }: {
   edge: LessonGraph['edges'][number];
   edgeIndex: number;
-  hasValidationIssue: boolean;
   onRemove: (index: number) => void;
 })
 {
   const sourceLabel = label(edge.source) || '(unnamed endpoint)';
   const targetLabel = label(edge.target) || '(unnamed endpoint)';
-  let rowClassName: string | undefined;
-  if (hasValidationIssue)
-  {
-    rowClassName = 'needs-fix';
-  }
 
   return (
-    <li className={rowClassName}>
+    <li>
       <span>
-        {hasValidationIssue && (
-          <b className="lesson-fix-label">Fix this arrow</b>
-        )}
         <strong>{sourceLabel}</strong>
         <strong>{targetLabel}</strong>
       </span>

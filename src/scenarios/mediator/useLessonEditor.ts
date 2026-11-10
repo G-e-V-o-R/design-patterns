@@ -9,7 +9,6 @@ import {
   simulateLesson,
   type CoordinationResult,
   type MediatorGraph,
-  type MediatorIssue,
   type RequestKind,
 } from './model';
 
@@ -19,22 +18,17 @@ export function useMediatorLesson(
 )
 {
   const [history, setHistory] = useState<MediatorGraph[]>([]);
-  const [issues, setIssues] = useState<MediatorIssue[] | null>(null);
   const [message, setMessage] = useState('');
   const [hint, setHint] = useState(-1);
   const [worked, setWorked] = useState(false);
   const [result, setResult] = useState<CoordinationResult | null>(null);
 
-  const issueClassIds = new Set(issues?.flatMap(issue => issue.classIds));
-  const issueMemberIds = new Set(issues?.flatMap(issue => issue.memberIds));
-  const issueEdgeIndices = new Set(issues?.flatMap(issue => issue.edgeIndices));
   const ready = getLessonIssues(graph).length === 0;
 
   function edit(nextGraph: MediatorGraph)
   {
     setHistory(previousHistory => [...previousHistory.slice(-29), graph]);
     onChange(nextGraph);
-    setIssues(null);
     setResult(null);
     setMessage('');
     setWorked(false);
@@ -110,23 +104,13 @@ export function useMediatorLesson(
     }
 
     edit({ ...graph, edges: [...graph.edges, edge] });
-    setMessage(
-      `Connected ${classLabel(from)} to ${classLabel(to)}. Check the diagram to test your choice.`,
-    );
+    setMessage(`Connected ${classLabel(from)} to ${classLabel(to)}.`);
   }
 
   function run(request: RequestKind)
   {
-    setIssues(getLessonIssues(graph));
     setMessage('');
     setResult(simulateLesson(graph, request));
-  }
-
-  function check()
-  {
-    setIssues(getLessonIssues(graph));
-    setMessage('');
-    setResult(null);
   }
 
   function showHint()
@@ -151,7 +135,6 @@ export function useMediatorLesson(
 
     onChange(previousGraph);
     setHistory(history.slice(0, -1));
-    setIssues(null);
     setResult(null);
     setWorked(false);
     setMessage('Last edit undone.');
@@ -163,22 +146,17 @@ export function useMediatorLesson(
   }
 
   return {
-    issues,
     message,
     hint,
     worked,
     result,
     ready,
-    issueClassIds,
-    issueMemberIds,
-    issueEdgeIndices,
     canUndo: history.length > 0,
     edit,
     assign,
     removeClasses,
     connect,
     run,
-    check,
     showHint,
     showSolution,
     undo,

@@ -23,10 +23,6 @@ type CardTrayInputs = {
   onCategoryChange: (category: CardCategory) => void;
   // ID карточки, которую сейчас тащат мышью; null означает, что перетаскивания нет.
   draggedMemberId: string | null;
-  // ID классов и членов диаграммы, которые проверка отметила как требующие исправления.
-  // Set хранит уникальные ID (примерно как std::unordered_set<string>), а массив — список.
-  classIdsWithIssues: Set<string>;
-  memberIdsWithIssues: string[];
   // Индекс текущей подсказки; отрицательное значение означает «ещё не выбрана».
   hintIndex: number;
   // Действия пользователя, которые панель просит выполнить родителя.
@@ -45,8 +41,6 @@ export function ObserverDiagramBuilderPanel({
   selectedCategory,
   onCategoryChange,
   draggedMemberId,
-  classIdsWithIssues,
-  memberIdsWithIssues,
   hintIndex,
   onAddClassToDiagram,
   onStartMemberDrag,
@@ -62,7 +56,6 @@ export function ObserverDiagramBuilderPanel({
     cardContent = (
       <ClassCards
         lessonGraph={lessonGraph}
-        classIdsWithIssues={classIdsWithIssues}
         onAddClassToDiagram={onAddClassToDiagram}
       />
     );
@@ -74,7 +67,6 @@ export function ObserverDiagramBuilderPanel({
         lessonGraph={lessonGraph}
         selectedCategory={selectedCategory}
         draggedMemberId={draggedMemberId}
-        memberIdsWithIssues={memberIdsWithIssues}
         onStartMemberDrag={onStartMemberDrag}
       />
     );
@@ -190,13 +182,11 @@ function HintControls({
 // Props описывают данные и действие добавления, которые получает этот дочерний компонент.
 type ClassCardsInputs = {
   lessonGraph: LessonGraph;
-  classIdsWithIssues: Set<string>;
   onAddClassToDiagram: (id: string) => void;
 };
 
 function ClassCards({
   lessonGraph,
-  classIdsWithIssues,
   onAddClassToDiagram,
 }: ClassCardsInputs)
 {
@@ -205,12 +195,7 @@ function ClassCards({
       {/* map превращает каждую запись модели classCards в отдельную карточку интерфейса. */}
       {classCards.map(card =>
       {
-        // Эти признаки определяют сообщение об ошибке, CSS-класс и доступность кнопки.
-        const hasValidationIssue = classIdsWithIssues.has(card.id);
         const isAlreadyInDiagram = lessonGraph.classes.includes(card.id);
-        // Собираем CSS-классы: filter(Boolean) удаляет отсутствующие условия,
-        // join(' ') формирует строку вида "lesson-tray-card needs-fix".
-        const className = ['lesson-tray-card', hasValidationIssue && 'needs-fix'].filter(Boolean).join(' ');
         let buttonLabel = '+ Add to diagram';
         if (isAlreadyInDiagram)
         {
@@ -220,11 +205,9 @@ function ClassCards({
         // key — стабильный ID, по которому React сопоставляет эту карточку
         // с предыдущим элементом списка при обновлении интерфейса.
         return (
-          <article className={className} key={card.id}>
+          <article className="lesson-tray-card" key={card.id}>
             <small>{card.kind}</small>
             <h3>{card.label}</h3>
-            {/* Условие && добавляет метку только для карточки с найденной ошибкой. */}
-            {hasValidationIssue && <span className="lesson-fix-label">Fix this</span>}
             <p>{card.description}</p>
             {/* Стрелочная функция запоминает ID этой карточки и передаёт его при нажатии. */}
             <button disabled={isAlreadyInDiagram} onClick={() => onAddClassToDiagram(card.id)}>
@@ -243,7 +226,6 @@ type MemberCardsInputs = {
   lessonGraph: LessonGraph;
   selectedCategory: CardCategory;
   draggedMemberId: string | null;
-  memberIdsWithIssues: string[];
   onStartMemberDrag: (event: DragEvent, id: string) => void;
 };
 
@@ -251,7 +233,6 @@ function MemberCards({
   lessonGraph,
   selectedCategory,
   draggedMemberId,
-  memberIdsWithIssues,
   onStartMemberDrag,
 }: MemberCardsInputs)
 {
@@ -282,12 +263,9 @@ function MemberCards({
         : visibleMembers.map(member =>
       {
         const isBeingDragged = draggedMemberId === member.id;
-        const hasValidationIssue = memberIdsWithIssues.includes(member.id);
-        // Временные CSS-классы подсвечивают перетаскивание и ошибки проверки.
         const className = [
           'lesson-member-card',
           isBeingDragged && 'is-dragging',
-          hasValidationIssue && 'needs-fix',
         ].filter(Boolean).join(' ');
 
         return (
@@ -301,7 +279,6 @@ function MemberCards({
                 событие и ID карточки, чтобы родитель мог управлять её переносом. */}
             <span className="lesson-drag-hint" aria-hidden="true">⠿ Drag to a class</span>
             <code>{member.label}</code>
-            {hasValidationIssue && <span className="lesson-fix-label">Fix this</span>}
             <p className="lesson-method-description">{member.description}</p>
           </article>
         );

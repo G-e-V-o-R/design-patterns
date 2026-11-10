@@ -7,8 +7,6 @@ export type ClassNode = Node<{
   label: string;
   kind: string;
   members: typeof memberCards;
-  needsFix: boolean;
-  issueMembers: Set<string>;
   isDropTarget: boolean;
   artwork?: { src: string; alt: string };
   onRemove: () => void;
@@ -21,7 +19,6 @@ export function DiagramClass({ data }: NodeProps<ClassNode>)
   const className = [
     'med-class',
     data.kind === 'interface' && 'med-interface',
-    data.needsFix && 'med-needs-fix',
     data.isDropTarget && 'med-drop-target',
   ].filter(Boolean).join(' ');
 
@@ -88,7 +85,6 @@ export function DiagramClass({ data }: NodeProps<ClassNode>)
         >
           ×
         </button>
-        {data.needsFix && <span className="med-fix">Fix this</span>}
       </header>
 
       {(['field', 'method'] as const).map(kind => (
@@ -97,12 +93,7 @@ export function DiagramClass({ data }: NodeProps<ClassNode>)
           {data.members
             .filter(member => member.kind === kind)
             .map(member => (
-              <code
-                key={member.id}
-                className={data.issueMembers.has(member.id) ? 'med-fix' : ''}
-              >
-                {member.label}
-              </code>
+              <code key={member.id}>{member.label}</code>
             ))}
           {!data.members.some(member => member.kind === kind) && (
             <p>Assign {kind}s from your cards</p>

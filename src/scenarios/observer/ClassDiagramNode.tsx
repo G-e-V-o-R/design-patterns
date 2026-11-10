@@ -8,9 +8,6 @@ type MemberKind = 'field' | 'method';
 // Данные, которые React Flow передаёт узлу. Это похоже на отдельную структуру
 // с полями карточки и функциями, нужными для обработки действий пользователя.
 export type ObserverClassNodeData = {
-  classHasValidationIssue: boolean;
-  memberIdsWithIssues: string[];
-  misplacedMemberIds: string[];
   draggedMemberId: string | null;
   onStartMemberDrag: (event: DragEvent, id: string) => void;
   onEndMemberDrag: () => void;
@@ -83,7 +80,6 @@ export function ObserverClassDiagramNode({ data }: NodeProps<ObserverClassNode>)
     'lesson-class',
     isInterface && 'is-interface',
     data.isMemberDropTarget && 'is-drop-target',
-    data.classHasValidationIssue && 'needs-fix',
   ].filter(Boolean).join(' ');
 
   return (
@@ -137,9 +133,6 @@ function ClassCardHeading({
     <div className="lesson-class-title">
       <small>{data.kind}</small>
       <strong>{data.label}</strong>
-      {data.classHasValidationIssue && (
-        <span className="lesson-fix-label">Fix this</span>
-      )}
       <button
         className="nodrag"
         aria-label={`Remove ${data.label} from diagram`}
@@ -251,15 +244,11 @@ function ClassMemberCard({
 }: ClassMemberCardInputs)
 {
   const isBeingDragged = data.draggedMemberId === member.id;
-  const hasValidationIssue = data.memberIdsWithIssues.includes(member.id);
-  const isMisplaced = data.misplacedMemberIds.includes(member.id);
   const className = [
     'lesson-assigned-method',
     'nodrag',
     'nopan',
     isBeingDragged && 'is-dragging',
-    isMisplaced && 'is-misplaced',
-    hasValidationIssue && 'needs-fix',
   ].filter(Boolean).join(' ');
 
   let memberSymbol = '+';
@@ -278,9 +267,6 @@ function ClassMemberCard({
     >
       <span>{memberSymbol}</span>
       <code>{member.label}</code>
-      {hasValidationIssue && (
-        <small className="lesson-fix-label">Fix this</small>
-      )}
     </div>
   );
 }

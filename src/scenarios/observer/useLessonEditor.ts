@@ -9,7 +9,6 @@ import {
   validateLesson,
   type ConnectionHandle,
   type LessonGraph,
-  type LessonIssue,
 } from './model';
 import { hints, label } from './lessonContent';
 import type { DemoRun } from './NotificationDemo';
@@ -20,7 +19,6 @@ export function useObserverLesson(
 )
 {
   const [history, setHistory] = useState<LessonGraph[]>([]);
-  const [issues, setIssues] = useState<LessonIssue[] | null>(null);
   const [message, setMessage] = useState('');
   const [hint, setHint] = useState(-1);
   const [worked, setWorked] = useState(false);
@@ -28,22 +26,12 @@ export function useObserverLesson(
   const [demoRun, setDemoRun] = useState<(DemoRun & { graph: LessonGraph }) | null>(null);
   const nextRunId = useRef(0);
 
-  const issueClassIds = new Set(issues?.flatMap(issue => issue.classIds));
-  const issueMemberIds = [...new Set(issues?.flatMap(issue => issue.memberIds))];
-  const expectedMembers = solutionLesson().members;
-  const misplacedMemberIds = Object.entries(graph.members)
-    .filter(([memberId, ownerClassId]) =>
-      expectedMembers[memberId] !== undefined
-      && expectedMembers[memberId] !== ownerClassId)
-    .map(([memberId]) => memberId);
-  const issueEdgeIndices = new Set(issues?.flatMap(issue => issue.edgeIndices));
   const demoReady = validateLesson(graph).length === 0;
 
   function edit(nextGraph: LessonGraph)
   {
     setHistory(previousHistory => [...previousHistory.slice(-29), graph]);
     onChange(nextGraph);
-    setIssues(null);
     setDemoRun(null);
     setMessage('');
     setWorked(false);
@@ -158,18 +146,14 @@ export function useObserverLesson(
         },
       ],
     });
-    setMessage(
-      `Relationship added: ${label(sourceClassId)} → ${label(targetClassId)}. Check your diagram.`,
-    );
+    setMessage(`Relationship added: ${label(sourceClassId)} → ${label(targetClassId)}.`);
   }
 
   function startDemo(danger: boolean)
   {
-    const lessonIssues = getLessonIssues(graph);
-    setIssues(lessonIssues);
     setMessage('');
 
-    if (lessonIssues.length > 0)
+    if (getLessonIssues(graph).length > 0)
     {
       setDemoRun(null);
       return;
@@ -212,7 +196,6 @@ export function useObserverLesson(
 
     onChange(previousGraph);
     setHistory(history.slice(0, -1));
-    setIssues(null);
     setDemoRun(null);
     setMessage('Last edit undone.');
     setWorked(false);
@@ -223,38 +206,18 @@ export function useObserverLesson(
     edit(emptyLesson());
   }
 
-  function check(runDemo = false)
-  {
-    if (runDemo)
-    {
-      startDemo(true);
-      return demoReady;
-    }
-
-    setIssues(getLessonIssues(graph));
-    setMessage('');
-    setDemoRun(null);
-    return false;
-  }
-
   return {
-    issues,
     message,
     hint,
     worked,
     narionSubscribed,
     demoRun,
     demoReady,
-    issueClassIds,
-    issueMemberIds,
-    misplacedMemberIds,
-    issueEdgeIndices,
     canUndo: history.length > 0,
     edit,
     assignMethod,
     removeClasses,
     connect,
-    check,
     startDemo,
     toggleBracelet,
     showHint,

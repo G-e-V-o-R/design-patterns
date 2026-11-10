@@ -13,8 +13,6 @@ type MediatorTrayProps = {
   tab: Tab;
   onTabChange: (tab: Tab) => void;
   draggedMember: string | null;
-  issueClassIds: Set<string>;
-  issueMemberIds: Set<string>;
   hint: number;
   onAddClass: (id: string) => void;
   onAssign: (memberId: string, owner: string) => void;
@@ -29,8 +27,6 @@ export function MediatorTray({
   tab,
   onTabChange,
   draggedMember,
-  issueClassIds,
-  issueMemberIds,
   hint,
   onAddClass,
   onAssign,
@@ -71,7 +67,6 @@ export function MediatorTray({
         ? (
           <ClassCards
             graph={graph}
-            issueClassIds={issueClassIds}
             onAddClass={onAddClass}
           />
         )
@@ -79,7 +74,6 @@ export function MediatorTray({
           <MemberCards
             graph={graph}
             draggedMember={draggedMember}
-            issueMemberIds={issueMemberIds}
             onAssign={onAssign}
             onStartDrag={onStartDrag}
             onDragEnd={onDragEnd}
@@ -104,27 +98,22 @@ export function MediatorTray({
 
 type ClassCardsProps = {
   graph: MediatorGraph;
-  issueClassIds: Set<string>;
   onAddClass: (id: string) => void;
 };
 
-function ClassCards({ graph, issueClassIds, onAddClass }: ClassCardsProps)
+function ClassCards({ graph, onAddClass }: ClassCardsProps)
 {
   return (
     <div className="med-card-list">
       {classCards.map(card =>
       {
         const isInDiagram = graph.classes.includes(card.id);
-        const hasIssue = issueClassIds.has(card.id);
-        const cardClassName = 'med-tray-card'
-          + (hasIssue ? ' med-needs-fix' : '');
 
         return (
-          <article key={card.id} className={cardClassName}>
+          <article key={card.id} className="med-tray-card">
             <small>{card.kind}</small>
             <h3>{card.label}</h3>
             <p>{card.description}</p>
-            {hasIssue && <span className="med-fix">Fix this</span>}
             <button
               disabled={isInDiagram}
               onClick={() => onAddClass(card.id)}
@@ -141,7 +130,6 @@ function ClassCards({ graph, issueClassIds, onAddClass }: ClassCardsProps)
 type MemberCardsProps = {
   graph: MediatorGraph;
   draggedMember: string | null;
-  issueMemberIds: Set<string>;
   onAssign: (memberId: string, owner: string) => void;
   onStartDrag: (event: DragEvent, id: string) => void;
   onDragEnd: () => void;
@@ -150,7 +138,6 @@ type MemberCardsProps = {
 function MemberCards({
   graph,
   draggedMember,
-  issueMemberIds,
   onAssign,
   onStartDrag,
   onDragEnd,
@@ -161,10 +148,8 @@ function MemberCards({
       {memberCards.map(member =>
       {
         const isDragging = draggedMember === member.id;
-        const hasIssue = issueMemberIds.has(member.id);
         const cardClassName = 'med-member-card'
-          + (isDragging ? ' is-dragging' : '')
-          + (hasIssue ? ' med-needs-fix' : '');
+          + (isDragging ? ' is-dragging' : '');
 
         return (
           <article
@@ -177,7 +162,6 @@ function MemberCards({
             <small>{member.kind} · drag or assign</small>
             <code>{member.label}</code>
             <p>{member.description}</p>
-            {hasIssue && <span className="med-fix">Fix this</span>}
             <label>
               Assign to
               <select

@@ -529,69 +529,15 @@
   font-size: 12px;
 }
 
-.mediator-scenario .med-check {
-  padding: 20px;
-}
-
-.mediator-scenario .med-check span {
-  font-size: 11px;
-  color: #a8b79f;
-}
-
-.mediator-scenario .med-primary {
-  background: #ceb17a;
-  color: #18251d;
-  font-weight: 700;
-}
-
-.mediator-scenario .med-primary:hover {
-  background: #e8ca91;
-}
-
-.mediator-scenario .med-needs-fix {
-  outline: 2px solid #f0a28e;
-  outline-offset: 1px;
-}
-
-.mediator-scenario .med-fix {
-  display: block;
-  color: #ffd4c6;
-  font-size: 10px;
-  padding: 2px 5px;
-  margin-top: 5px;
-  background: #55372e;
-  width: fit-content;
-  max-width: 100%;
-  border-radius: 3px;
-}
-
-.mediator-scenario .med-feedback {
-  margin: 0 20px;
-  font-size: 12px;
+.mediator-scenario .med-workspace-status {
+  margin: 0 20px 16px;
   color: #e0c58d;
-}
-
-.mediator-scenario .med-feedback > div {
-  border-left: 2px solid #c3a56a;
-  padding: 14px 18px;
-  background: #293526;
-  margin-bottom: 20px;
-}
-
-.mediator-scenario .med-feedback ul {
-  padding-left: 18px;
-  font-size: 11px;
-  line-height: 1.9;
-  margin: 0;
-}
-
-.mediator-scenario .med-feedback p {
+  font-size: 12px;
   line-height: 1.8;
 }
 
-.mediator-scenario .med-feedback .med-success {
-  border-color: #b4cc8d;
-  background: #263c2c;
+.mediator-scenario .med-workspace-status:empty {
+  display: none;
 }
 
 .mediator-scenario .med-demo {
@@ -1018,8 +964,7 @@
     font-size: 12px;
   }
 
-  .mediator-scenario .med-board-heading,
-  .mediator-scenario .med-check {
+  .mediator-scenario .med-board-heading {
     padding: 15px;
   }
 
