@@ -8,10 +8,18 @@
   }
   .lesson-intro {
     display: grid;
-    grid-template-columns: minmax(0,1fr) 240px;
-    gap: 32px;
+    grid-template-columns: minmax(230px,0.55fr) minmax(0,1.45fr);
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 1px solid #aec79d26;
+    border-radius: 12px;
+    background: #1b2823;
+  }
+  .lesson-intro-copy {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 32px;
   }
   .lesson-kicker {
     font-size: 10px;
@@ -25,31 +33,36 @@
     margin-left: 20px;
   }
   .lesson-intro h1 {
-    font-size: clamp(28px,3vw,45px);
+    font-size: clamp(28px,3vw,43px);
     line-height: 1.2;
     margin-bottom: 18px;
   }
-  .lesson-intro h1>span {
+  .lesson-intro h1 > span {
     display: inline-block;
     font-size: 12px;
     letter-spacing: 0;
     vertical-align: middle;
-    margin-left: 18px;
     border: 1px solid #b0c19f44;
     padding: 6px 12px;
     border-radius: 30px;
     color: #d5c398;
-    font-weight: 500;
+    margin: 8px 0 0 12px;
   }
-  .lesson-situation {
+  .lesson-intro p:not(.lesson-kicker) {
     color: #bbc6b6;
-    font-size: 14px;
-    line-height: 1.8;
-    margin-bottom: 15px;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .lesson-story {
+    margin-bottom: 16px;
+  }
+  .lesson-story p {
+    margin: 0;
+  }
+  .lesson-story p + p {
+    margin-top: 12px;
   }
   .lesson-goal {
-    font-size: 13px;
-    line-height: 1.8;
     margin: 0;
   }
   .lesson-goal strong {
@@ -57,32 +70,26 @@
     margin-right: 10px;
   }
   .lesson-intro figure {
+    grid-column: 1;
+    grid-row: 1;
     margin: 0;
     position: relative;
-    height: 205px;
-    border-radius: 12px;
+    aspect-ratio: 0.69;
     overflow: hidden;
-    border: 1px solid var(--lesson-border);
-  }
-  .lesson-intro figure:after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(0deg,#12231c,transparent 70%);
+    background: #12231c;
   }
   .lesson-intro figure img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center 35%;
+    object-fit: contain;
   }
   .lesson-intro figcaption {
     position: absolute;
-    bottom: 15px;
-    left: 0;
-    right: 0;
+    bottom: 0;
+    inset-inline: 0;
+    padding: 24px 10px 10px;
+    background: linear-gradient(transparent, #12231c);
     text-align: center;
-    z-index: 1;
     font-size: 11px;
     color: #e9dfc7;
   }
@@ -495,13 +502,15 @@
       padding: 15px;
     }
     .lesson-intro {
-      gap: 25px;
-      grid-template-columns: minmax(0,1fr) 220px;
+      grid-template-columns: minmax(220px,0.55fr) minmax(0,1.45fr);
+    }
+    .lesson-intro-copy {
+      padding: 24px;
     }
     .lesson-canvas {
       height: 800px;
     }
-    .lesson-intro h1>span {
+    .lesson-intro h1 > span {
       margin-left: 0;
       display: table;
       margin-top: 12px;
@@ -521,8 +530,15 @@
     .lesson-intro {
       display: block;
     }
+    .lesson-intro-copy {
+      padding: 24px 20px;
+    }
     .lesson-intro figure {
-      display: none;
+      display: block;
+      width: 82%;
+      margin: 0 auto;
+      border-top: 1px solid #aec79d26;
+      border-radius: 0 0 12px 12px;
     }
     .lesson-intro h1 {
       font-size: 30px;
@@ -534,11 +550,8 @@
     .lesson-kicker span {
       margin-left: 12px;
     }
-    .lesson-situation {
-      font-size: 12px;
-    }
-    .lesson-goal {
-      font-size: 12px;
+    .lesson-intro p:not(.lesson-kicker) {
+      font-size: 14px;
     }
     .lesson-steps {
       gap: 10px;
