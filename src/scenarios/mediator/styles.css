@@ -34,10 +34,19 @@
 
 .mediator-scenario .med-intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
-  gap: 32px;
+  grid-template-columns: minmax(260px, 0.55fr) minmax(0, 1.45fr);
   align-items: center;
   margin-bottom: 28px;
+  overflow: hidden;
+  border: 1px solid #aec79d26;
+  border-radius: 12px;
+  background: #1b2823;
+}
+
+.mediator-scenario .med-intro > div {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 32px;
 }
 
 .mediator-scenario .med-kicker {
@@ -67,9 +76,21 @@
 }
 
 .mediator-scenario .med-intro p:not(.med-kicker) {
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.75;
   color: #bbc6b6;
+}
+
+.mediator-scenario .med-story {
+  margin-bottom: 16px;
+}
+
+.mediator-scenario .med-story p {
+  margin: 0;
+}
+
+.mediator-scenario .med-story p + p {
+  margin-top: 12px;
 }
 
 .mediator-scenario .med-task strong {
@@ -78,18 +99,19 @@
 }
 
 .mediator-scenario .med-intro figure {
+  grid-column: 1;
+  grid-row: 1;
   margin: 0;
-  height: 200px;
+  aspect-ratio: 0.69;
   position: relative;
-  border: 1px solid #aec79d26;
-  border-radius: 12px;
   overflow: hidden;
+  background: #12231c;
 }
 
 .mediator-scenario .med-intro img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .mediator-scenario .med-intro figcaption {
@@ -599,49 +621,6 @@
   color: #e2c992 !important;
 }
 
-.mediator-scenario .med-before {
-  display: grid;
-  grid-template-columns: minmax(150px, .7fr) minmax(0, 1fr);
-  min-height: 150px;
-  margin: 20px 0;
-  overflow: hidden;
-  border: 1px solid #bd8c6b77;
-  border-radius: 8px;
-  background: #2b261f;
-}
-
-.mediator-scenario .med-before img {
-  width: 100%;
-  height: 100%;
-  min-height: 150px;
-  object-fit: cover;
-  object-position: center 53%;
-  filter: saturate(.78) brightness(.78);
-}
-
-.mediator-scenario .med-before > div {
-  align-self: center;
-  padding: 18px;
-}
-
-.mediator-scenario .med-before small {
-  color: #e1ae80;
-  font-size: 9px;
-  letter-spacing: 1px;
-}
-
-.mediator-scenario .med-before h3 {
-  margin: 8px 0;
-  font-size: 16px;
-}
-
-.mediator-scenario .med-before p {
-  margin: 0;
-  color: #c9b9a7;
-  font-size: 11px;
-  line-height: 1.7;
-}
-
 .mediator-scenario .med-actor-scene {
   position: relative;
   display: grid;
@@ -963,7 +942,11 @@
   }
 
   .mediator-scenario .med-intro {
-    grid-template-columns: minmax(0, 1fr) 200px;
+    grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1.45fr);
+  }
+
+  .mediator-scenario .med-intro > div {
+    padding: 24px;
   }
 
   .mediator-scenario .med-canvas {
@@ -980,8 +963,16 @@
     display: block;
   }
 
+  .mediator-scenario .med-intro > div {
+    padding: 24px 20px;
+  }
+
   .mediator-scenario .med-intro figure {
-    display: none;
+    display: block;
+    width: 82%;
+    margin: 0 auto;
+    border-top: 1px solid #aec79d26;
+    border-radius: 0 0 12px 12px;
   }
 
   .mediator-scenario h1 {
@@ -994,7 +985,7 @@
   }
 
   .mediator-scenario .med-intro p:not(.med-kicker) {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .mediator-scenario .med-steps {
@@ -1111,14 +1102,6 @@
   .mediator-scenario .med-actor img,
   .mediator-scenario .med-actor-raven img {
     aspect-ratio: 1.25;
-  }
-
-  .mediator-scenario .med-before {
-    grid-template-columns: minmax(100px, .7fr) minmax(0, 1fr);
-  }
-
-  .mediator-scenario .med-before > div {
-    padding: 12px;
   }
 
   .mediator-scenario .med-route-summary {

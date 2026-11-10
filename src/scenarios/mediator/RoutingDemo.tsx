@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react';
 import { classLabel, type CoordinationResult, type RequestKind } from './model';
-import { classArtwork, introArt } from './lessonContent';
+import { classArtwork } from './lessonContent';
 
 type MediatorDemoProps = {
   ready: boolean;
@@ -50,18 +50,6 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
           Complete the diagram, or show the solution, to try both requests.
         </p>
       )}
-
-      <div className="med-before">
-        <img src={introArt.src} alt="" />
-        <div>
-          <small>BEFORE THE RAVEN</small>
-          <h3>Scattered in the ambush</h3>
-          <p>
-            The group is under attack. Without a coordinator, each companion
-            reacts alone; requests and help have no clear route.
-          </p>
-        </div>
-      </div>
 
       {showDirectMesh
         ? (

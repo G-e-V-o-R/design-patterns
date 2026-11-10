@@ -12,12 +12,24 @@ export function MediatorIntro()
           <h1 id="mediator-heading">
             Thoughts through the raven <span>Mediator</span>
           </h1>
-          <p>
-            An ambush scatters the group. Elvir sends his raven to coordinate
-            their requests. Dre’Kaar needs cover; Faelina needs shelter. The
-            raven knows who can help and passes each request to the right
-            companion.
-          </p>
+          <div className="med-story">
+            <p>
+              The ambush closes around the companions. Everyone is shouting.
+              Faelina warns, “Enemy behind you!” Narion calls, “Saerenn is
+              bleeding—get her to safety!” Their cries collide. Narion turns
+              toward the enemy, while Dre’Kaar rushes to Saerenn—then both
+              hesitate, unsure whether to fight or get her to safety.
+            </p>
+            <p>
+              Elvir sends Raven aloft. A mental link joins Raven to every
+              companion, so they can send a thought instead of shouting across
+              the fight. “Saerenn is bleeding—get her to safety!” Narion thinks.
+              Raven knows who can help and directs the request to them. Faelina
+              can ask for shelter and Dre’Kaar for cover; Raven routes those
+              requests to Saerenn and Narion. The companions stay focused on the
+              fight while Raven keeps each request moving to the right person.
+            </p>
+          </div>
           <p className="med-task">
             <strong>Your task</strong>
             {' '}
