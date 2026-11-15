@@ -1,189 +1,128 @@
-# Reference scenario: adding a new one
+# Adding a scenario
 
-Observer is the reference implementation. Mediator is the second example. Copy the structure, not the story or vocabulary.
+## Recommended: one config and local images
 
-Shared class-card artwork styling lives in `src/scenarios/shared/artwork.css`. Scenario-specific styles stay in each scenario directory.
+Copy `docs/scenario-template/` to `src/scenarios/<id>/`, then edit `scenario.json`. Its `id` must equal the directory name. See [the complete config guide](../../docs/scenario-template/README.md) and [the working Strategy lesson](./strategy/scenario.json).
 
-## Agent workflow
+The config defines the story, classes, nested fields and methods, expected relationships, hints, and optional positions. Shared code supplies state, history, validation, solution generation, card and arrow interactions, and layout. Registration, asset bundling, and generic model checks are automatic; do not edit the registry or package scripts for a config-only scenario.
 
-Shortest reliable path:
+An optional scenario-local `Demo.tsx` default export receives `ConfiguredDemoProps` and is discovered automatically. A plain config lesson has completion feedback without a simulated runtime demo. Novel simulation behavior still belongs in scenario code.
 
-1. Read `observer/Scenario.tsx`, `observer/model.ts`, and `observer/model.test.ts`.
-2. Read `observer/LessonWorkspace.tsx`, `observer/useLessonEditor.ts`, and the extracted components to see the expected decomposition.
-3. Write the new model and its tests first.
-4. Build the UI against the tested model.
-5. Register the scenario and add its test script.
-6. Run the checks below.
+`shared/scenarioConfig.ts` validates content, `shared/configuredLessonModel.ts` validates learner graphs, and the `Configured*` components plus `useConfiguredLesson.ts` implement the reusable workspace. Instances own independent graph/history state. Shared code contains no pattern-specific branches.
 
-Do not read every component before starting. The model and tests define the behavior; the UI structure is defined by the decomposition below.
+## Existing examples
 
-## Required file set
+All four lessons use the shared configured runtime. [Strategy](./strategy/scenario.json) needs only a config and artwork. [Observer](./observer/scenario.json), [Mediator](./mediator/scenario.json), and [Chain](./chain/scenario.json) also supply custom demonstrations.
+
+## File layout
 
 ```text
 src/scenarios/<id>/
-  <Pattern>Scenario.tsx   thin public entry point; owns scenario state
-  <Pattern>LessonWorkspace.tsx     lesson orchestrator; composes the UI
-  model.ts                cards, solutions, validation, simulation
-  model.test.ts           standalone model tests
-  <pattern>.css           styles scoped to the scenario root
+  scenario.json          story, diagram cards, member ownership, arrows, hints, positions
+  resource/              local artwork
+  Demo.tsx               optional default export accepting ConfiguredDemoProps
+  demoModel.ts           optional framework-independent simulation
+  demoModel.test.ts      simulation tests, when a demo model exists
+  styles.css             optional styles scoped to the demo root
 ```
 
-Decompose the lesson further by responsibility. Observer is the reference:
+A demo may have focused presentation helpers such as Observer's `NotificationDemo.tsx`. Do not copy editors, diagram validators, canvases, or lesson workspace components into a scenario. Shared `ConfiguredScenario`, `ConfiguredLessonWorkspace`, `useConfiguredLesson`, and `configuredLessonModel` own those responsibilities.
 
-```text
-  use<Pattern>Lesson.ts   stateful editor logic and handlers
-  <Pattern>ClassDiagramNode.tsx React Flow node renderer with a descriptive name
-  <Pattern>ClassDiagramCanvas.tsx    React Flow canvas and diagram controls
-  <Pattern>NotificationDemo.tsx       pattern-specific demonstration
-  <Pattern>StoryIntro.tsx      story and instructions
-  <Pattern>Tray.tsx       card tray
-```
+## Agent workflow
 
-Do not keep the whole lesson in one component. `<Pattern>LessonWorkspace.tsx` should read as composition and view wiring, not contain the full UI and all behavior. Extract content, node rendering, presentational sections, and stateful logic into focused files. The exact boundaries can vary, but a monolith is not acceptable.
+1. Read the template guide and a matching existing config.
+2. Define story, classes, fields, methods, directed relationships, hints, and artwork in `scenario.json`. Keep stable, unique IDs and put each member inside its owning class.
+3. If simulation is useful, add a default-exported `Demo.tsx` receiving `graph`, `ready`, and `active` from `ConfiguredDemoProps`.
+4. Keep simulation rules and tests local; use the shared configured graph validator instead of reimplementing lesson validation. Derive card labels and artwork metadata from the config when the demo needs them.
+5. Run the checks and browser flows below.
 
-## Public entry contract
+## Demo lifecycle and tests
 
-The registry imports the default export. The shell passes `active`, which tells a scenario whether it is visible.
+- The shared runtime mounts the demo only for a valid diagram; invalidation unmounts it and clears stale results.
+- Clear displayed results when the graph changes. Preserve demo state when only switching scenarios.
+- Gate timers, animation, and layout/resize effects with `active`. Respect reduced motion and expose outcomes as readable status text.
+- Keep simulation independent of React and do not mutate the graph. Invalid graphs must not produce successful simulation results.
+- Test every meaningful outcome, including safe/unmatched cases, subscription changes, first-match stopping, or other pattern-specific behavior.
+- Add a `test:<id>` script for custom demo tests and include it in `npm test`. Config validation, artwork checks, generated solutions, and generic diagram checks are already automatic.
 
-```tsx
-import { useState } from 'react';
-import { emptyLesson } from './model';
-import { PatternLesson } from './PatternLesson';
-import './pattern.css';
+## Registration and boundaries
 
-export default function PatternScenario({ active = true }: { active?: boolean }) {
-  const [graph, setGraph] = useState(emptyLesson);
-  return <div className="pattern-scenario"><PatternLesson active={active} graph={graph} onChange={setGraph}/></div>;
-}
-```
+`registry.ts` discovers `scenario.json`, local resources, and optional `Demo.tsx` exports eagerly. Config IDs must match their directory names. Set `number` to preserve a specific lesson order. Do not add static registry entries for configured lessons.
 
-Rules:
+Scenarios may import their own files and scenario-neutral resources from `shared/`. Shared resources must not depend on scenario internals or the app shell. Keep pattern-specific artwork in the scenario's `resource/` directory, retaining documentation copies where needed.
 
-- The scenario owns its mutable state.
-- Pass `active` to visibility-dependent effects such as React Flow `fitView`.
-- Use one root class for scoped styles, e.g. `pattern-scenario`.
-- Import shared scenario resources only from `src/scenarios/shared/`. Do not import from `src/app/`, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or another scenario.
+## Intro panel visual contract
 
-## Model contract
+The Observer and Mediator intros share one composition. Future scenarios must preserve this layout and styling, changing only scenario copy, artwork, caption, and pattern-specific terminology:
 
-Keep the model independent of React.
+- Render one framed intro panel containing the story/task copy and one `figure` with meaningful `img` alt text and a short `figcaption`.
+- At desktop/tablet widths, place the large illustration in the **left** column and the story in the **right** column. Use a two-column grid with proportions close to `0.55fr / 1.45fr`; do not shrink the image into a small thumbnail or put it after the story.
+- Give the whole panel a 1px subtle green border (`#aec79d26`), 12px rounded corners, clipped contents, and dark green text-panel background (`#1b2823`). Pad the copy by 32px on wide screens.
+- Keep the copy hierarchy and sizing consistent: uppercase 10px scenario/pattern kicker (`#d2b980`, 1.8px letter spacing); prominent title at `clamp(28px, 3vw, 43px)` and 1.2 line height; small outlined 12px pattern-name pill; story paragraphs at 16px/1.75 in muted green (`#bbc6b6`) with 12px between paragraphs; and a clearly emphasized “Your task” instruction with warm gold emphasis (`#e1c38d`).
+- The image fills a tall portrait region (approximately `aspect-ratio: 0.69`) with `object-fit: contain` over dark green (`#12231c`). Fade the 11px caption into the bottom of the image; do not crop important artwork.
+- Follow the intro with a compact, three-step horizontal strip using a top border and generous spacing, then the lesson workspace. Place the main-idea/concept callout after the interactive lesson content.
+- At tablet widths (up to 1050px), retain both columns, use a minimum 220px image column, and reduce copy padding to 24px. At widths up to 720px, stack the copy above the illustration, use 24px 20px copy padding, keep the illustration visible at roughly 82% width, reduce the title to 30px and body copy to 14px, and space the steps evenly. Ensure the content does not overflow. Never hide the intro artwork on mobile.
+- Scope intro selectors to the scenario root and intro classes. Match the reference spacing, typography, colors, borders, and responsive breakpoints rather than inventing a new per-pattern card style.
 
-Typical graph:
+For exact markup and CSS, use `shared/StoryIntro.tsx` and `shared/lesson.css`. Scenario configs supply content to that template; change the shared files once to update both.
 
-```ts
-export type PatternGraph = {
-  classes: string[];
-  members: Record<string, string>;
-  edges: { source: string; target: string; type: string }[];
-};
-```
+## User-facing UX consistency contract
 
-The model should export:
+From the learner's point of view, every scenario should feel like another lesson in the same workshop, not a separate app. Keep the same navigation, lesson progression, workspace structure, control placement, interaction conventions, and feedback behavior. Change the story, pattern vocabulary, diagram data, and demo behavior—not the way users operate the workshop.
 
-- `classCards`, `memberCards`, `relationshipKinds`
-- `emptyLesson()`
-- `solutionLesson()`
-- `getLessonIssues(graph)`
-- `validateLesson(graph)` as a convenience wrapper
-- `hints`
-- `simulateLesson(...)` or an equivalent demo function
-- optional `parseLesson(...)` only if saved input is accepted
+### Workshop navigation and lesson order
 
-Issues must identify what to fix:
+- Use the shared app shell for the workshop header, scenario navigation, skip link, and footer. Do not build scenario-specific navigation or duplicate shell elements inside a scenario.
+- Keep each scenario's content in this order: intro panel; three numbered orientation steps; diagram-building workspace; main-idea/concept callout.
+- Keep the scenario selector and workspace behavior consistent when switching patterns. Each scenario owns its own state; switching scenarios must not unexpectedly clear another scenario's in-memory progress or run effects for a hidden scenario.
 
-```ts
-export type Issue = {
-  message: string;
-  classIds: string[];
-  memberIds: string[];
-  edgeIndices: number[];
-};
-```
+### Workspace layout and controls
 
-Rules:
+- Preserve the same desktop workspace arrangement: builder/tray on the left and diagram board on the right. On narrow screens, stack these regions in a predictable order without hiding lesson functionality.
+- Keep the builder's card-category controls, card list, hint, and solution controls together in the tray. Use consistent labels and interaction patterns for adding classes and assigning fields/methods. Pattern-specific card counts and class names may differ.
+- Keep the board heading and progress summary at the top of the board. Place `Undo` and `Reset` together in the same location in every scenario; disable `Undo` when there is no undo history.
+- Keep diagram controls attached to the diagram board. Relationship creation, movement, deletion, and other editing operations should use the same discoverable interaction conventions across scenarios.
+- Treat relationship arrows as a core part of the learner experience, not as incidental diagram decoration:
+  - Keep the relationship-tool group inside the diagram canvas at the bottom-left. Include a `Move` mode and one clearly labelled, keyboard-operable tool per relationship type, each with a small visual preview of its line and arrowhead.
+  - Selecting a relationship tool enters drawing mode. Clearly indicate the selected tool and provide a live instruction: select the source class, then the target class; `Escape` or `Move` cancels drawing mode. Preserve the same sequence and status placement in every scenario.
+  - Arrows are directed: the arrowhead points from source to target. Preserve that direction in the graph model, visible edge, accessible label, validation, and demo semantics. Never silently reverse an edge to make an invalid solution pass.
+  - Make each relationship type visually distinguishable and consistent between its toolbar preview and canvas edge. Follow the established convention: solid line with a closed arrowhead for ordinary relationships; dashed line with an open/hollow arrowhead for `implements`. Put the relationship label on the edge so meaning does not depend on color or arrow shape alone.
+  - Keep arrow selection/deletion discoverable: clicking an edge selects it, selected state is visible, and the relationship list gives each edge a labelled remove action. Keyboard deletion must work as well as pointer deletion.
+  - Validate expected direction, type, endpoints, and multiplicity. Give targeted feedback for missing, reversed, duplicate, self-referencing, unknown, and extra arrows; keep invalid arrows visible and identifiable so the learner can correct them. Test these cases in the model tests.
+- Keep validation/status feedback immediately after the diagram and before the interactive demo. Keep the demo in the board/workspace flow, after the learner has built and validated the diagram; do not make users search for a scenario-specific location.
+- Keep hints progressive and discoverable, and keep `Show solution` in the builder tray. Loading the solution must be clearly identified as an example/solution state, not as the learner having independently completed the task.
+- Use consistent control labels, disabled/loading/ready states, confirmation behavior for destructive actions, status-message placement, focus behavior, and keyboard support. Do not rename or relocate common controls without a clear usability reason applied consistently to the reference scenarios too.
 
-- `solutionLesson()` returns fresh objects on every call.
-- Validation accepts cards in any order but checks expected ownership and relationships.
-- Report missing, misplaced, duplicate, reversed, and extra members or edges.
-- Do not produce a success-shaped simulation result for an invalid graph.
-- Do not mutate the input graph.
-- Keep all ids unique and stable.
+### Consistency with room for pattern differences
 
-## Test contract
+- Reuse the same panel/card surfaces, typography scale, spacing rhythm, border/radius treatment, button hierarchy, muted/gold color roles, focus indicators, and status/feedback styling defined by Observer and Mediator.
+- Keep component placement and sequence consistent even when a scenario needs a different demo. The demo content, controls, animation, and outcome may express that pattern, but use the same heading/intro/status conventions and remain in the same workspace position.
+- Keep step-strip ordering and number of steps consistent. Wording may reflect each pattern's task, but use short action-oriented labels that describe the same progression: add/assign diagram elements, connect the diagram, then test the pattern.
+- Preserve the same behavior and layout at desktop, tablet, and mobile breakpoints. Stack rather than remove content or controls, prevent horizontal overflow, and maintain a usable tap target and reading order.
+- Keep patterns accessible in the same way: semantic headings and regions, labelled controls, useful `aria-*` states, visible keyboard focus, keyboard-operable actions, and announced validation/demo status. Do not rely on color or drag-and-drop alone; provide an accessible alternative for essential actions.
 
-`model.test.ts` runs directly with `tsx`; there is no test framework. Use a local `assert` helper like Observer does.
+When adding or changing a scenario, compare the rendered experience side by side with Observer and Mediator at desktop and mobile widths. A scenario-specific difference should be intentional, explained by the pattern, and not force the learner to relearn the workshop UI.
 
-Test at least:
+## Shared interaction and accessibility rules
 
-- the canonical solution has no issues;
-- an empty graph has issues;
-- each missing class, member, and relationship produces a targeted issue;
-- misplaced members are reported on both the member and the expected class;
-- reversed, extra, and duplicate relationships are rejected;
-- simulation succeeds only for a valid graph;
-- every meaningful demo outcome, including a no-op or contrasting case;
-- `solutionLesson()` does not share mutable state;
-- parser tests if the model accepts external input.
+When extracting components or applying the visual contract:
 
-End with a readable pass message.
-
-## Registration and test wiring
-
-Add a static import and entry in `src/scenarios/registry.ts`:
-
-```ts
-import PatternScenario from './pattern/PatternScenario';
-
-export const scenarios = [
-  { id: 'pattern', number: '03', title: 'Story title', pattern: 'Pattern', Component: PatternScenario },
-] as const satisfies readonly ScenarioDefinition[];
-```
-
-Add scripts to `package.json`:
-
-```json
-"test:pattern": "tsx src/scenarios/pattern/model.test.ts",
-"test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:pattern"
-```
-
-The boundary test enforces:
-
-- every scenario directory owns `model.test.ts`;
-- scenario imports stay inside that directory, `src/scenarios/shared/`, or `docs/`;
-- every directory has exactly one registry entry;
-- every registry entry imports from its own directory;
-- every scenario has a `test:<id>` script included in `npm test`.
-
-## UI guidance
-
-For a diagram lesson, Observer shows the expected split:
-
-- `ObserverDiagram` owns React Flow and `fitView`.
-- `ObserverClassDiagramNode` owns the Observer node shape; name node renderers descriptively for each scenario.
-- `ObserverDiagramBuilderPanel`, `ObserverIntro`, `ObserverRelations`, and `ObserverActions` are presentational.
-- `useObserverLesson` owns history, issues, hints, solution, and demo invalidation.
-- `ObserverLesson` keeps view-only state and connects the pieces.
-
-When extracting:
-
-- preserve existing DOM structure, class names, `aria-*`, and button text;
-- keep behavior-changing logic out of presentational components;
+- preserve meaningful DOM structure, class names, `aria-*` attributes, keyboard behavior, and button labels;
+- keep behavior-changing logic in the model/editor/workspace, not in presentation-only components;
 - keep visibility-dependent effects behind `active`;
-- do not introduce a shared runtime abstraction across scenarios.
+- keep status and validation feedback visible and specific; do not make an invalid diagram appear ready or successful;
+- maintain usable keyboard controls and narrow layouts;
+- reuse the stateless presentation templates in `src/scenarios/shared/`; keep lesson state and validation in the configured runtime and custom simulation in the scenario. Do not create a shared pattern-specific runtime engine.
 
 ## Common mistakes
 
-- Importing model helpers from another scenario.
-- Forgetting `model.test.ts` or the `test:<id>` script.
-- Adding the directory but not registering it.
-- Registering it but importing from the wrong path.
-- Forgetting to pass `active`.
-- Returning shared mutable objects from `solutionLesson()`.
-- Returning a successful demo result for an invalid graph.
-- Reporting only a generic “invalid diagram” message without ids.
-- Not testing reversed, extra, and duplicate relationships.
-- Keeping the whole lesson in one component.
-- Putting pattern-specific branches in the shell.
+- Importing another scenario's internals.
+- Duplicating diagram definitions or validation in demo code.
+- Adding a static registry entry for a discovered config.
+- Forgetting demo tests or allowing an invalid graph to simulate successfully.
+- Running hidden-scenario timers or layout effects.
+- Retaining demo results after the graph changes.
+- Omitting local artwork or informative alt text for concrete classes.
 
 ## Verification
 
@@ -202,3 +141,7 @@ Then check in a browser:
 - reset and undo;
 - keyboard use and narrow layout;
 - switching scenarios preserves state and does not run hidden-scenario effects.
+
+## Shared presentation
+
+The configured runtime uses the stateless templates documented in [shared/README.md](./shared/README.md). Change common workspace behavior there once for every lesson. Only custom demonstration behavior needs scenario-specific implementation.

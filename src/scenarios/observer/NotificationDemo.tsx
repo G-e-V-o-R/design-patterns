@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { DiscoveryResult } from './model';
+import type { DiscoveryResult } from './demoModel';
 
 export type DemoRun = {
   id: number;
@@ -8,6 +8,7 @@ export type DemoRun = {
 
 type ObserverDemoProps = {
   ready: boolean;
+  active: boolean;
   narionSubscribed: boolean;
   onToggleBracelet: () => void;
   onRun: (danger: boolean) => void;
@@ -16,6 +17,7 @@ type ObserverDemoProps = {
 
 export function ObserverDemo({
   ready,
+  active,
   narionSubscribed,
   onToggleBracelet,
   onRun,
@@ -30,6 +32,7 @@ export function ObserverDemo({
       <DiscoveryScene
         key={getSceneKey(run)}
         ready={ready}
+        active={active}
         run={run}
         narionSubscribed={narionSubscribed}
         onRun={onRun}
@@ -47,23 +50,23 @@ function DemoHeading()
         <p className="lesson-kicker">TRY THE STORY</p>
         <h2 id="demo-heading">Who gets the message?</h2>
       </div>
-      <p>The fox sends a message only when it sees danger.</p>
+      <p>The Subject publishes a notification only when it sees danger.</p>
     </div>
   );
 }
 
 function SubscriberSummary({ narionSubscribed }: { narionSubscribed: boolean })
 {
-  let activeSubscribers = 'Dre’Kaar';
+  let activeObservers = 'Dre’Kaar';
   if (narionSubscribed)
   {
-    activeSubscribers = 'Narion, Dre’Kaar';
+    activeObservers = 'Narion, Dre’Kaar';
   }
 
   return (
     <p className="demo-subscribers">
-      <code>subscribers: Subscriber[]</code>
-      <span>Active subscribers: {activeSubscribers}</span>
+      <code>observers: Observer[]</code>
+      <span>Attached observers: {activeObservers}</span>
     </p>
   );
 }
@@ -105,6 +108,7 @@ function getSceneKey(run: DemoRun | null)
 
 type DiscoverySceneProps = {
   ready: boolean;
+  active: boolean;
   run: DemoRun | null;
   narionSubscribed: boolean;
   onRun: (danger: boolean) => void;
@@ -115,6 +119,7 @@ type DiscoveryPhase = 'idle' | 'checking' | 'sending' | 'finished';
 
 function DiscoveryScene({
   ready,
+  active,
   run,
   narionSubscribed,
   onRun,
@@ -128,19 +133,24 @@ function DiscoveryScene({
 
   useEffect(() =>
   {
+    if (!active)
+    {
+      return;
+    }
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const updateMotionPreference = () =>
       setReducedMotion(motionPreference.matches);
 
+    updateMotionPreference();
     motionPreference.addEventListener('change', updateMotionPreference);
     return () => motionPreference.removeEventListener('change', updateMotionPreference);
-  }, []);
+  }, [active]);
 
   const shownPhase = getShownPhase(reducedMotion, run, phase);
 
   useEffect(() =>
   {
-    if (!run || phase === 'finished')
+    if (!active || !run || phase === 'finished')
     {
       return;
     }
@@ -168,7 +178,7 @@ function DiscoveryScene({
     }, delayInMilliseconds);
 
     return () => window.clearTimeout(timerId);
-  }, [run, phase, reducedMotion]);
+  }, [run, phase, reducedMotion, active]);
 
   const result = run?.result;
   const isFinished = shownPhase === 'finished';
@@ -235,12 +245,12 @@ function getStatusMessage(
 {
   if (phase === 'checking')
   {
-    return 'The fox is checking the path.';
+    return 'The Subject is checking the path.';
   }
 
   if (phase === 'sending')
   {
-    return 'Danger ahead! The fox is sending its message.';
+    return 'Danger ahead! The Subject is publishing a notification.';
   }
 
   if (phase === 'finished' && result)
@@ -248,7 +258,7 @@ function getStatusMessage(
     return result.summary;
   }
 
-  return 'Choose a path to see what the fox does.';
+  return 'Choose a path to see what the Subject does.';
 }
 
 function FoxCard({
@@ -282,7 +292,7 @@ function FoxCard({
     <article className="demo-fox">
       <span aria-hidden="true">🦊</span>
       <h3>Fox</h3>
-      <p>Publisher</p>
+      <p>Subject</p>
       <p>{foxStatus}</p>
     </article>
   );

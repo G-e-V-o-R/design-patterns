@@ -1,0 +1,91 @@
+{
+  "id": "strategy",
+  "number": "04",
+  "title": "Choose a route through the forest",
+  "pattern": "Strategy",
+  "intro": {
+    "paragraphs": [
+      "A traveler can cross the forest using different travel strategies. The journey planner keeps a strategy and asks it to plan the route.",
+      "Build the shared contract and connect a concrete walking strategy to the planner."
+    ],
+    "image": "./resource/intro.svg",
+    "imageAlt": "A forest map with alternative routes between a cabin and a destination",
+    "caption": "One journey, interchangeable ways to travel.",
+    "task": "Assign each member and connect the planner, strategy interface, and walking strategy.",
+    "concept": "Strategy lets a context use interchangeable algorithms through one shared interface.",
+    "steps": [
+      "Add the three class cards",
+      "Assign fields and methods",
+      "Connect and complete the diagram"
+    ]
+  },
+  "classes": [
+    {
+      "id": "travel-strategy",
+      "label": "TravelStrategy",
+      "kind": "interface",
+      "description": "The contract for every route-planning algorithm.",
+      "methods": [
+        {
+          "id": "strategy-plan",
+          "label": "planRoute(destination): Route",
+          "description": "The operation every travel strategy must provide."
+        }
+      ]
+    },
+    {
+      "id": "walking-strategy",
+      "label": "WalkingStrategy",
+      "kind": "class",
+      "description": "Plans a route using paths suitable for walking.",
+      "image": "./resource/walking.svg",
+      "imageAlt": "Walking boots on a forest path",
+      "methods": [
+        {
+          "id": "walking-plan",
+          "label": "planRoute(destination): Route",
+          "description": "The concrete walking implementation."
+        }
+      ],
+      "relationships": [
+        {
+          "type": "implements",
+          "target": "travel-strategy"
+        }
+      ]
+    },
+    {
+      "id": "journey-planner",
+      "label": "JourneyPlanner",
+      "kind": "class",
+      "description": "Delegates route planning to its selected strategy.",
+      "image": "./resource/planner.svg",
+      "imageAlt": "A compass and a route map",
+      "fields": [
+        {
+          "id": "planner-strategy",
+          "label": "strategy: TravelStrategy",
+          "description": "The interchangeable algorithm used by the planner."
+        }
+      ],
+      "methods": [
+        {
+          "id": "planner-plan",
+          "label": "planJourney(destination): Route",
+          "description": "Asks the selected strategy to produce a route."
+        }
+      ],
+      "relationships": [
+        {
+          "type": "uses",
+          "target": "travel-strategy"
+        }
+      ]
+    }
+  ],
+  "hints": [
+    "Both the interface and the concrete strategy have a planRoute method.",
+    "The planner owns the strategy field and planJourney method.",
+    "WalkingStrategy implements TravelStrategy. JourneyPlanner uses TravelStrategy."
+  ]
+}

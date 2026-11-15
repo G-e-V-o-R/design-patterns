@@ -1,33 +1,9 @@
-# Mediator scenario files
+# Mediator: Thoughts through the raven
 
-This directory contains the standalone Mediator learning scenario. The learner assembles a class diagram, validates the mediator and colleague relationships, then explores how messages are routed through the mediator.
+`scenario.json` owns the story, diagram classes and members, directed relationships, hints, positions, and local artwork. The shared configured lesson supplies editing, validation, history, and the worked solution.
 
-## File responsibilities
+`Demo.tsx` is discovered automatically and owns the demo result. `RoutingDemo.tsx` renders cover and shelter routes, their method traces, and the six direct connections shown for comparison. Visibility-dependent measurements and animation respect `active`; changing the graph clears stale results.
 
-| File | Responsibility |
-|---|---|
-| `Scenario.tsx` | Public entry point; initializes the scenario model and renders the lesson. |
-| `LessonWorkspace.tsx` | Composes the lesson UI and wires the diagram, editing state, status messages, and demo together. |
-| `model.ts` | Defines the diagram model, expected structure, readiness validation, and routing simulation. |
-| `model.test.ts` | Tests model validation, feedback, routing, and scenario state isolation. |
-| `useLessonEditor.ts` | Manages lesson editing state, demo readiness, reset, undo, hints, and demo launch. |
-| `StoryIntro.tsx` | Presents the scenario story and explains the Mediator pattern. |
-| `DiagramBuilderPanel.tsx` | Displays the available class, field, and method cards and builder actions. |
-| `ClassDiagramCanvas.tsx` | Renders the diagram canvas and its controls. |
-| `ClassDiagramNode.tsx` | Renders an individual class node and its members on the canvas. |
-| `RoutingDemo.tsx` | Demonstrates message flow routed between colleagues through the mediator. |
-| `lessonContent.ts` | Stores scenario-specific labels, hints, and diagram presentation data. |
-| `styles.css` | Contains styles scoped to the Mediator scenario. |
+`demoModel.ts` simulates coordination only after the shared validator accepts the graph against this JSON. `demoArtwork.ts` supplies bundled images for the demo and obtains alternative text from the same config. `styles.css` contains scoped demo styles.
 
-## Where to start
-
-| Change | Start with |
-|---|---|
-| Story or pattern explanation | `StoryIntro.tsx` |
-| Diagram classes, relationships, rules, or routing behavior | `model.ts` |
-| Hints, labels, or diagram presentation data | `lessonContent.ts` |
-| Diagram editing or lesson state | `useLessonEditor.ts` and `LessonWorkspace.tsx` |
-| Canvas or class node UI | `ClassDiagramCanvas.tsx` or `ClassDiagramNode.tsx` |
-| Demo readiness or routing behavior | `useLessonEditor.ts` and `RoutingDemo.tsx` |
-| Message-routing demonstration | `RoutingDemo.tsx` |
-| Scenario styling | `styles.css` |
+Run `npm run test:mediator` for request routing and invalid-diagram gating, and `npm run test:configs` for shared diagram validation.

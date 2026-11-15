@@ -7,26 +7,29 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:chain",
+    "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:templates && npm run test:chain && npm run test:configs",
     "test:boundaries": "tsx src/tests/scenario-boundaries.test.mjs",
-    "test:observer": "tsx src/scenarios/observer/model.test.ts",
-    "test:mediator": "tsx src/scenarios/mediator/model.test.ts",
-    "test:chain": "tsx src/scenarios/chain/model.test.ts"
+    "test:observer": "tsx src/scenarios/observer/demoModel.test.ts",
+    "test:mediator": "tsx src/scenarios/mediator/demoModel.test.ts",
+    "test:templates": "tsx src/tests/shared-templates.test.mjs",
+    "test:chain": "tsx src/scenarios/chain/demoModel.test.ts",
+    "test:configs": "tsx src/tests/configured-lesson.test.ts && tsx src/tests/scenario-configs.test.ts"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
-    "vite": "8.3.5",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "vite": "8.3.5"
   },
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
   },
   "dependencies": {
+    "@xyflow/react": "12.12.1",
     "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "@xyflow/react": "12.12.1"
+    "react-dom": "19.3.1"
   }
 }

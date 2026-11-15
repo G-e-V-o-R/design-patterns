@@ -1,6 +1,6 @@
 # Design Patterns agent guidance
 
-This repository contains design pattern reference material in `docs/` and a Vite/React app in `src/`. The app is a small shell (`src/app/`) that renders independently owned scenarios from `src/scenarios/<id>/`. Each scenario owns its model, validation, simulation, UI, styles, and tests; the registry uses static imports so missing modules fail at build time. Inspect the live repository before assuming a stack or module layout.
+This repository contains design pattern reference material in `docs/` and a Vite/React app in `src/`. The app is a small shell (`src/app/`) that renders independently owned scenarios from `src/scenarios/<id>/`. New diagram lessons use `scenario.json` plus local artwork; the shared runtime supplies their model, validation, editor, and UI. Optional `Demo.tsx` files own custom simulation behavior. Existing code-based scenarios own their models, validation, simulation, UI, styles, and tests. The registry keeps their static imports and automatically discovers configs and demos with eager imports; Vite validates configs and images at startup/build time. Inspect the live repository before assuming a stack or module layout.
 
 Scenarios may import their own files, shared scenario-neutral resources from `src/scenarios/shared/`, and artwork from `docs/`. Do not import from sibling scenarios or `src/app/`; shared resources must not depend on scenario internals.
 

@@ -1,5 +1,11 @@
 # Scenario authoring standard
 
+## Config-first authoring
+
+For a new diagram lesson, copy [the scenario template](../../docs/scenario-template/README.md) into a scenario directory and fill in `scenario.json`. Shared code owns the editor, validation, history, solution, and layout; automatic discovery and tests include the new directory without registry or package edits. The [Strategy scenario](./strategy/scenario.json) is a working config-only example. A custom `Demo.tsx` is optional.
+
+Observer, Mediator, and Chain also use this config infrastructure, with local `Demo.tsx` components for their simulations. Config-only lessons use shared model checks and finish with diagram completion feedback; they do not require a bespoke simulation.
+
 Use the Observer scenario as the quality bar for every new learning scenario. The goal is not to copy its fox story or its exact interface; each scenario should teach its own pattern with the same clarity, feedback, and completeness.
 
 ## What every scenario must teach
@@ -25,9 +31,9 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Implementation boundaries
 
-- Keep each scenario's content and behavior in its own `src/scenarios/<id>/` directory: public component, model, validation, simulation, styles, and tests. Put reusable scenario-neutral resources used by multiple scenarios in `src/scenarios/shared/`.
+- Keep each scenario's content and behavior in its own `src/scenarios/<id>/` directory: config, artwork, and optional demo components, simulation, styles, and tests. Put reusable scenario-neutral resources used by multiple scenarios in `src/scenarios/shared/`.
 - Keep the public entry and lesson orchestrator thin. Decompose content, presentational UI, and stateful logic into focused files rather than building a monolith.
-- Give each scenario its own state and model. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or `src/app/`. Reusable scenario-neutral resources belong in `src/scenarios/shared/`; artwork may be imported from `docs/`.
+- Let the configured runtime own each lesson’s independent graph and editor state; keep custom demo state local. Do not import from sibling scenarios, `src/scenarios/types.ts`, `src/scenarios/registry.ts`, or `src/app/`. Reusable scenario-neutral resources belong in `src/scenarios/shared/`; artwork may be imported from `docs/`.
 - Keep the initial activity understandable and safe to explore. A page reload starts a fresh scenario.
 - Keep pattern-specific logic in the scenario. Do not add pattern-specific branches to the application shell or make a scenario depend on another scenario's internals.
 - Scope styles to a scenario root class. Keep class names, animation names, and visual changes local; shared shell or base-style changes need regression checks for all scenarios.
@@ -43,29 +49,29 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Model and test expectations
 
-- Keep the scenario's graph or lesson model explicit and independently testable. Put validation and simulation in the scenario model rather than coupling correctness to rendering.
+- Use the shared configured graph model and validator. Keep custom simulation independently testable in the scenario’s demo model.
 - Test the canonical solution, an incomplete attempt, common incorrect assignments or relationships, and each meaningful simulation outcome. Verify that invalid structures cannot produce a success-shaped demo result.
 - If the model parses external or saved input, test malformed and unsupported values and ensure they cannot introduce unknown classes, members, or relationships.
-- Test scenario isolation and registration through the existing boundary checks. Add the scenario's model test to the project's test command.
+- Test scenario isolation and registration through the existing boundary checks. Add custom demo tests to the project’s test command; config checks are discovered automatically.
 
 ## Adding a scenario
 
-1. Create `src/scenarios/<id>/` with the scenario component, model, scoped styles, and `model.test.ts`.
-2. Adapt the scenario idea from `docs/hobbit/Russian Scenarios.md` into a clear A2-level description. Explain the problem and how the pattern solves it, then build the task, diagram activity, targeted checking, hints or solution, and a pattern-specific demonstration.
-3. Register a unique ID and the public component import in `src/scenarios/registry.ts`; keep `src/scenarios/types.ts` limited to the shell contract. The registry uses static imports so problems are reported at build time.
-4. Add a `test:<id>` script to `package.json` and include it in the aggregate `test` script. The boundary test verifies this wiring.
+1. Copy `docs/scenario-template/` into `src/scenarios/<id>/` and set a unique matching config ID.
+2. Adapt the scenario idea into clear story copy, diagram definitions, targeted hints, and local artwork in `scenario.json`.
+3. Add an optional `Demo.tsx` and focused simulation helpers when the pattern needs a custom demonstration. Registration is automatic.
+4. Include custom demo tests in `npm test`; config validation already covers every scenario directory.
 5. Run `npm test`, `npm run typecheck`, and `npm run build`.
 6. Check the scenario in a browser: initial state, incomplete and incorrect models, solution, every demo case, reset, undo if present, keyboard use, narrow layouts, and switching between scenarios. Confirm that switching preserves the scenario's state, the hidden scenario does not run visibility-dependent behavior, and reset affects only that scenario.
 
 ## Observer as the reference
 
-Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [Scenario.tsx](./observer/Scenario.tsx) as the public-entry example and [LessonWorkspace.tsx](./observer/LessonWorkspace.tsx) as the full lesson example. The Observer reference is valuable because it combines:
+Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [scenario.json](./observer/scenario.json) as a complete lesson definition and [Demo.tsx](./observer/Demo.tsx) as the custom demo entry example. The Observer reference is valuable because it combines:
 
 - A memorable story with a specific, testable learning goal.
 - A build sequence and clear descriptions for class, member, and relationship cards, with scenario artwork on the concrete class cards.
 - Targeted validation that identifies the affected diagram elements.
 - Progressive hints, a worked solution, reset, and undo.
 - A demonstration with contrasting danger/safe outcomes, subscription changes, accessible status, and a method-call trace.
-- A separate model and tests for validation and behavior.
+- Shared graph validation plus a separate demo model and behavior tests.
 
 These are learning and quality standards, not requirements to reproduce Observer's vocabulary, exact controls, or visual design. Choose the interactions and test cases that best express the new pattern.

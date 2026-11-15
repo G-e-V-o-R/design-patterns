@@ -1,0 +1,109 @@
+import { Panel } from '@xyflow/react';
+import { relationshipMarkerId, type RelationshipDefinition } from './relationships';
+
+export type RelationshipToolsProps = {
+  relationships: readonly RelationshipDefinition[];
+  drawing: boolean;
+  relationship: string;
+  connectionSource: string | null;
+  classLabel: (id: string) => string;
+  onMoveMode: () => void;
+  onSelectRelationship: (type: string) => void;
+};
+
+export function RelationshipTools({
+  relationships,
+  drawing,
+  relationship,
+  connectionSource,
+  classLabel,
+  onMoveMode,
+  onSelectRelationship,
+}: RelationshipToolsProps)
+{
+  let drawingStatus = 'Move cards · choose an arrow to connect';
+  if (drawing && connectionSource)
+  {
+    drawingStatus = `From ${classLabel(connectionSource)}: click the second class`;
+  }
+  else if (drawing)
+  {
+    drawingStatus = 'Click the first class, then the second class';
+  }
+
+  return (
+    <Panel position="bottom-left" className="pattern-arrow-tools nodrag nopan">
+      <div role="group" aria-label="Relationship drawing tools">
+        <button type="button" aria-pressed={!drawing} title="Move cards (Escape)" onClick={onMoveMode}>
+          ↖ <span>Move</span>
+        </button>
+        {relationships.map(kind => (
+          <button
+            key={kind.id}
+            type="button"
+            aria-label={`Draw ${kind.label}`}
+            title={`Draw ${kind.label}`}
+            aria-pressed={drawing && relationship === kind.id}
+            onClick={() => onSelectRelationship(kind.id)}
+          >
+            <RelationshipIcon appearance={kind.appearance} />
+            <span>{kind.toolLabel ?? kind.label}</span>
+          </button>
+        ))}
+      </div>
+      <p role="status">{drawingStatus}</p>
+    </Panel>
+  );
+}
+
+export function RelationshipIcon({ appearance }: Pick<RelationshipDefinition, 'appearance'>)
+{
+  const isImplementation = appearance === 'implementation';
+  return (
+    <svg width="38" height="18" viewBox="0 0 38 18" aria-hidden="true">
+      <path
+        d="M2 9 H26"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeDasharray={isImplementation ? '4 3' : undefined}
+      />
+      <path
+        d="M25 3 L35 9 L25 15 Z"
+        fill={isImplementation ? 'none' : 'currentColor'}
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+export function RelationshipMarkers({
+  relationships,
+  namespace,
+}: {
+  relationships: readonly RelationshipDefinition[];
+  namespace: string;
+})
+{
+  return (
+    <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute' }}>
+      <defs>
+        {relationships.filter(kind => kind.appearance === 'implementation').flatMap(kind => [false, true].map(invalid => (
+          <marker
+            key={`${kind.id}-${invalid}`}
+            id={relationshipMarkerId(namespace, kind.id, invalid)}
+            viewBox="0 0 12 12"
+            refX="11"
+            refY="6"
+            markerWidth="12"
+            markerHeight="12"
+            orient="auto"
+          >
+            <path d="M1,1 L11,6 L1,11 Z" fill="#102019" stroke={invalid ? '#ef9a87' : '#a7bba4'} strokeWidth="1" />
+          </marker>
+        )))}
+      </defs>
+    </svg>
+  );
+}

@@ -1,0 +1,182 @@
+import assert from 'node:assert/strict';
+import { compileScenarioConfig, type ScenarioConfig } from '../scenarios/shared/scenarioConfig';
+import {
+  emptyConfiguredLesson,
+  getConfiguredLessonIssues,
+  solutionConfiguredLesson,
+  type LessonGraph,
+} from '../scenarios/shared/configuredLessonModel';
+
+function fixture(): ScenarioConfig
+{
+  return {
+    id: 'sample',
+    title: 'A configurable lesson',
+    pattern: 'Strategy',
+    intro: { paragraphs: ['Choose a route.'], image: './resource/intro.svg', task: 'Build the strategy diagram.' },
+    classes: [
+      { id: 'route', label: 'Route', kind: 'interface', methods: [{ id: 'travel', label: 'travel()' }] },
+      {
+        id: 'walker', label: 'Walker', kind: 'class', image: './resource/walker.svg',
+        fields: [{ id: 'speed', label: 'speed: number' }],
+        methods: [{ id: 'walker-travel', label: 'travel()' }],
+        relationships: [{ type: 'implements', target: 'route' }],
+      },
+    ],
+    hints: ['Start with the shared contract.'],
+  };
+}
+
+function compile(config: unknown)
+{
+  return compileScenarioConfig(config, 'sample/scenario.json', path => `/resolved/${path.replace(/^\.\//, '')}`);
+}
+
+const scenario = compile(fixture());
+assert.equal(scenario.members.length, 3);
+assert.equal(scenario.memberOwners.speed, 'walker');
+assert.equal(scenario.classes[1]?.artwork?.src, '/resolved/resource/walker.svg');
+assert.deepEqual(getConfiguredLessonIssues(scenario, solutionConfiguredLesson(scenario)), []);
+assert.ok(getConfiguredLessonIssues(scenario, emptyConfiguredLesson()).length > 0);
+assert.notDeepEqual(scenario.positions.route, scenario.positions.walker);
+
+const first = solutionConfiguredLesson(scenario);
+const second = solutionConfiguredLesson(scenario);
+first.classes.pop();
+first.members.speed = 'route';
+first.edges[0]!.target = 'walker';
+assert.equal(second.classes.length, 2);
+assert.equal(second.members.speed, 'walker');
+assert.equal(second.edges[0]?.target, 'route');
+assert.equal(scenario.expectedEdges[0]?.target, 'route');
+
+const positioned = solutionConfiguredLesson(scenario);
+positioned.classes.reverse();
+positioned.edges[0]!.sourceHandle = 'left';
+positioned.edges[0]!.targetHandle = 'right';
+const before = JSON.stringify(positioned);
+assert.deepEqual(getConfiguredLessonIssues(scenario, positioned), [], 'Port positions and card order are not semantic');
+assert.equal(JSON.stringify(positioned), before, 'Validation must not mutate learner input');
+
+function issuesAfter(edit: (graph: LessonGraph) => void)
+{
+  const graph = solutionConfiguredLesson(scenario);
+  edit(graph);
+  return getConfiguredLessonIssues(scenario, graph);
+}
+
+for (const card of scenario.classes)
+{
+  assert.ok(issuesAfter(graph =>
+  {
+    graph.classes = graph.classes.filter(id => id !== card.id);
+  }).some(issue => issue.classIds.includes(card.id)));
+}
+for (const member of scenario.members)
+{
+  assert.ok(issuesAfter(graph =>
+  {
+    delete graph.members[member.id];
+  }).some(issue => issue.memberIds.includes(member.id)));
+}
+assert.ok(issuesAfter(graph =>
+{
+  graph.members.speed = 'route';
+}).some(issue => issue.memberIds.includes('speed') && issue.classIds.includes('walker') && issue.classIds.includes('route')));
+assert.ok(issuesAfter(graph => graph.classes.push('walker')).some(issue => issue.message.includes('duplicate')));
+assert.ok(issuesAfter(graph => graph.classes.push('ghost')).some(issue => issue.classIds.includes('ghost')));
+assert.ok(issuesAfter(graph =>
+{
+  graph.members.ghost = 'walker';
+}).some(issue => issue.memberIds.includes('ghost')));
+assert.ok(issuesAfter(graph => graph.edges.pop()).some(issue => issue.message.startsWith('Connect ')));
+assert.ok(issuesAfter(graph => graph.edges.push({ ...graph.edges[0]! })).some(issue => issue.edgeIndices.includes(0) && issue.edgeIndices.includes(1)));
+assert.ok(issuesAfter(graph =>
+{
+  graph.edges[0] = { source: 'route', target: 'walker', type: 'implements' };
+}).some(issue => issue.message.startsWith('Reverse') && issue.edgeIndices.includes(0)));
+assert.ok(issuesAfter(graph =>
+{
+  graph.edges.push({ source: 'walker', target: 'route', type: 'uses' });
+}).some(issue => issue.edgeIndices.includes(1)));
+assert.ok(issuesAfter(graph =>
+{
+  graph.edges[0]!.target = 'walker';
+}).some(issue => issue.message.includes('different classes') && issue.edgeIndices.includes(0)));
+assert.ok(issuesAfter(graph =>
+{
+  graph.edges[0]!.target = 'ghost';
+}).some(issue => issue.edgeIndices.includes(0) && issue.classIds.includes('ghost')));
+
+function invalid(edit: (config: ScenarioConfig) => void, field: string)
+{
+  const config = fixture();
+  edit(config);
+  assert.throws(() => compile(config), error => error instanceof Error
+    && error.message.includes('sample/scenario.json') && error.message.includes(field));
+}
+
+invalid(config =>
+{
+  config.id = '../other';
+}, 'id');
+invalid(config =>
+{
+  config.classes[1]!.id = 'route';
+}, 'classes[1].id');
+invalid(config =>
+{
+  config.classes[1]!.fields![0]!.id = 'travel';
+}, 'classes[1].fields[0].id');
+invalid(config =>
+{
+  config.classes[1]!.relationships![0]!.target = 'ghost';
+}, 'classes[1].relationships[0].target');
+invalid(config =>
+{
+  config.classes[1]!.relationships![0]!.target = 'walker';
+}, 'classes[1].relationships[0].target');
+invalid(config =>
+{
+  config.classes[1]!.relationships![0]!.type = 'unknown';
+}, 'classes[1].relationships[0].type');
+invalid(config =>
+{
+  config.classes[1]!.relationships!.push({ type: 'implements', target: 'route' });
+}, 'classes[1].relationships[1]');
+invalid(config =>
+{
+  delete config.classes[1]!.image;
+}, 'classes[1].image');
+invalid(config =>
+{
+  config.intro.image = '../other/resource/intro.svg';
+}, 'intro.image');
+invalid(config =>
+{
+  config.intro.image = 'https://example.com/intro.svg';
+}, 'intro.image');
+invalid(config =>
+{
+  config.classes[1]!.position = { x: Number.NaN, y: 0 };
+}, 'classes[1].position');
+invalid(config =>
+{
+  config.relationshipTypes = [{ id: 'uses', label: 'duplicate' }];
+}, 'relationshipTypes[0].id');
+invalid(config =>
+{
+  config.intro.steps = ['Only one'];
+}, 'intro.steps');
+assert.throws(() => compile({ ...fixture(), clasess: [] }), /scenario.clasess/);
+assert.throws(() => compile({ ...fixture(), classes: null }), /classes/);
+assert.throws(() => compileScenarioConfig(fixture(), 'sample/scenario.json', () =>
+{
+  throw new Error('Missing file');
+}), /sample\/scenario.json: classes\[1\].image:.*Missing file/);
+
+const custom = fixture();
+custom.relationshipTypes = [{ id: 'delegates', label: 'delegates work' }];
+custom.classes[1]!.relationships![0]!.type = 'delegates';
+assert.equal(compile(custom).expectedEdges[0]?.type, 'delegates');
+console.log('Configured lesson parsing, solutions, targeted validation, and immutability cases passed.');

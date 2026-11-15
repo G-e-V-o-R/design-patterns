@@ -24,7 +24,8 @@ function isInside(parent, target) {
 for (const module of modules) {
     const moduleRoot = join(scenariosRoot, module);
     const moduleFiles = files(moduleRoot).filter(file => /\.(ts|tsx)$/.test(file));
-    assert.ok(moduleFiles.some(file => file.endsWith('model.test.ts')), `${module} must own a model.test.ts`);
+    const configured = existsSync(join(moduleRoot, 'scenario.json'));
+    if (!configured) assert.ok(moduleFiles.some(file => file.endsWith('model.test.ts')), `${module} must own a model.test.ts`);
     for (const file of moduleFiles) {
         const imports = ts.preProcessFile(readFileSync(file, 'utf8'), true, true).importedFiles.map(item => item.fileName);
         for (const specifier of imports) {
@@ -41,6 +42,21 @@ for (const module of modules) {
     }
 }
 
+for (const file of files(sharedRoot).filter(file => /\.(ts|tsx)$/.test(file))) {
+    const imports = ts.preProcessFile(readFileSync(file, 'utf8'), true, true).importedFiles.map(item => item.fileName);
+    for (const specifier of imports) {
+        if (!specifier.startsWith('.')) {
+            assert.ok(!specifier.startsWith('@/') && !specifier.startsWith('src/'), `Use explicit relative imports in ${file}`);
+            continue;
+        }
+        const target = resolve(dirname(file), specifier.replace(/[?#].*$/, ''));
+        assert.ok(
+            isInside(sharedRoot, target) || isInside(docsRoot, target),
+            `${file} imports scenario-specific or application code: ${specifier}`,
+        );
+    }
+}
+
 const registryFile = join(scenariosRoot, 'registry.ts');
 const registry = ts.createSourceFile('registry.ts', readFileSync(registryFile, 'utf8'), ts.ScriptTarget.Latest, true);
 const componentImports = new Map();
@@ -54,7 +70,7 @@ function unwrap(node) {
 function visit(node) {
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.importClause?.name)
         componentImports.set(node.importClause.name.text, node.moduleSpecifier.text);
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'scenarios' && node.initializer)
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'legacyScenarios' && node.initializer)
         scenarioArray = unwrap(node.initializer);
     ts.forEachChild(node, visit);
 }
@@ -71,8 +87,10 @@ const entries = scenarioArray.elements.map(element => {
     return { id: id.text, Component: Component.text };
 });
 
+const configuredModules = modules.filter(module => existsSync(join(scenariosRoot, module, 'scenario.json')));
+const legacyModules = modules.filter(module => !configuredModules.includes(module));
 const ids = entries.map(entry => entry.id);
-assert.equal(ids.length, modules.length, 'Register every scenario exactly once');
+assert.equal(ids.length, legacyModules.length, 'Register every scenario exactly once');
 assert.equal(new Set(ids).size, ids.length, 'Scenario IDs must be unique');
 for (const entry of entries) {
     assert.ok(modules.includes(entry.id), `No scenario directory named ${entry.id}`);
@@ -80,17 +98,25 @@ for (const entry of entries) {
     assert.ok(specifier, `Missing import for ${entry.Component}`);
     assert.ok(specifier.startsWith(`./${entry.id}/`), `${entry.id} must import its component from ./${entry.id}/`);
 }
-for (const module of modules)
+for (const module of legacyModules)
     assert.ok(ids.includes(module), `Scenario directory ${module} is not registered`);
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-for (const module of modules) {
+for (const module of legacyModules) {
     const script = pkg.scripts[`test:${module}`];
     const testPath = `src/scenarios/${module}/model.test.ts`;
     assert.ok(typeof script === 'string', `Add a test:${module} script to package.json`);
     assert.ok(script.includes(testPath), `test:${module} must run ${testPath}`);
     assert.ok(pkg.scripts.test.includes(`test:${module}`), `npm test must include test:${module}`);
     assert.ok(existsSync(resolve(testPath)), `Missing ${testPath}`);
+}
+
+assert.ok(pkg.scripts.test.includes('test:configs'), 'npm test must validate all config-only scenarios');
+assert.ok(readFileSync(registryFile, 'utf8').includes("import.meta.glob('./*/scenario.json'"), 'Discover config-only scenarios automatically');
+for (const module of configuredModules) {
+    const config = JSON.parse(readFileSync(join(scenariosRoot, module, 'scenario.json'), 'utf8'));
+    assert.equal(config.id, module, 'Config ID must match its directory');
+    assert.ok(!ids.includes(module), 'Do not register a config-only scenario twice');
 }
 
 console.log('Scenario module boundaries, registry, and test wiring checks passed.');

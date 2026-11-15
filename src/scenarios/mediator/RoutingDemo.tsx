@@ -4,16 +4,17 @@ import {
   useRef,
   useState,
 } from 'react';
-import { classLabel, type CoordinationResult, type RequestKind } from './model';
-import { classArtwork } from './lessonContent';
+import { classLabel, type CoordinationResult, type RequestKind } from './demoModel';
+import { actorArtwork, type ActorId } from './demoArtwork';
 
 type MediatorDemoProps = {
   ready: boolean;
+  active: boolean;
   result: CoordinationResult | null;
   onRun: (request: RequestKind) => void;
 };
 
-export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
+export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps)
 {
   const [animationKey, setAnimationKey] = useState(0);
   const [showDirectMesh, setShowDirectMesh] = useState(false);
@@ -22,13 +23,18 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
 
   useEffect(() =>
   {
+    if (!active)
+    {
+      return;
+    }
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const updateMotionPreference = () =>
       setReducedMotion(motionPreference.matches);
 
+    updateMotionPreference();
     motionPreference.addEventListener('change', updateMotionPreference);
     return () => motionPreference.removeEventListener('change', updateMotionPreference);
-  }, []);
+  }, [active]);
 
   function runRequest(request: RequestKind)
   {
@@ -59,7 +65,7 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
                 Back to Mediator demo
               </button>
             </div>
-            <DirectConnectionsScene reducedMotion={reducedMotion} />
+            <DirectConnectionsScene reducedMotion={reducedMotion} active={active} />
           </>
         )
         : (
@@ -82,6 +88,7 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
 
             <ActorScene
               result={result}
+              active={active}
               animationKey={animationKey}
               reducedMotion={reducedMotion}
             />
@@ -120,7 +127,7 @@ export function MediatorDemo({ ready, result, onRun }: MediatorDemoProps)
   );
 }
 
-type ParticipantId = Exclude<keyof typeof classArtwork, 'raven'>;
+type ParticipantId = Exclude<ActorId, 'raven'>;
 
 const directConnections: [ParticipantId, ParticipantId][] = [
   ['dre-kaar', 'narion'],
@@ -131,7 +138,7 @@ const directConnections: [ParticipantId, ParticipantId][] = [
   ['faelina', 'saerenn'],
 ];
 
-function DirectConnectionsScene({ reducedMotion }: { reducedMotion: boolean })
+function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: boolean; active: boolean })
 {
   const sceneRef = useRef<HTMLDivElement>(null);
   const actorRefs = useRef<Record<ParticipantId, HTMLElement | null>>({
@@ -154,7 +161,7 @@ function DirectConnectionsScene({ reducedMotion }: { reducedMotion: boolean })
   useLayoutEffect(() =>
   {
     const scene = sceneRef.current;
-    if (!scene)
+    if (!active || !scene)
     {
       return;
     }
@@ -191,7 +198,7 @@ function DirectConnectionsScene({ reducedMotion }: { reducedMotion: boolean })
     const resizeObserver = new ResizeObserver(updateLinks);
     resizeObserver.observe(scene);
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [active]);
 
   return (
     <section
@@ -251,9 +258,11 @@ function ActorScene({
   result,
   animationKey,
   reducedMotion,
+  active,
 }: {
   result: CoordinationResult | null;
   animationKey: number;
+  active: boolean;
   reducedMotion: boolean;
 })
 {
@@ -267,6 +276,10 @@ function ActorScene({
 
   useLayoutEffect(() =>
   {
+    if (!active)
+    {
+      return;
+    }
     const scene = sceneRef.current;
     if (!scene || !result)
     {
@@ -320,7 +333,7 @@ function ActorScene({
     const resizeObserver = new ResizeObserver(updateRoute);
     resizeObserver.observe(scene);
     return () => resizeObserver.disconnect();
-  }, [result, animationKey]);
+  }, [result, animationKey, active]);
 
   return (
     <div
@@ -365,7 +378,7 @@ function ActorScene({
         >
           <g
             className="med-message-packet"
-            transform={reducedMotion
+            transform={reducedMotion || !active
               ? `translate(${route.endpoint.x} ${route.endpoint.y})`
               : undefined}
           >
@@ -374,7 +387,7 @@ function ActorScene({
               className="med-message-envelope"
               d="M-7 -4 H7 V5 H-7 Z M-7 -4 L0 1 L7 -4"
             />
-            {!reducedMotion && (
+            {!reducedMotion && active && (
               <animateMotion
                 path={route.path}
                 dur="2.4s"
@@ -452,13 +465,13 @@ function ActorCard({
   result,
   actorRef,
 }: {
-  id: keyof typeof classArtwork;
+  id: ActorId;
   description: string;
   result: CoordinationResult | null;
   actorRef: (element: HTMLElement | null) => void;
 })
 {
-  const artwork = classArtwork[id];
+  const artwork = actorArtwork(id);
   const isMediator = id === 'raven';
   let actorClassName = `med-actor med-actor-${id}`;
 

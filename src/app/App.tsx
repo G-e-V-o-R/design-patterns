@@ -3,8 +3,8 @@ import { scenarios } from '../scenarios/registry';
 import { ScenarioBoundary } from './ScenarioBoundary';
 import './shell.css';
 export default function App() {
-  const [activeId, setActiveId] = useState<string>(scenarios[0].id);
-  const [visited, setVisited] = useState<string[]>([scenarios[0].id]);
+  const [activeId, setActiveId] = useState<string>(scenarios[0]!.id);
+  const [visited, setVisited] = useState<string[]>([scenarios[0]!.id]);
   const active = scenarios.find(scenario => scenario.id === activeId)!;
   return <div className="workshop-app">
     <a className="skip-link" href="#lesson-main">Skip to lesson</a>
