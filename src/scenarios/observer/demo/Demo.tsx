@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ConfiguredDemoProps } from '../shared/ConfiguredScenario';
-import type { LessonGraph } from '../shared/configuredLessonModel';
+import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
+import type { LessonGraph } from '../../shared/configuredLessonModel';
 import { simulateDiscovery } from './demoModel';
 import { ObserverDemo, type DemoRun } from './NotificationDemo';
 import './styles.css';

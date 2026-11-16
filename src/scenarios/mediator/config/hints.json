@@ -1,0 +1,5 @@
+[
+  "Give each participant a mediator: Mediator field. A participant asks through the interface, without knowing which companion will help.",
+  "Mediator declares notify(sender, request). RavenMediator implements it, stores participant references, and owns the routing decisions.",
+  "Draw four uses arrows to Mediator, one implements arrow from RavenMediator, and four knows arrows from RavenMediator to the participants. No participant needs a direct link to another."
+]

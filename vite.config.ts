@@ -16,7 +16,7 @@ function validateScenarioConfigs(): Plugin
     {
       function refresh(path: string)
       {
-        if (!path.startsWith(scenariosRoot) || (!path.endsWith('/scenario.json') && !path.includes('/resource/')))
+        if (!path.startsWith(scenariosRoot) || (!path.endsWith('.json') && !path.includes('/resource/')))
         {
           return;
         }

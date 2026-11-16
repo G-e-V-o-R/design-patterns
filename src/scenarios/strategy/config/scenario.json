@@ -1,0 +1,9 @@
+{
+  "id": "strategy",
+  "number": "04",
+  "title": "Choose a route through the forest",
+  "pattern": "Strategy",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json"
+}

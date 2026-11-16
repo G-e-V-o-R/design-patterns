@@ -8,6 +8,7 @@ export function createConfiguredScenarios(
   assets: Record<string, string>,
   existing: readonly ScenarioDefinition[],
   demos: Record<string, ComponentType<ConfiguredDemoProps>> = {},
+  sections: Record<string, unknown> = {},
 ): ScenarioDefinition[]
 {
   const ids = new Set(existing.map(scenario => scenario.id));
@@ -23,7 +24,7 @@ export function createConfiguredScenarios(
         throw new Error(`Missing artwork: ${assetPath}`);
       }
       return asset;
-    });
+    }, relativePath => sections[`./${directory}/config/${relativePath.slice(2)}`]);
     if (config.id !== directory)
     {
       throw new Error(`${path}: id must match directory "${directory}".`);
@@ -54,7 +55,7 @@ export function createConfiguredScenarios(
       return createElement(ConfiguredScenario, {
         ...props,
         config: numberedConfig,
-        Demo: demos[`./${config.id}/Demo.tsx`],
+        Demo: demos[`./${config.id}/demo/Demo.tsx`],
       });
     }
     return { id: config.id, title: config.title, pattern: config.pattern, number, Component: Scenario };

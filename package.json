@@ -9,10 +9,10 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:templates && npm run test:chain && npm run test:configs",
     "test:boundaries": "tsx src/tests/scenario-boundaries.test.mjs",
-    "test:observer": "tsx src/scenarios/observer/demoModel.test.ts",
-    "test:mediator": "tsx src/scenarios/mediator/demoModel.test.ts",
+    "test:observer": "tsx src/scenarios/observer/demo/demoModel.test.ts",
+    "test:mediator": "tsx src/scenarios/mediator/demo/demoModel.test.ts",
     "test:templates": "tsx src/tests/shared-templates.test.mjs",
-    "test:chain": "tsx src/scenarios/chain/demoModel.test.ts",
+    "test:chain": "tsx src/scenarios/chain/demo/demoModel.test.ts",
     "test:configs": "tsx src/tests/configured-lesson.test.ts && tsx src/tests/scenario-configs.test.ts"
   },
   "devDependencies": {

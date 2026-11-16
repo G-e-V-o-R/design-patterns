@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { emptyConfiguredLesson, solutionConfiguredLesson } from '../shared/configuredLessonModel';
+import { emptyConfiguredLesson, solutionConfiguredLesson } from '../../shared/configuredLessonModel';
 import { demoConfig, simulateLesson } from './demoModel';
 
 const solution = solutionConfiguredLesson(demoConfig);

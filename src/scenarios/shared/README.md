@@ -2,7 +2,7 @@
 
 ## Config-only lessons
 
-New diagram lessons can use `scenario.json` and local `resource/` images only. Start with [the copyable template and field guide](../../../docs/scenario-template/README.md). The shared config compiler, graph validator, editor, and `ConfiguredScenario` render the whole activity. Automatic discovery happens outside shared code in the scenario registry. Optional scenario-local `Demo.tsx` supplies custom behavior through the shared demo props. Existing custom lessons can continue using the lower-level components below.
+New diagram lessons use a small `scenario.json` manifest, referenced JSON sections, and local `resource/` images. Start with [the authoring guide](../REFERENCE_SCENARIO.md). The shared config compiler, graph validator, editor, and `ConfiguredScenario` render the whole activity. Automatic discovery happens outside shared code in the scenario registry. Optional scenario-local `Demo.tsx` supplies custom behavior through the shared demo props. Existing custom lessons can continue using the lower-level components below.
 
 Observer, Mediator, and Chain use this UI kit. Change the shared components or `lesson.css` once to change all three designs. Pattern-specific data, validation, graph state, and demonstrations remain in their own scenario folders.
 
@@ -60,7 +60,7 @@ For the reusable adapters, see `ConfiguredLessonWorkspace.tsx` and `ConfiguredCl
 
 ## Start a new pattern with data
 
-Copy `docs/scenario-template/` into a scenario directory and edit `scenario.json`. The configured runtime imports the shared styles and supplies the node, canvas, tray, relationships, validation, and history adapters. Do not copy those adapters into the scenario.
+Copy `src/scenarios/strategy/` into a scenario directory and edit its manifest and section files. The configured runtime imports the shared styles and supplies the node, canvas, tray, relationships, validation, and history adapters. Do not copy those adapters into the scenario.
 
 For a custom demonstration, add `Demo.tsx` with a default export accepting `ConfiguredDemoProps`. Observer, Mediator, and Chain show how to separate demo state, simulation, presentation, and scoped styles. Their demo models validate graphs against the same JSON through `configuredLessonModel` before simulating.
 
@@ -81,3 +81,5 @@ For a custom demonstration, add `Demo.tsx` with a default export accepting `Conf
 | Custom simulation and demonstration | Scenario-local `Demo.tsx` and demo helpers |
 
 `ConfiguredLessonWorkspace` passes targeted feedback from the shared validator to class cards, edges, and relationship rows. Keep shared validation and rendering free of pattern-specific branches. See `REFERENCE_SCENARIO.md` for authoring and verification requirements.
+
+Config sections (`intro`, `classes`, `hints`, and optional `relationshipTypes`) may be inline values or local JSON paths. The compiler accepts a fourth argument to resolve referenced sections, shared by browser registration, build validation, and demo config loaders. See [the section format](../REFERENCE_SCENARIO.md).

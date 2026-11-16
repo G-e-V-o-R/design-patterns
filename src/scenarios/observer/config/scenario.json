@@ -1,0 +1,10 @@
+{
+  "id": "observer",
+  "number": "01",
+  "title": "The fox’s discovery",
+  "pattern": "Observer",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "relationshipTypes": "./relationships.json",
+  "hints": "./hints.json"
+}

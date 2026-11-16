@@ -1,8 +1,5 @@
-import scenario from './scenario.json';
-import { compileScenarioConfig } from '../shared/scenarioConfig';
-import { getConfiguredLessonIssues, type LessonGraph } from '../shared/configuredLessonModel';
-
-const config = compileScenarioConfig(scenario, 'observer/scenario.json', path => path);
+import { config } from '../config/config';
+import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 
 export type DiscoveryOptions = {
   danger: boolean;

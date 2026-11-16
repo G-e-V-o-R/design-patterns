@@ -1,0 +1,130 @@
+[
+  {
+    "id": "publisher",
+    "label": "FoxSubject",
+    "kind": "class",
+    "description": "Looks for danger and keeps a list of observers. When it finds danger, it publishes the discovery through the Observer interface.",
+    "image": "./resource/fox-card.png",
+    "imageAlt": "Fox — the Subject",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "fields": [
+      {
+        "id": "subscribers",
+        "label": "observers: Observer[]",
+        "description": "The list of observers that receive the subject’s notifications."
+      }
+    ],
+    "methods": [
+      {
+        "id": "subscribe",
+        "label": "attach(o: Observer)",
+        "description": "Subscribe an observer by adding it to the observers field."
+      },
+      {
+        "id": "unsubscribe",
+        "label": "detach(o: Observer)",
+        "description": "Unsubscribe an observer by removing it from the observers field."
+      },
+      {
+        "id": "notify",
+        "label": "notify()",
+        "description": "Publish the current discovery by calling update(discovery) on each attached observer."
+      },
+      {
+        "id": "discover",
+        "label": "discoverDanger() · subject logic",
+        "description": "When the fox finds danger, save what it sees and call notify(). Publish nothing when the path is safe."
+      }
+    ],
+    "relationships": [
+      {
+        "target": "subscriber",
+        "type": "stores"
+      }
+    ]
+  },
+  {
+    "id": "subscriber",
+    "label": "Observer",
+    "kind": "interface",
+    "description": "The shared update(discovery) contract. Every concrete observer implements it to receive notifications.",
+    "position": {
+      "x": 390,
+      "y": 0
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "update-contract",
+        "label": "update(discovery) · contract",
+        "description": "Put this method in the Observer interface. Each concrete observer implements it."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "narion",
+    "label": "NarionObserver",
+    "kind": "class",
+    "description": "Implements Observer. Gets the discovery and helps Narion plan a safer path.",
+    "image": "./resource/narion-card.png",
+    "imageAlt": "Narion — a concrete Observer",
+    "position": {
+      "x": 0,
+      "y": 800
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "narion-update",
+        "label": "update(discovery) · NarionObserver",
+        "description": "Get the notification and call planRoute() for Narion."
+      },
+      {
+        "id": "narion-logic",
+        "label": "planRoute() · business logic",
+        "description": "Narion uses the message to choose a safer path."
+      }
+    ],
+    "relationships": [
+      {
+        "target": "subscriber",
+        "type": "implements"
+      }
+    ]
+  },
+  {
+    "id": "dre-kaar",
+    "label": "DreKaarObserver",
+    "kind": "class",
+    "description": "Implements Observer. Gets the same discovery and helps Dre’Kaar protect the group.",
+    "image": "./resource/dre-kaar-card.png",
+    "imageAlt": "Dre’Kaar — a concrete Observer",
+    "position": {
+      "x": 390,
+      "y": 800
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "dre-update",
+        "label": "update(discovery) · DreKaarObserver",
+        "description": "Get the notification and call prepareDefense() for Dre’Kaar."
+      },
+      {
+        "id": "dre-logic",
+        "label": "prepareDefense() · business logic",
+        "description": "Dre’Kaar gets ready to protect the group."
+      }
+    ],
+    "relationships": [
+      {
+        "target": "subscriber",
+        "type": "implements"
+      }
+    ]
+  }
+]

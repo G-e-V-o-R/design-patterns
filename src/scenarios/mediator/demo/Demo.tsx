@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ConfiguredDemoProps } from '../shared/ConfiguredScenario';
+import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import { MediatorDemo } from './RoutingDemo';
 import { simulateLesson, type CoordinationResult, type RequestKind } from './demoModel';
 import './styles.css';

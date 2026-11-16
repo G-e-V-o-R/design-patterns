@@ -1,0 +1,64 @@
+[
+  {
+    "id": "travel-strategy",
+    "label": "TravelStrategy",
+    "kind": "interface",
+    "description": "The contract for every route-planning algorithm.",
+    "methods": [
+      {
+        "id": "strategy-plan",
+        "label": "planRoute(destination): Route",
+        "description": "The operation every travel strategy must provide."
+      }
+    ]
+  },
+  {
+    "id": "walking-strategy",
+    "label": "WalkingStrategy",
+    "kind": "class",
+    "description": "Plans a route using paths suitable for walking.",
+    "image": "./resource/walking.svg",
+    "imageAlt": "Walking boots on a forest path",
+    "methods": [
+      {
+        "id": "walking-plan",
+        "label": "planRoute(destination): Route",
+        "description": "The concrete walking implementation."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "implements",
+        "target": "travel-strategy"
+      }
+    ]
+  },
+  {
+    "id": "journey-planner",
+    "label": "JourneyPlanner",
+    "kind": "class",
+    "description": "Delegates route planning to its selected strategy.",
+    "image": "./resource/planner.svg",
+    "imageAlt": "A compass and a route map",
+    "fields": [
+      {
+        "id": "planner-strategy",
+        "label": "strategy: TravelStrategy",
+        "description": "The interchangeable algorithm used by the planner."
+      }
+    ],
+    "methods": [
+      {
+        "id": "planner-plan",
+        "label": "planJourney(destination): Route",
+        "description": "Asks the selected strategy to produce a route."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "travel-strategy"
+      }
+    ]
+  }
+]

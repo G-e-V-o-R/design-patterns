@@ -1,8 +1,7 @@
-import scenario from './scenario.json';
-import { compileScenarioConfig } from '../shared/scenarioConfig';
-import { getConfiguredLessonIssues, type LessonGraph } from '../shared/configuredLessonModel';
+import { config as demoConfig } from '../config/config';
+import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 
-export const demoConfig = compileScenarioConfig(scenario, 'mediator/scenario.json', path => path);
+export { demoConfig };
 
 export function classLabel(id: string)
 {

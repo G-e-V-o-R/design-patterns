@@ -1,8 +1,7 @@
-import scenario from './scenario.json';
-import { compileScenarioConfig } from '../shared/scenarioConfig';
-import { getConfiguredLessonIssues, type LessonGraph } from '../shared/configuredLessonModel';
+import { config as chainConfig } from '../config/config';
+import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 
-export const chainConfig = compileScenarioConfig(scenario, 'chain/scenario.json', path => path);
+export { chainConfig };
 
 export function classLabel(id: string)
 {

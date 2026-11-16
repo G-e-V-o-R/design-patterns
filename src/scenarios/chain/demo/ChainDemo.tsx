@@ -1,8 +1,8 @@
 import { chainConfig, classLabel, requests, type ChainResult, type RequestKind } from './demoModel';
-import introImage from './resource/intro.png?url';
-import bloodImage from './resource/blood-spider.png?url';
-import stepImage from './resource/step-spider.png?url';
-import ironImage from './resource/iron-spider.png?url';
+import introImage from '../resource/intro.png?url';
+import bloodImage from '../resource/blood-spider.png?url';
+import stepImage from '../resource/step-spider.png?url';
+import ironImage from '../resource/iron-spider.png?url';
 
 const demoImages: Record<string, string> = {
   thread: introImage,

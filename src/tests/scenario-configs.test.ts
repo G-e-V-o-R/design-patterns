@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { readConfiguredScenarios } from '../../scripts/scenarioConfigs';
 import { emptyConfiguredLesson, getConfiguredLessonIssues, solutionConfiguredLesson } from '../scenarios/shared/configuredLessonModel';
 
 const configs = readConfiguredScenarios(resolve('src/scenarios'));
-assert.ok(configs.length > 0, 'Keep a working config-only example in the repository.');
+assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'mediator', 'observer', 'strategy'],
+  'Discover every lesson from its config directory.');
 for (const config of configs)
 {
   const solution = solutionConfiguredLesson(config);
@@ -26,3 +29,19 @@ for (const config of configs)
   }
 }
 console.log(`Validated ${configs.length} configured scenarios, local artwork, solutions, and targeted invalid-diagram feedback.`);
+
+const temporaryRoot = mkdtempSync(join(tmpdir(), 'scenario-sections-'));
+try
+{
+  const directory = join(temporaryRoot, 'strategy');
+  cpSync(resolve('src/scenarios/strategy'), directory, { recursive: true });
+  assert.equal(readConfiguredScenarios(temporaryRoot)[0]?.id, 'strategy');
+  writeFileSync(join(directory, 'config', 'intro.json'), '{ broken JSON');
+  assert.throws(() => readConfiguredScenarios(temporaryRoot), /intro.json/);
+  rmSync(join(directory, 'config', 'intro.json'));
+  assert.throws(() => readConfiguredScenarios(temporaryRoot), /intro.json/);
+}
+finally
+{
+  rmSync(temporaryRoot, { recursive: true, force: true });
+}

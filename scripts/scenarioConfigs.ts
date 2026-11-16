@@ -6,12 +6,12 @@ export function readConfiguredScenarios(root: string)
 {
   return readdirSync(root, { withFileTypes: true })
     .filter(entry => entry.isDirectory() && entry.name !== 'shared')
-    .filter(entry => existsSync(join(root, entry.name, 'scenario.json')))
+    .filter(entry => existsSync(join(root, entry.name, 'config', 'scenario.json')))
     .sort((left, right) => left.name.localeCompare(right.name))
     .map(entry =>
     {
       const directory = join(root, entry.name);
-      const path = join(directory, 'scenario.json');
+      const path = join(directory, 'config', 'scenario.json');
       let input: unknown;
       try
       {
@@ -29,6 +29,17 @@ export function readConfiguredScenarios(root: string)
           throw new Error(`Missing artwork: ${asset}`);
         }
         return asset;
+      }, relativePath =>
+      {
+        const sectionPath = join(directory, 'config', relativePath);
+        try
+        {
+          return JSON.parse(readFileSync(sectionPath, 'utf8'));
+        }
+        catch (error)
+        {
+          throw new Error(`${sectionPath}: ${String(error)}`);
+        }
       });
       if (config.id !== entry.name)
       {

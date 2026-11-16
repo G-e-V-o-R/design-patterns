@@ -1,0 +1,16 @@
+{
+  "paragraphs": [
+    "The ambush closes around the companions. Everyone is shouting. Faelina warns, “Enemy behind you!” Narion calls, “Saerenn is bleeding—get her to safety!” Their cries collide. Narion turns toward the enemy, while Dre’Kaar rushes to Saerenn—then both hesitate, unsure whether to fight or get her to safety.",
+    "Elvir sends Raven aloft. A mental link joins Raven to every companion, so they can send a thought instead of shouting across the fight. “Saerenn is bleeding—get her to safety!” Narion thinks. Raven knows who can help and directs the request to them. Faelina can ask for shelter and Dre’Kaar for cover; Raven routes those requests to Saerenn and Narion. The companions stay focused on the fight while Raven keeps each request moving to the right person."
+  ],
+  "caption": "Many requests → one coordinator",
+  "task": "Build a class diagram where companions ask through a Mediator interface. Let RavenMediator decide who responds.",
+  "concept": "Keep coordination in the mediator. Participants can cooperate without holding references to each other. Changing the raven’s routing rule does not require changing the requesters.",
+  "image": "./resource/intro.png",
+  "imageAlt": "The raven coordinating the companions",
+  "steps": [
+    "Add classes and assign members",
+    "Connect the diagram",
+    "Try both requests"
+  ]
+}

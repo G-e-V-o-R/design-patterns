@@ -58,11 +58,14 @@ export function compileScenarioConfig(
   input: unknown,
   sourcePath: string,
   resolveAsset: (relativePath: string) => string,
+  resolveSection?: (relativePath: string) => unknown,
 ): CompiledScenario
 {
+  const sectionSources: Record<string, string> = {};
   function fail(path: string, message: string): never
   {
-    throw new Error(`${sourcePath}: ${path}: ${message}`);
+    const section = path.split(/[.\[]/)[0]!;
+    throw new Error(`${sectionSources[section] ?? sourcePath}: ${path}: ${message}`);
   }
 
   function record(value: unknown, path: string, keys: string[]): Record<string, unknown>
@@ -148,7 +151,37 @@ export function compileScenarioConfig(
     return { src, alt: optionalString(alt, `${path}.imageAlt`) ?? fallbackAlt };
   }
 
-  const root = record(input, 'scenario', ['id', 'title', 'pattern', 'number', 'intro', 'classes', 'relationshipTypes', 'hints']);
+  const root = { ...record(input, 'scenario', ['id', 'title', 'pattern', 'number', 'intro', 'classes', 'relationshipTypes', 'hints']) };
+  for (const section of ['intro', 'classes', 'relationshipTypes', 'hints'])
+  {
+    const reference = root[section];
+    if (typeof reference !== 'string')
+    {
+      continue;
+    }
+    if (!/^\.\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.json$/.test(reference)
+      || reference === './scenario.json')
+    {
+      fail(section, 'Use a local JSON section path such as ./intro.json.');
+    }
+    if (!resolveSection)
+    {
+      fail(section, `Cannot load "${reference}" without a JSON section resolver.`);
+    }
+    try
+    {
+      root[section] = resolveSection(reference);
+      if (root[section] === undefined)
+      {
+        throw new Error('Section file was not found.');
+      }
+    }
+    catch (error)
+    {
+      fail(section, `Cannot load "${reference}": ${error instanceof Error ? error.message : String(error)}`);
+    }
+    sectionSources[section] = `${sourcePath.slice(0, sourcePath.lastIndexOf('/') + 1)}${reference.slice(2)}`;
+  }
   const id = identifier(root.id, 'id');
   if (!/^[a-z][a-z0-9-]*$/.test(id))
   {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { ConfiguredDemoProps } from '../shared/ConfiguredScenario';
-import type { LessonGraph } from '../shared/configuredLessonModel';
+import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
+import type { LessonGraph } from '../../shared/configuredLessonModel';
 import { ChainDemo } from './ChainDemo';
 import { simulateLesson, type ChainResult, type RequestKind } from './demoModel';
 import './styles.css';

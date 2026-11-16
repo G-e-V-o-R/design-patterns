@@ -1,0 +1,197 @@
+[
+  {
+    "id": "mediator",
+    "label": "Mediator",
+    "kind": "interface",
+    "description": "The contract companions use to report a request.",
+    "position": {
+      "x": 360,
+      "y": 0
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "notify-contract",
+        "label": "notify(sender, request) · contract",
+        "description": "Declare how participants contact the mediator."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "raven",
+    "label": "RavenMediator",
+    "kind": "class",
+    "description": "Knows the companions and chooses who should handle each request.",
+    "image": "./resource/raven-card.png",
+    "imageAlt": "RavenMediator — the concrete mediator",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "fields": [
+      {
+        "id": "participants",
+        "label": "participants: Companions",
+        "description": "References to the four participants, supplied when the raven is created."
+      }
+    ],
+    "methods": [
+      {
+        "id": "notify-routing",
+        "label": "notify(sender, request) · routing",
+        "description": "Choose Narion for cover and Saerenn for shelter."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "implements",
+        "target": "mediator"
+      },
+      {
+        "type": "knows",
+        "target": "dre-kaar"
+      },
+      {
+        "type": "knows",
+        "target": "narion"
+      },
+      {
+        "type": "knows",
+        "target": "faelina"
+      },
+      {
+        "type": "knows",
+        "target": "saerenn"
+      }
+    ]
+  },
+  {
+    "id": "dre-kaar",
+    "label": "DreKaar",
+    "kind": "class",
+    "description": "Asks the mediator for cover without knowing who will provide it.",
+    "image": "./resource/dre-kaar-card.png",
+    "imageAlt": "Dre’Kaar — asks the raven for cover",
+    "position": {
+      "x": 0,
+      "y": 760
+    },
+    "fields": [
+      {
+        "id": "dre-kaar-mediator",
+        "label": "mediator: Mediator · DreKaar",
+        "description": "Hold the Mediator interface, not references to peer participants."
+      }
+    ],
+    "methods": [
+      {
+        "id": "request-cover",
+        "label": "requestCover()",
+        "description": "Call mediator.notify(this, \"cover\")."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "mediator"
+      }
+    ]
+  },
+  {
+    "id": "narion",
+    "label": "Narion",
+    "kind": "class",
+    "description": "Provides covering fire when the raven asks.",
+    "image": "./resource/narion-card.png",
+    "imageAlt": "Narion — provides covering fire when asked",
+    "position": {
+      "x": 360,
+      "y": 760
+    },
+    "fields": [
+      {
+        "id": "narion-mediator",
+        "label": "mediator: Mediator · Narion",
+        "description": "Hold the Mediator interface, not references to peer participants."
+      }
+    ],
+    "methods": [
+      {
+        "id": "provide-cover",
+        "label": "provideCover()",
+        "description": "Narion’s business logic: shoot to cover the group."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "mediator"
+      }
+    ]
+  },
+  {
+    "id": "faelina",
+    "label": "Faelina",
+    "kind": "class",
+    "description": "Asks the mediator for shelter without contacting a companion directly.",
+    "image": "./resource/faelina-card.png",
+    "imageAlt": "Faelina — asks the raven for shelter",
+    "position": {
+      "x": 0,
+      "y": 1500
+    },
+    "fields": [
+      {
+        "id": "faelina-mediator",
+        "label": "mediator: Mediator · Faelina",
+        "description": "Hold the Mediator interface, not references to peer participants."
+      }
+    ],
+    "methods": [
+      {
+        "id": "request-shelter",
+        "label": "requestShelter()",
+        "description": "Call mediator.notify(this, \"shelter\")."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "mediator"
+      }
+    ]
+  },
+  {
+    "id": "saerenn",
+    "label": "Saerenn",
+    "kind": "class",
+    "description": "Provides shelter when the raven asks.",
+    "image": "./resource/saerenn-card.png",
+    "imageAlt": "Saerenn — provides shelter when asked",
+    "position": {
+      "x": 360,
+      "y": 1500
+    },
+    "fields": [
+      {
+        "id": "saerenn-mediator",
+        "label": "mediator: Mediator · Saerenn",
+        "description": "Hold the Mediator interface, not references to peer participants."
+      }
+    ],
+    "methods": [
+      {
+        "id": "provide-shelter",
+        "label": "provideShelter()",
+        "description": "Saerenn’s business logic: guide the group into shelter."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "mediator"
+      }
+    ]
+  }
+]

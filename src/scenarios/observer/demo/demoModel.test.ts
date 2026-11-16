@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
-import scenario from './scenario.json';
-import { compileScenarioConfig } from '../shared/scenarioConfig';
-import { emptyConfiguredLesson, solutionConfiguredLesson } from '../shared/configuredLessonModel';
+import { config } from '../config/config';
+import { emptyConfiguredLesson, solutionConfiguredLesson } from '../../shared/configuredLessonModel';
 import { simulateDiscovery } from './demoModel';
 
-const config = compileScenarioConfig(scenario, 'observer/scenario.json', path => path);
 const graph = solutionConfiguredLesson(config);
 const original = structuredClone(graph);
 

@@ -1,0 +1,8 @@
+[
+  {
+    "id": "stores",
+    "label": "has observers: Observer[]",
+    "toolLabel": "Has observers",
+    "appearance": "solid"
+  }
+]

@@ -24,7 +24,7 @@ function isInside(parent, target) {
 for (const module of modules) {
     const moduleRoot = join(scenariosRoot, module);
     const moduleFiles = files(moduleRoot).filter(file => /\.(ts|tsx)$/.test(file));
-    const configured = existsSync(join(moduleRoot, 'scenario.json'));
+    const configured = existsSync(join(moduleRoot, 'config', 'scenario.json'));
     if (!configured) assert.ok(moduleFiles.some(file => file.endsWith('model.test.ts')), `${module} must own a model.test.ts`);
     for (const file of moduleFiles) {
         const imports = ts.preProcessFile(readFileSync(file, 'utf8'), true, true).importedFiles.map(item => item.fileName);
@@ -87,7 +87,7 @@ const entries = scenarioArray.elements.map(element => {
     return { id: id.text, Component: Component.text };
 });
 
-const configuredModules = modules.filter(module => existsSync(join(scenariosRoot, module, 'scenario.json')));
+const configuredModules = modules.filter(module => existsSync(join(scenariosRoot, module, 'config', 'scenario.json')));
 const legacyModules = modules.filter(module => !configuredModules.includes(module));
 const ids = entries.map(entry => entry.id);
 assert.equal(ids.length, legacyModules.length, 'Register every scenario exactly once');
@@ -112,9 +112,9 @@ for (const module of legacyModules) {
 }
 
 assert.ok(pkg.scripts.test.includes('test:configs'), 'npm test must validate all config-only scenarios');
-assert.ok(readFileSync(registryFile, 'utf8').includes("import.meta.glob('./*/scenario.json'"), 'Discover config-only scenarios automatically');
+assert.ok(readFileSync(registryFile, 'utf8').includes("import.meta.glob('./*/config/scenario.json'"), 'Discover config-only scenarios automatically');
 for (const module of configuredModules) {
-    const config = JSON.parse(readFileSync(join(scenariosRoot, module, 'scenario.json'), 'utf8'));
+    const config = JSON.parse(readFileSync(join(scenariosRoot, module, 'config', 'scenario.json'), 'utf8'));
     assert.equal(config.id, module, 'Config ID must match its directory');
     assert.ok(!ids.includes(module), 'Do not register a config-only scenario twice');
 }

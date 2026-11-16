@@ -1,0 +1,5 @@
+[
+  "Start with SignalHandler. SilkThread and all three spiders implement this shared handle(request) contract.",
+  "Each concrete handler owns handle(request) and a nullable next reference. SilkThread forwards unconditionally; each spider first checks its own signal.",
+  "Connect next links in this example order: SilkThread → BloodSpider → StepSpider → IronSpider. IronSpider ends the chain with next = null."
+]

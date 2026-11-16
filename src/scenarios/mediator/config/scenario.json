@@ -1,0 +1,10 @@
+{
+  "id": "mediator",
+  "number": "02",
+  "title": "Thoughts through the raven",
+  "pattern": "Mediator",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "relationshipTypes": "./relationships.json",
+  "hints": "./hints.json"
+}

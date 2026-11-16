@@ -1,0 +1,10 @@
+{
+  "id": "chain",
+  "number": "03",
+  "title": "Spiders on the wind",
+  "pattern": "Chain of Responsibility",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "relationshipTypes": "./relationships.json",
+  "hints": "./hints.json"
+}

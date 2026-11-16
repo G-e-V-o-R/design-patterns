@@ -1,0 +1,5 @@
+[
+  "Give FoxSubject the observers: Observer[] field and attach(), detach(), notify(), and discoverDanger(). Looking for danger is its subject logic.",
+  "Observer is an interface with update(discovery). Each concrete observer implements this method and decides what to do.",
+  "FoxSubject keeps a list of Observer. NarionObserver and DreKaarObserver implement Observer. Connect the fox to this interface, not to the concrete classes."
+]

@@ -1,10 +1,31 @@
 # Adding a scenario
 
-## Recommended: one config and local images
+## Recommended: a manifest and focused content files
 
-Copy `docs/scenario-template/` to `src/scenarios/<id>/`, then edit `scenario.json`. Its `id` must equal the directory name. See [the complete config guide](../../docs/scenario-template/README.md) and [the working Strategy lesson](./strategy/scenario.json).
+Copy `src/scenarios/strategy/` to `src/scenarios/<id>/`, then update the manifest ID, metadata, content files, and artwork. Its `id` must equal the directory name. See [the working Strategy manifest](./strategy/scenario.json).
 
-The config defines the story, classes, nested fields and methods, expected relationships, hints, and optional positions. Shared code supplies state, history, validation, solution generation, card and arrow interactions, and layout. Registration, asset bundling, and generic model checks are automatic; do not edit the registry or package scripts for a config-only scenario.
+Keep `scenario.json` focused on metadata and local section references:
+
+```json
+{
+  "id": "strategy",
+  "number": "04",
+  "title": "Choose a route through the forest",
+  "pattern": "Strategy",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json"
+}
+```
+
+- `intro.json` contains the story object: paragraphs, image, task, and optional imageAlt, caption, concept, and three steps.
+- `classes.json` contains the class/interface array. Keep fields, methods, relationships, and positions nested inside their owning class.
+- `hints.json` contains an array of progressive hint strings.
+- Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in.
+
+Each section can also remain inline. References must start with `./`, end with `.json`, and stay inside the scenario directory; nested folders are supported. Section files contain the section value directly, without a wrapper key. Includes are not recursive. Artwork paths remain relative to the scenario directory, even when a content file lives in a subfolder.
+
+Shared code supplies state, history, validation, solution generation, card and arrow interactions, and layout. Registration, asset bundling, and generic model checks are automatic; do not edit the registry or package scripts for a config-only scenario. Development validation refreshes when any scenario JSON file changes.
 
 An optional scenario-local `Demo.tsx` default export receives `ConfiguredDemoProps` and is discovered automatically. A plain config lesson has completion feedback without a simulated runtime demo. Novel simulation behavior still belongs in scenario code.
 
@@ -18,7 +39,12 @@ All four lessons use the shared configured runtime. [Strategy](./strategy/scenar
 
 ```text
 src/scenarios/<id>/
-  scenario.json          story, diagram cards, member ownership, arrows, hints, positions
+  scenario.json          metadata and section references
+  intro.json             story, task, artwork, concept, steps
+  classes.json           cards, members, arrows, positions
+  hints.json             progressive hints
+  relationships.json     optional custom relationship types
+  config.ts              optional typed loader for demo code
   resource/              local artwork
   Demo.tsx               optional default export accepting ConfiguredDemoProps
   demoModel.ts           optional framework-independent simulation
@@ -30,10 +56,10 @@ A demo may have focused presentation helpers such as Observer's `NotificationDem
 
 ## Agent workflow
 
-1. Read the template guide and a matching existing config.
-2. Define story, classes, fields, methods, directed relationships, hints, and artwork in `scenario.json`. Keep stable, unique IDs and put each member inside its owning class.
+1. Read a matching existing manifest and its content files.
+2. Define metadata in `scenario.json` and story, diagram, and hints in their referenced files. Keep stable, unique IDs and put each member inside its owning class.
 3. If simulation is useful, add a default-exported `Demo.tsx` receiving `graph`, `ready`, and `active` from `ConfiguredDemoProps`.
-4. Keep simulation rules and tests local; use the shared configured graph validator instead of reimplementing lesson validation. Derive card labels and artwork metadata from the config when the demo needs them.
+4. Keep simulation rules and tests local; use the shared configured graph validator instead of reimplementing lesson validation. Derive card labels and artwork metadata from the config when the demo needs them. For direct TypeScript use, follow `observer/config.ts`: statically import section JSON and pass a lookup as the fourth argument to `compileScenarioConfig`.
 5. Run the checks and browser flows below.
 
 ## Demo lifecycle and tests

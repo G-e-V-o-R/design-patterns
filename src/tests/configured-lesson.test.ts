@@ -180,3 +180,34 @@ custom.relationshipTypes = [{ id: 'delegates', label: 'delegates work' }];
 custom.classes[1]!.relationships![0]!.type = 'delegates';
 assert.equal(compile(custom).expectedEdges[0]?.type, 'delegates');
 console.log('Configured lesson parsing, solutions, targeted validation, and immutability cases passed.');
+
+const inline = fixture();
+const sectionFiles: Record<string, unknown> = {
+  './content/intro.json': inline.intro,
+  './classes.json': inline.classes,
+  './hints.json': inline.hints,
+  './relationships.json': [],
+};
+const manifest = {
+  id: inline.id,
+  title: inline.title,
+  pattern: inline.pattern,
+  intro: './content/intro.json',
+  classes: './classes.json',
+  hints: './hints.json',
+  relationshipTypes: './relationships.json',
+};
+const loadSections = (input: unknown, files = sectionFiles) => compileScenarioConfig(
+  input, 'sample/scenario.json', path => `/resolved/${path.replace(/^\.\//, '')}`, path => files[path],
+);
+assert.deepEqual(loadSections(manifest), compile(inline), 'Split and inline configurations compile identically.');
+assert.deepEqual(loadSections({ ...manifest, intro: inline.intro }), compile(inline), 'Inline and referenced sections can be mixed.');
+assert.equal(manifest.intro, './content/intro.json', 'Compilation must not mutate the manifest.');
+for (const reference of ['../intro.json', '/intro.json', './other/../intro.json', 'https://example.com/intro.json', './scenario.json'])
+{
+  assert.throws(() => loadSections({ ...manifest, intro: reference }), /intro: Use a local JSON section path/);
+}
+assert.throws(() => loadSections(manifest, {}), /scenario.json: intro: Cannot load.*intro.json/);
+assert.throws(() => loadSections(manifest, { ...sectionFiles, './content/intro.json': [] }), /content\/intro.json: intro: Expected an object/);
+assert.throws(() => loadSections(manifest, { ...sectionFiles, './hints.json': './nested.json' }), /hints.json: hints: Expected an array/);
+assert.throws(() => compile(manifest), /without a JSON section resolver/);
