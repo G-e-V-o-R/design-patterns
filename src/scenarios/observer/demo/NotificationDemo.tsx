@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
+import foxPortrait from '../resource/fox-card.png?url';
+import narionPortrait from '../resource/narion-card.png?url';
+import dreKaarPortrait from '../resource/dre-kaar-card.png?url';
 import type { DiscoveryResult } from './demoModel';
 
+const subscribers = [
+  { id: 'narion', name: 'Narion', portrait: narionPortrait },
+  { id: 'dre-kaar', name: 'Dre’Kaar', portrait: dreKaarPortrait },
+] as const;
+
+type Subscriber = typeof subscribers[number];
+type Phase = 'idle' | 'checking' | 'sending' | 'finished';
+type DeliveryState = 'waiting' | 'disconnected' | 'sending' | 'received';
+
 export type DemoRun = {
-  id: number;
   result: DiscoveryResult;
 };
 
@@ -15,6 +26,151 @@ type ObserverDemoProps = {
   run: DemoRun | null;
 };
 
+function getStatus(phase: Phase, result: DiscoveryResult | undefined)
+{
+  switch (phase)
+  {
+    case 'checking':
+      return 'The fox checks the path.';
+    case 'sending':
+      return 'Danger ahead! The fox sends the same warning to each subscribed observer.';
+    case 'finished':
+      return result?.summary;
+    default:
+      return 'Choose what the fox finds. Try changing Narion’s bracelet between runs.';
+  }
+}
+
+function getDeliveryState(subscribed: boolean, receivesMessage: boolean, phase: Phase): DeliveryState
+{
+  if (!subscribed)
+  {
+    return 'disconnected';
+  }
+
+  if (receivesMessage && phase === 'sending')
+  {
+    return 'sending';
+  }
+
+  if (receivesMessage && phase === 'finished')
+  {
+    return 'received';
+  }
+
+  return 'waiting';
+}
+
+function PathControls({ disabled, playing, selection, onRun }: {
+  disabled: boolean;
+  playing: boolean;
+  selection: boolean | undefined;
+  onRun: (danger: boolean) => void;
+})
+{
+  return (
+    <div className="observer-paths" role="group" aria-label="What does the fox find?">
+      <button
+        type="button"
+        data-path="danger"
+        disabled={disabled}
+        aria-disabled={playing}
+        aria-pressed={selection === true}
+        onClick={() => onRun(true)}
+      >
+        Find danger
+      </button>
+      <button
+        type="button"
+        data-path="safe"
+        disabled={disabled}
+        aria-disabled={playing}
+        aria-pressed={selection === false}
+        onClick={() => onRun(false)}
+      >
+        Check a safe path
+      </button>
+    </div>
+  );
+}
+
+function FoxCard({ phase, danger }: { phase: Phase; danger: boolean | undefined })
+{
+  let detail = 'Ready to scout';
+  if (phase === 'checking')
+  {
+    detail = 'Checking the path…';
+  }
+  else if (phase === 'sending' || (phase === 'finished' && danger))
+  {
+    detail = 'Danger ahead!';
+  }
+  else if (phase === 'finished')
+  {
+    detail = 'The path is safe';
+  }
+
+  return (
+    <article className="observer-fox" data-phase={phase} data-danger={danger}>
+      <img src={foxPortrait} alt="" draggable={false} />
+      <div>
+        <h3>Fox <span>Subject</span></h3>
+        <p>{detail}</p>
+      </div>
+    </article>
+  );
+}
+
+function SubscriberCard({ subscriber, subscribed, delivery, response, disabled, playing, onToggleBracelet }: {
+  subscriber: Subscriber;
+  subscribed: boolean;
+  delivery: DeliveryState;
+  response: string;
+  disabled: boolean;
+  playing: boolean;
+  onToggleBracelet: () => void;
+})
+{
+  return (
+    <article className="observer-person" data-delivery={delivery}>
+      <div className="observer-portrait">
+        <img src={subscriber.portrait} alt="" draggable={false} />
+        <h3>{subscriber.name}</h3>
+      </div>
+      <div className="observer-person-detail">
+        <p className="observer-subscription">
+          {subscribed ? 'Subscribed' : 'Unsubscribed'}
+        </p>
+        <p>{response}</p>
+        {subscriber.id === 'narion' && (
+          <button
+            type="button"
+            className="observer-bracelet"
+            disabled={disabled}
+            aria-disabled={playing}
+            aria-pressed={subscribed}
+            onClick={onToggleBracelet}
+          >
+            Narion’s bracelet <span aria-hidden="true">{subscribed ? 'On' : 'Off'}</span>
+          </button>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function DiscoveryTrace({ result }: { result: DiscoveryResult })
+{
+  return (
+    <details className="observer-trace">
+      <summary>See the method calls</summary>
+      <ol>
+        {result.trace.map(step => <li key={step}>{step}</li>)}
+      </ol>
+    </details>
+  );
+}
+
 export function ObserverDemo({
   ready,
   active,
@@ -24,486 +180,123 @@ export function ObserverDemo({
   run,
 }: ObserverDemoProps)
 {
-  return (
-    <section className="observer-demo" aria-labelledby="demo-heading">
-      <DemoHeading />
-      <SubscriberSummary narionSubscribed={narionSubscribed} />
-      {!ready && <DiagramReadinessMessage />}
-      <DiscoveryScene
-        key={getSceneKey(run)}
-        ready={ready}
-        active={active}
-        run={run}
-        narionSubscribed={narionSubscribed}
-        onRun={onRun}
-        onToggleBracelet={onToggleBracelet}
-      />
-    </section>
-  );
-}
-
-function DemoHeading()
-{
-  return (
-    <div className="demo-heading">
-      <div>
-        <p className="lesson-kicker">TRY THE STORY</p>
-        <h2 id="demo-heading">Who gets the message?</h2>
-      </div>
-      <p>The Subject publishes a notification only when it sees danger.</p>
-    </div>
-  );
-}
-
-function SubscriberSummary({ narionSubscribed }: { narionSubscribed: boolean })
-{
-  let activeObservers = 'Dre’Kaar';
-  if (narionSubscribed)
+  const [progress, setProgress] = useState<{ run: DemoRun; phase: Phase }>();
+  let phase: Phase = 'idle';
+  if (run)
   {
-    activeObservers = 'Narion, Dre’Kaar';
+    phase = progress?.run === run ? progress.phase : 'checking';
   }
-
-  return (
-    <p className="demo-subscribers">
-      <code>observers: Observer[]</code>
-      <span>Attached observers: {activeObservers}</span>
-    </p>
-  );
-}
-
-function DiagramReadinessMessage()
-{
-  return (
-    <p className="demo-help">
-      Complete the diagram or show the solution to run discovery.
-    </p>
-  );
-}
-
-function DiscoveryControls({
-  ready,
-  onRun,
-}: {
-  ready: boolean;
-  onRun: (danger: boolean) => void;
-})
-{
-  return (
-    <div className="demo-controls">
-      <button disabled={!ready} onClick={() => onRun(true)}>Find danger</button>
-      <button disabled={!ready} onClick={() => onRun(false)}>Check a safe path</button>
-    </div>
-  );
-}
-
-function getSceneKey(run: DemoRun | null)
-{
-  if (!run)
-  {
-    return 'idle';
-  }
-
-  return run.id;
-}
-
-type DiscoverySceneProps = {
-  ready: boolean;
-  active: boolean;
-  run: DemoRun | null;
-  narionSubscribed: boolean;
-  onRun: (danger: boolean) => void;
-  onToggleBracelet: () => void;
-};
-
-type DiscoveryPhase = 'idle' | 'checking' | 'sending' | 'finished';
-
-function DiscoveryScene({
-  ready,
-  active,
-  run,
-  narionSubscribed,
-  onRun,
-  onToggleBracelet,
-}: DiscoverySceneProps)
-{
-  const [reducedMotion, setReducedMotion] = useState(() =>
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [phase, setPhase] = useState<DiscoveryPhase>(() =>
-    getInitialPhase(run));
 
   useEffect(() =>
   {
-    if (!active)
-    {
-      return;
-    }
-    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const updateMotionPreference = () =>
-      setReducedMotion(motionPreference.matches);
-
-    updateMotionPreference();
-    motionPreference.addEventListener('change', updateMotionPreference);
-    return () => motionPreference.removeEventListener('change', updateMotionPreference);
-  }, [active]);
-
-  const shownPhase = getShownPhase(reducedMotion, run, phase);
-
-  useEffect(() =>
-  {
-    if (!active || !run || phase === 'finished')
+    if (!run || phase === 'finished')
     {
       return;
     }
 
-    if (reducedMotion)
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function finish()
     {
-      setPhase('finished');
-      return;
-    }
-
-    let nextPhase: DiscoveryPhase = 'finished';
-    let delayInMilliseconds = 1400;
-    if (phase === 'checking')
-    {
-      delayInMilliseconds = 650;
-      if (run.result.danger)
+      if (run)
       {
-        nextPhase = 'sending';
+        setProgress({ run, phase: 'finished' });
       }
     }
 
-    const timerId = window.setTimeout(() =>
+    if (!active || preference.matches)
     {
-      setPhase(nextPhase);
-    }, delayInMilliseconds);
+      finish();
+      return;
+    }
 
-    return () => window.clearTimeout(timerId);
-  }, [run, phase, reducedMotion, active]);
+    const nextPhase = phase === 'checking' && run.result.danger ? 'sending' : 'finished';
+    const delay = phase === 'checking' ? 540 : 900;
+    const timer = window.setTimeout(() => setProgress({ run, phase: nextPhase }), delay);
+
+    function updateMotion()
+    {
+      if (preference.matches)
+      {
+        window.clearTimeout(timer);
+        finish();
+      }
+    }
+
+    preference.addEventListener('change', updateMotion);
+    return () =>
+    {
+      window.clearTimeout(timer);
+      preference.removeEventListener('change', updateMotion);
+    };
+  }, [active, phase, run]);
 
   const result = run?.result;
-  const isFinished = shownPhase === 'finished';
-  const statusMessage = getStatusMessage(shownPhase, result);
+  const disabled = !ready || !active;
+  const playing = phase === 'checking' || phase === 'sending';
 
-  return (
-    <>
-      <p
-        className="demo-status"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {statusMessage}
-      </p>
-      <DiscoveryControls ready={ready} onRun={onRun} />
-      <div className="demo-stage" data-phase={shownPhase}>
-        <FoxCard phase={shownPhase} result={result} isFinished={isFinished} />
-        {(['narion', 'dre-kaar'] as const).map(subscriberId => (
-          <SubscriberDelivery
-            key={subscriberId}
-            subscriberId={subscriberId}
-            phase={shownPhase}
-            result={result}
-            isFinished={isFinished}
-            narionSubscribed={narionSubscribed}
-            onToggleBracelet={onToggleBracelet}
-          />
-        ))}
-      </div>
-      {isFinished && result && <DiscoveryTrace result={result} />}
-    </>
-  );
-}
-
-function getInitialPhase(run: DemoRun | null): DiscoveryPhase
-{
-  if (run)
+  function choosePath(danger: boolean)
   {
-    return 'checking';
-  }
-
-  return 'idle';
-}
-
-function getShownPhase(
-  reducedMotion: boolean,
-  run: DemoRun | null,
-  phase: DiscoveryPhase,
-): DiscoveryPhase
-{
-  if (reducedMotion && run)
-  {
-    return 'finished';
-  }
-
-  return phase;
-}
-
-function getStatusMessage(
-  phase: DiscoveryPhase,
-  result: DiscoveryResult | undefined,
-)
-{
-  if (phase === 'checking')
-  {
-    return 'The Subject is checking the path.';
-  }
-
-  if (phase === 'sending')
-  {
-    return 'Danger ahead! The Subject is publishing a notification.';
-  }
-
-  if (phase === 'finished' && result)
-  {
-    return result.summary;
-  }
-
-  return 'Choose a path to see what the Subject does.';
-}
-
-function FoxCard({
-  phase,
-  result,
-  isFinished,
-}: {
-  phase: DiscoveryPhase;
-  result: DiscoveryResult | undefined;
-  isFinished: boolean;
-})
-{
-  let foxStatus = 'Looking for danger';
-  if (phase === 'checking')
-  {
-    foxStatus = 'Checking the path…';
-  }
-  else if (result && isFinished)
-  {
-    if (result.danger)
+    if (!disabled && !playing)
     {
-      foxStatus = 'Danger ahead!';
+      onRun(danger);
     }
-    else
+  }
+
+  function toggleBracelet()
+  {
+    if (!disabled && !playing)
     {
-      foxStatus = 'The path is safe.';
+      onToggleBracelet();
     }
   }
 
   return (
-    <article className="demo-fox">
-      <span aria-hidden="true">🦊</span>
-      <h3>Fox</h3>
-      <p>Subject</p>
-      <p>{foxStatus}</p>
-    </article>
-  );
-}
+    <section className="observer-demo" aria-labelledby="observer-demo-heading">
+      <h2 id="observer-demo-heading">Follow the fox’s warning</h2>
+      <p>The fox warns everyone wearing a bracelet when it finds danger.</p>
+      {!ready && <p>Complete the diagram or show the solution to start.</p>}
 
-type SubscriberId = 'narion' | 'dre-kaar';
+      <PathControls disabled={disabled} playing={playing} selection={result?.danger} onRun={choosePath} />
+      <div className="observer-scene">
+        <FoxCard phase={phase} danger={result?.danger} />
+        <div className="observer-deliveries">
+          {subscribers.map(subscriber =>
+          {
+            const subscribed = subscriber.id !== 'narion' || narionSubscribed;
+            const receivesMessage = result?.recipients.includes(subscriber.id) ?? false;
+            const delivery = getDeliveryState(subscribed, receivesMessage, phase);
+            let response = subscribed ? 'Waiting for a warning.' : 'Bracelet is off.';
+            if (phase === 'finished' && result)
+            {
+              response = result.responses[subscriber.id];
+            }
+            else if (delivery === 'sending')
+            {
+              response = 'Warning on the way…';
+            }
 
-function SubscriberDelivery({
-  subscriberId,
-  phase,
-  result,
-  isFinished,
-  narionSubscribed,
-  onToggleBracelet,
-}: {
-  subscriberId: SubscriberId;
-  phase: DiscoveryPhase;
-  result: DiscoveryResult | undefined;
-  isFinished: boolean;
-  narionSubscribed: boolean;
-  onToggleBracelet: () => void;
-})
-{
-  const isNarion = subscriberId === 'narion';
-  const isSubscribed = !isNarion || narionSubscribed;
-  const receivesMessage = result?.recipients.includes(subscriberId) ?? false;
-  const pathLabel = getDeliveryLabel(phase, isSubscribed, receivesMessage, isFinished);
-  let pathClassName = 'demo-message-path';
-  if (!isSubscribed)
-  {
-    pathClassName += ' is-off';
-  }
-
-  let personClassName = 'demo-person';
-  if (isFinished && receivesMessage)
-  {
-    personClassName += ' has-message';
-  }
-
-  return (
-    <div className="demo-delivery">
-      <div className={pathClassName} aria-hidden="true">
-        <span className="demo-path-label">{pathLabel}</span>
-        {phase === 'sending' && receivesMessage && (
-          <span className="demo-message-dot" />
-        )}
-        <span className="demo-path-arrow">→</span>
+            return (
+              <div key={subscriber.id} className="observer-delivery" data-subscriber={subscriber.id}>
+                <div className="observer-branch" data-delivery={delivery} aria-hidden="true">
+                  {delivery === 'sending' && <span className="observer-pulse" />}
+                </div>
+                <SubscriberCard
+                  subscriber={subscriber}
+                  subscribed={subscribed}
+                  delivery={delivery}
+                  response={response}
+                  disabled={disabled}
+                  playing={playing}
+                  onToggleBracelet={toggleBracelet}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <article className={personClassName}>
-        <SubscriberCard
-          subscriberId={subscriberId}
-          isNarion={isNarion}
-          isSubscribed={isSubscribed}
-          result={result}
-          isFinished={isFinished}
-          onToggleBracelet={onToggleBracelet}
-        />
-      </article>
-    </div>
-  );
-}
 
-function getDeliveryLabel(
-  phase: DiscoveryPhase,
-  isSubscribed: boolean,
-  receivesMessage: boolean,
-  isFinished: boolean,
-)
-{
-  if (phase === 'sending' && receivesMessage)
-  {
-    return 'Message';
-  }
-
-  if (isFinished && receivesMessage)
-  {
-    return 'Sent';
-  }
-
-  if (isFinished)
-  {
-    return 'No message';
-  }
-
-  if (!isSubscribed)
-  {
-    return 'Off';
-  }
-
-  return 'Ready';
-}
-
-function SubscriberCard({
-  subscriberId,
-  isNarion,
-  isSubscribed,
-  result,
-  isFinished,
-  onToggleBracelet,
-}: {
-  subscriberId: SubscriberId;
-  isNarion: boolean;
-  isSubscribed: boolean;
-  result: DiscoveryResult | undefined;
-  isFinished: boolean;
-  onToggleBracelet: () => void;
-})
-{
-  const subscriberName = getSubscriberName(subscriberId);
-  const response = getSubscriberResponse(
-    subscriberId,
-    isSubscribed,
-    result,
-    isFinished,
-  );
-
-  return (
-    <>
-      <h3>{subscriberName}</h3>
-      {isNarion && (
-        <NarionBracelet
-          isSubscribed={isSubscribed}
-          onToggleBracelet={onToggleBracelet}
-        />
-      )}
-      {!isNarion && <p className="demo-bracelet-state">Bracelet on · subscribed</p>}
-      {isNarion && (
-        <NarionSubscriptionState isSubscribed={isSubscribed} />
-      )}
-      <p className="demo-response">{response}</p>
-    </>
-  );
-}
-
-function getSubscriberName(subscriberId: SubscriberId)
-{
-  if (subscriberId === 'narion')
-  {
-    return 'Narion';
-  }
-
-  return 'Dre’Kaar';
-}
-
-function NarionBracelet({
-  isSubscribed,
-  onToggleBracelet,
-}: {
-  isSubscribed: boolean;
-  onToggleBracelet: () => void;
-})
-{
-  let buttonLabel = 'Put on bracelet';
-  if (isSubscribed)
-  {
-    buttonLabel = 'Take off bracelet';
-  }
-
-  return (
-    <button
-      className="demo-bracelet"
-      aria-pressed={isSubscribed}
-      aria-label="Narion’s bracelet"
-      onClick={onToggleBracelet}
-    >
-      <span aria-hidden="true">◯</span> {buttonLabel}
-    </button>
-  );
-}
-
-function NarionSubscriptionState({ isSubscribed }: { isSubscribed: boolean })
-{
-  let subscriptionText = 'Bracelet off · unsubscribed';
-  if (isSubscribed)
-  {
-    subscriptionText = 'Bracelet on · subscribed';
-  }
-
-  return <p className="demo-bracelet-state">{subscriptionText}</p>;
-}
-
-function getSubscriberResponse(
-  subscriberId: SubscriberId,
-  isSubscribed: boolean,
-  result: DiscoveryResult | undefined,
-  isFinished: boolean,
-)
-{
-  if (isFinished && result)
-  {
-    return result.responses[subscriberId];
-  }
-
-  if (isSubscribed)
-  {
-    return 'Waiting for a message.';
-  }
-
-  return 'No messages while the bracelet is off.';
-}
-
-function DiscoveryTrace({ result }: { result: DiscoveryResult })
-{
-  return (
-    <details className="demo-trace">
-      <summary>See the method calls</summary>
-      <ol>
-        {result.trace.map((step, stepIndex) => (
-          <li key={stepIndex}>{step}</li>
-        ))}
-      </ol>
-    </details>
+      <p className="observer-outcome" role="status">{getStatus(phase, result)}</p>
+      {phase === 'finished' && result && <DiscoveryTrace result={result} />}
+    </section>
   );
 }

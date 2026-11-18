@@ -1,20 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import type { LessonGraph } from '../../shared/configuredLessonModel';
-import { simulateDiscovery } from './demoModel';
-import { ObserverDemo, type DemoRun } from './NotificationDemo';
+import { simulateDiscovery, type DiscoveryResult } from './demoModel';
+import { ObserverDemo } from './NotificationDemo';
 import './styles.css';
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
   const [narionSubscribed, setNarionSubscribed] = useState(true);
-  const [run, setRun] = useState<(DemoRun & { graph: LessonGraph }) | null>(null);
-  const nextRunId = useRef(0);
+  const [run, setRun] = useState<{ graph: LessonGraph; result: DiscoveryResult } | null>(null);
 
-  useEffect(() =>
+  if (run && run.graph !== graph)
   {
     setRun(null);
-  }, [graph]);
+  }
 
   function startDiscovery(danger: boolean)
   {
@@ -23,7 +22,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
       return;
     }
     const result = simulateDiscovery(graph, { danger, narionSubscribed });
-    setRun(result ? { id: ++nextRunId.current, graph, result } : null);
+    setRun(result ? { graph, result } : null);
   }
 
   function toggleBracelet()
@@ -33,7 +32,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
   }
 
   return (
-    <div className="observer-scenario" data-active={active}>
+    <div className="observer-scenario">
       <ObserverDemo
         ready={ready}
         active={active}
