@@ -10,13 +10,6 @@ export function classLabel(id: string)
 
 export type RequestKind = 'blood' | 'step' | 'iron' | 'safe';
 
-export const requests: { id: RequestKind; label: string }[] = [
-  { id: 'blood', label: 'Orc blood trail' },
-  { id: 'step', label: 'Goblin footsteps' },
-  { id: 'iron', label: 'Mercenary iron' },
-  { id: 'safe', label: 'Harmless traveller' },
-];
-
 export type ChainStep = {
   handler: string;
   action: 'forward' | 'pass' | 'handle' | 'unhandled';
@@ -37,8 +30,13 @@ export function simulateLesson(graph: LessonGraph, request: RequestKind): ChainR
     return null;
   }
 
-  const trace: ChainStep[] = [];
-  let current: string | undefined = 'thread';
+  const firstHandler = 'blood';
+  const trace: ChainStep[] = [{
+    handler: 'thread',
+    action: 'forward',
+    message: `SilkThread forwards the request to ${classLabel(firstHandler)}.`,
+  }];
+  let current: string | undefined = firstHandler;
   while (current)
   {
     const next = graph.edges.find(edge => edge.source === current && edge.type === 'next')?.target;
@@ -50,14 +48,7 @@ export function simulateLesson(graph: LessonGraph, request: RequestKind): ChainR
 
     if (next)
     {
-      let action: ChainStep['action'] = 'pass';
-      let message = `${classLabel(current)} does not recognize the signal. Pass to ${classLabel(next)}.`;
-      if (current === 'thread')
-      {
-        action = 'forward';
-        message = `SilkThread forwards the request to ${classLabel(next)}.`;
-      }
-      trace.push({ handler: current, action, message });
+      trace.push({ handler: current, action: 'pass', message: `${classLabel(current)} does not recognize the signal. Pass to ${classLabel(next)}.` });
     }
     else
     {

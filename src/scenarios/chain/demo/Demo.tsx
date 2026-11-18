@@ -36,7 +36,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   return (
     <div className="chain-scenario">
-      <ChainDemo ready={ready && active} result={result} onRun={sendSignal} />
+      <ChainDemo ready={ready} active={active} result={result} onRun={sendSignal} />
     </div>
   );
 }

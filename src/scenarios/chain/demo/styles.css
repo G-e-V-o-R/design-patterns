@@ -3,141 +3,369 @@
 }
 
 .chain-scenario .chain-demo {
-  margin: 0 20px 20px;
-  padding: 22px;
+  margin: 0 8px 20px;
+  padding: 16px;
   border: 1px solid #829d7055;
   border-radius: 10px;
   background: #12221b;
 }
 
-.chain-scenario .chain-kicker {
-  color: #d2b980;
-  font-size: 10px;
-  letter-spacing: 1.8px;
-  font-weight: 700;
-  margin: 0 0 10px;
-}
-
 .chain-scenario .chain-demo h2 {
+  margin: 0 0 6px;
   font-size: 22px;
   line-height: 1.3;
-  margin-bottom: 14px;
 }
 
-.chain-scenario .chain-demo p:not(.chain-kicker) {
-  font-size: 12px;
+.chain-scenario .chain-demo > p {
+  margin: 0 0 14px;
   color: #b8c6af;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-.chain-scenario .chain-signals {
+.chain-scenario .chain-scene {
+  --entry-x: 12.5%;
+  --blood-x: 36%;
+  --step-x: 61%;
+  --iron-x: 86%;
+  --exit-x: 112%;
+  --source-height: 124px;
+  --source-spacing: 134px;
+  --source-start: 80px;
+  --source-width: clamp(52px, 20%, 132px);
+  --traveller-y: calc(var(--source-start) + 3 * var(--source-spacing));
+  --spider-width: clamp(48px, 21%, 148px);
+  --spider-height: 122px;
+  --silk-y: 20px;
+  --trail-y: calc(var(--traveller-y) + var(--source-height) + 10px);
+  --drop: calc(var(--trail-y) - var(--silk-y) - var(--spider-height) - var(--source-height) / 2 - 3px);
+  --lunge: 10px;
+  position: relative;
+  height: calc(var(--trail-y) + var(--source-height) / 2 + 20px);
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #748e604f;
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 64% 5%, #304637, #14251e 65%, #0f1c17);
+}
+
+.chain-scenario .chain-sources,
+.chain-scenario .chain-spiders {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.chain-scenario [data-position="entry"] {
+  --position-x: var(--entry-x);
+}
+
+.chain-scenario [data-position="blood"] {
+  --position-x: var(--blood-x);
+}
+
+.chain-scenario [data-position="step"] {
+  --position-x: var(--step-x);
+}
+
+.chain-scenario [data-position="iron"] {
+  --position-x: var(--iron-x);
+}
+
+.chain-scenario [data-position="exit"] {
+  --position-x: var(--exit-x);
+}
+
+.chain-scenario [data-target="blood"] {
+  --source-y: var(--source-start);
+}
+
+.chain-scenario [data-target="iron"] {
+  --source-y: calc(var(--source-start) + var(--source-spacing));
+}
+
+.chain-scenario [data-target="step"] {
+  --source-y: calc(var(--source-start) + 2 * var(--source-spacing));
+}
+
+.chain-scenario [data-target="safe"] {
+  --source-y: var(--traveller-y);
+}
+
+.chain-scenario .chain-target-card,
+.chain-scenario .chain-spider-card {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #8d9d755e;
+  border-radius: 7px;
+  background: #203427;
+  color: #f2eddd;
+  box-shadow: 0 5px 14px #08140c99;
+  text-align: center;
 }
 
-.chain-scenario .chain-signals button {
-  padding: 10px 12px;
-  border: 1px solid #829d7066;
-  border-radius: 6px;
-  color: #e7ecdf;
-  background: #203427;
-  font-size: 12px;
+.chain-scenario .chain-target-card img,
+.chain-scenario .chain-spider-card img {
+  display: block;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+}
+
+.chain-scenario .chain-target-card img {
+  object-fit: contain;
+}
+
+.chain-scenario .chain-target-card span,
+.chain-scenario .chain-spider-card span {
+  padding: 4px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.chain-scenario .chain-target-card {
+  box-sizing: border-box;
+  height: var(--source-height);
+  padding: 0;
+}
+
+.chain-scenario .chain-source {
+  position: absolute;
+  z-index: 1;
+  top: var(--source-y);
+  left: var(--entry-x);
+  width: var(--source-width);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
   cursor: pointer;
 }
 
-.chain-scenario .chain-signals button[aria-pressed="true"] {
+.chain-scenario .chain-source:hover:not([aria-disabled="true"]),
+.chain-scenario .chain-source[aria-pressed="true"] {
   border-color: #e1c38d;
-  background: #38432a;
 }
 
-.chain-scenario .chain-signals button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.chain-scenario .chain-signals button:focus-visible {
+.chain-scenario .chain-source:focus-visible {
   outline: 2px solid #f4dfb4;
   outline-offset: 3px;
 }
 
-.chain-scenario .chain-route {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 0;
-  list-style: none;
-  counter-reset: handler;
+.chain-scenario .chain-source:disabled,
+.chain-scenario .chain-source[aria-disabled="true"] {
+  cursor: default;
 }
 
-.chain-scenario .chain-handler {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid #829d7055;
-  border-radius: 8px;
-  background: #203427;
-  counter-increment: handler;
+.chain-scenario .chain-source[data-in-flight="true"] {
+  background: #16271f;
+  border-style: dashed;
 }
 
-.chain-scenario .chain-handler h3 {
-  font-size: 14px;
-  overflow-wrap: anywhere;
-  margin: 8px 0;
+.chain-scenario .chain-source[data-in-flight="true"] > * {
+  opacity: 0;
 }
 
-.chain-scenario .chain-handler h3::before {
-  content: counter(handler) '. ';
-  color: #d2b980;
+.chain-scenario .chain-silk {
+  position: absolute;
+  top: var(--silk-y);
+  left: 24%;
+  right: 2%;
+  height: 2px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #acba9800, #f7ebc7 10%, #d4dec1 92%, #acba9800);
+  box-shadow: 0 0 9px #e7d6a155;
+  pointer-events: none;
 }
 
-.chain-scenario .chain-handler p {
-  margin: 0;
+.chain-scenario .chain-spider {
+  position: absolute;
+  z-index: 2;
+  top: var(--silk-y);
+  left: var(--position-x);
+  width: var(--spider-width);
+  transform: translateX(-50%);
 }
 
-.chain-scenario .chain-handler-artwork {
-  display: block;
-  width: 120px;
-  max-width: 100%;
-  height: auto;
-  margin: 12px 0;
-  border-radius: 6px;
+.chain-scenario .chain-spider-card {
+  position: relative;
+  height: var(--spider-height);
+  box-sizing: border-box;
+  transition: transform 420ms ease-in-out, border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.chain-scenario .chain-handler-state {
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #d2b980;
+.chain-scenario .chain-spider-card img {
+  object-fit: cover;
+  object-position: center 45%;
 }
 
-.chain-scenario .chain-handler-handle {
-  border-color: #e1c38d;
-  background: #38432a;
+.chain-scenario .chain-spider-tether {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: calc(var(--drop) + 3px);
+  transform: scaleY(0);
+  transform-origin: top;
+  background: #f3e7c5;
+  box-shadow: 0 0 7px #f3e7c580;
+  transition: transform 420ms ease-in-out;
 }
 
-.chain-scenario .chain-handler-skipped {
-  opacity: 0.55;
+.chain-scenario .chain-spider[data-descended="true"] .chain-spider-card {
+  transform: translateY(var(--drop));
 }
 
-.chain-scenario .chain-handler-unhandled {
-  border-color: #9bbd98;
+.chain-scenario .chain-spider[data-descended="true"] .chain-spider-tether {
+  transform: scaleY(1);
+}
+
+.chain-scenario .chain-spider[data-biting="true"] .chain-spider-card {
+  animation: chain-lunge 210ms ease-in-out;
+}
+
+.chain-scenario .chain-spider[data-biting="true"] .chain-spider-tether {
+  animation: chain-tug 210ms ease-in-out;
+}
+
+.chain-scenario .chain-spider[data-action="pass"] .chain-spider-card,
+.chain-scenario .chain-spider[data-action="unhandled"] .chain-spider-card {
+  border-color: #a0bd9b;
+  box-shadow: 0 0 13px #a0bd9b4d;
+}
+
+.chain-scenario .chain-spider[data-action="handle"] .chain-spider-card {
+  border-color: #f1d39d;
+  box-shadow: 0 0 17px #e8b76a66;
+}
+
+.chain-scenario .chain-target-token {
+  position: absolute;
+  z-index: 3;
+  top: var(--trail-y);
+  left: var(--position-x);
+  width: var(--source-width);
+  transform: translate(-50%, -50%);
+  transition: top 500ms ease-in-out, left 540ms ease-in-out;
+  pointer-events: none;
+}
+
+.chain-scenario .chain-target-token[data-phase="launch"] {
+  top: var(--source-y);
+  transition: none;
+}
+
+.chain-scenario .chain-target-token[data-phase="bite"] .chain-target-card {
+  animation: chain-bite 210ms ease-out both;
+}
+
+.chain-scenario .chain-target-token[data-phase="bite"]::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border: 2px solid #ffcf87;
+  border-radius: 12px;
+  box-shadow: 0 0 18px #f5ad68a8, inset 0 0 14px #ffe3a882;
+  animation: chain-impact 210ms ease-out both;
+}
+
+.chain-scenario .chain-target-token[data-phase="caught"] .chain-target-card {
+  animation: chain-vanish 330ms ease-in both;
 }
 
 .chain-scenario .chain-outcome {
-  margin-top: 16px;
+  min-height: 1.6em;
+  margin-top: 14px;
   color: #e1c38d;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
-@media (max-width: 720px) {
-  .chain-scenario .chain-demo {
-    margin: 0 15px 15px;
-    padding: 14px;
+.chain-scenario .chain-trace {
+  margin-top: 8px;
+  color: #b8c6af;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.chain-scenario .chain-trace summary {
+  cursor: pointer;
+}
+
+@keyframes chain-lunge {
+  35% {
+    transform: translateY(calc(var(--drop) + var(--lunge)));
+  }
+}
+
+@keyframes chain-tug {
+  35% {
+    height: calc(var(--drop) + 3px + var(--lunge));
+  }
+}
+
+@keyframes chain-bite {
+  0%, 100% {
+    transform: translateX(0);
   }
 
-  .chain-scenario .chain-route {
-    grid-template-columns: minmax(0, 1fr);
+  20%, 60% {
+    transform: translateX(-5px) rotate(-5deg);
+    filter: brightness(1.65);
+  }
+
+  40%, 80% {
+    transform: translateX(5px) rotate(5deg);
+  }
+}
+
+@keyframes chain-impact {
+  from {
+    opacity: 1;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes chain-vanish {
+  to {
+    opacity: 0;
+    transform: scale(0.2) translateY(-45%);
+  }
+}
+
+@media (max-width: 560px) {
+  .chain-scenario .chain-demo {
+    margin: 0 0 15px;
+    padding: 8px;
+  }
+
+  .chain-scenario .chain-scene {
+    --source-height: 98px;
+    --source-spacing: 108px;
+    --source-start: 60px;
+    --spider-height: 100px;
+    --silk-y: 14px;
+  }
+
+  .chain-scenario .chain-target-card span,
+  .chain-scenario .chain-spider-card span {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chain-scenario .chain-target-token,
+  .chain-scenario .chain-spider-card,
+  .chain-scenario .chain-spider-tether {
+    transition: none;
   }
 }
