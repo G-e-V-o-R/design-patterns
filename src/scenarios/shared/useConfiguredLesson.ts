@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import { createDiagramRelationship, type DiagramConnection } from './connections';
+import { createDiagramRelationship, type DiagramConnection, type DiagramRelationship } from './connections';
 import {
   emptyConfiguredLesson,
   getConfiguredLessonIssues,
@@ -122,7 +122,7 @@ export function useConfiguredLesson(config: CompiledScenario)
     });
   }
 
-  function connect(connection: DiagramConnection, type: string)
+  function saveRelationship(connection: DiagramConnection, type: string, previous?: DiagramRelationship)
   {
     if (!state.graph.classes.includes(connection.source) || !state.graph.classes.includes(connection.target))
     {
@@ -140,13 +140,46 @@ export function useConfiguredLesson(config: CompiledScenario)
       return;
     }
     const relationship = createDiagramRelationship(connection, type);
-    if (state.graph.edges.some(edge => edge.source === relationship.source
+    if (state.graph.edges.some(edge => edge !== previous && edge.source === relationship.source
       && edge.target === relationship.target && edge.type === type))
     {
       dispatch({ type: 'message', message: 'That relationship already exists.' });
       return;
     }
-    edit(graph => ({ ...graph, edges: [...graph.edges, relationship] }), 'Relationship added.');
+    if (!previous)
+    {
+      edit(graph => ({ ...graph, edges: [...graph.edges, relationship] }), 'Relationship added.');
+      return;
+    }
+
+    const current = createDiagramRelationship(previous, previous.type);
+    if (current.source === relationship.source && current.target === relationship.target
+      && current.sourceHandle === relationship.sourceHandle && current.targetHandle === relationship.targetHandle)
+    {
+      return;
+    }
+    edit(graph =>
+    {
+      if (!graph.edges.includes(previous))
+      {
+        return graph;
+      }
+      return { ...graph, edges: graph.edges.map(edge => edge === previous ? relationship : edge) };
+    }, 'Relationship reconnected.');
+  }
+
+  function connect(connection: DiagramConnection, type: string)
+  {
+    saveRelationship(connection, type);
+  }
+
+  function reconnect(index: number, connection: DiagramConnection)
+  {
+    const previous = state.graph.edges[index];
+    if (previous)
+    {
+      saveRelationship(connection, previous.type, previous);
+    }
   }
 
   function removeEdges(indices: number[])
@@ -177,6 +210,7 @@ export function useConfiguredLesson(config: CompiledScenario)
     removeClasses,
     assign,
     connect,
+    reconnect,
     removeEdges,
     showSolution,
     showHint: () => dispatch({ type: 'hint', count: config.hints.length }),

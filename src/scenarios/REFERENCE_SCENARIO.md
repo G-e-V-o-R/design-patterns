@@ -19,9 +19,9 @@ Keep `scenario.json` focused on metadata and local section references:
 ```
 
 - `intro.json` contains the story object: paragraphs, image, task, and optional imageAlt, caption, concept, and three steps.
-- `classes.json` contains the class/interface array. Keep fields, methods, relationships, and positions nested inside their owning class.
+- `classes.json` contains the class/interface array. Keep fields, methods, and positions nested inside their owning class. Each class or interface lists its expected outgoing arrows in `relationships`, with a `type` and a `target` class ID for each arrow. Use `"relationships": []` when there are no outgoing arrows.
 - `hints.json` contains an array of progressive hint strings.
-- Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in.
+- Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in. The toolbar offers a relationship type only when a class declares an arrow of that type in `classes.json`.
 
 Each section can also remain inline. References must start with `./`, end with `.json`, and stay inside the scenario directory; nested folders are supported. Section files contain the section value directly, without a wrapper key. Includes are not recursive. Artwork paths remain relative to the scenario directory, even when a content file lives in a subfolder.
 

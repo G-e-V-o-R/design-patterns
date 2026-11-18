@@ -1,5 +1,5 @@
 import { Panel } from '@xyflow/react';
-import { relationshipMarkerId, type RelationshipDefinition } from './relationships';
+import { hasHollowRelationshipMarker, relationshipMarkerId, type RelationshipDefinition } from './relationships';
 
 export type RelationshipToolsProps = {
   relationships: readonly RelationshipDefinition[];
@@ -21,7 +21,7 @@ export function RelationshipTools({
   onSelectRelationship,
 }: RelationshipToolsProps)
 {
-  let drawingStatus = 'Move cards · choose an arrow to connect';
+  let drawingStatus = relationships.length ? 'Move cards · choose an arrow to connect' : 'Move cards';
   if (drawing && connectionSource)
   {
     drawingStatus = `From ${classLabel(connectionSource)}: click the second class`;
@@ -70,7 +70,7 @@ export function RelationshipIcon({ appearance }: Pick<RelationshipDefinition, 'a
       />
       <path
         d="M25 3 L35 9 L25 15 Z"
-        fill={isImplementation ? 'none' : 'currentColor'}
+        fill={hasHollowRelationshipMarker(appearance) ? 'none' : 'currentColor'}
         stroke="currentColor"
         strokeWidth="1.6"
       />
@@ -86,10 +86,12 @@ export function RelationshipMarkers({
   namespace: string;
 })
 {
+  const markedRelationships = relationships.filter(kind => hasHollowRelationshipMarker(kind.appearance));
+
   return (
     <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute' }}>
       <defs>
-        {relationships.filter(kind => kind.appearance === 'implementation').flatMap(kind => [false, true].map(invalid => (
+        {markedRelationships.flatMap(kind => [false, true].map(invalid => (
           <marker
             key={`${kind.id}-${invalid}`}
             id={relationshipMarkerId(namespace, kind.id, invalid)}

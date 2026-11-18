@@ -1,5 +1,5 @@
 [
-  "Start with SignalHandler. SilkThread and all three spiders implement this shared handle(request) contract.",
-  "Each concrete handler owns handle(request) and a nullable next reference. SilkThread forwards unconditionally; each spider first checks its own signal.",
-  "Connect next links in this example order: SilkThread → BloodSpider → StepSpider → IronSpider. IronSpider ends the chain with next = null."
+  "Put Handle(request) and SetNext(handler: IHandler) on IHandler. EnemyHandler implements IHandler, stores the next handler, and supplies public SetNext and protected forward.",
+  "OrcHandler, GoblinHandler, and TrollHandler extend EnemyHandler. Each implements its own Handle(request) and calls forward on a mismatch. SilkThread uses IHandler and calls Handle on its single handler reference.",
+  "Use the Passes to arrows between concrete handlers: OrcHandler → GoblinHandler → TrollHandler. TrollHandler has no next handler."
 ]

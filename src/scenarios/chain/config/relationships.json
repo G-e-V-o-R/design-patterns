@@ -1,8 +1,13 @@
 [
   {
+    "id": "extends",
+    "label": "extends",
+    "appearance": "inheritance"
+  },
+  {
     "id": "next",
-    "label": "next in chain",
-    "toolLabel": "Next",
+    "label": "passes requests to",
+    "toolLabel": "Passes to",
     "appearance": "solid"
   }
 ]

@@ -1,16 +1,16 @@
 {
   "paragraphs": [
-    "Faelina opens a bundle of white silk. Inside are three spiders, each marked with a different sign. One senses the blood of orcs. Another recognizes goblin footsteps. The third detects the iron carried by mercenaries. A harmless traveller should pass without waking the trap.",
+    "Faelina opens a bundle of white silk. Inside are three spiders, each marked with a different sign. One senses the blood of orcs. Another recognizes goblin footsteps. The third detects the foul stench of trolls. A harmless traveller should pass without waking the trap.",
     "She links them with a silk thread. A signal enters the chain, and each spider makes one decision: handle it, or pass it to the next spider. The first match acts and stops the request. If none match, the chain ends quietly. Faelina sends the signal without choosing its handler."
   ],
   "image": "./resource/intro.png",
   "imageAlt": "Faelina preparing a silk-thread trap with spiders in the forest",
   "caption": "One signal → one chain → the first matching handler",
-  "task": "Build the shared SignalHandler contract and its concrete handlers. Configure this example chain: SilkThread → BloodSpider → StepSpider → IronSpider. Then send different signals through it.",
+  "task": "Build IHandler, the EnemyHandler base class, and the three concrete handlers. Connect SilkThread to IHandler with a uses arrow. Then connect the concrete handlers in this order: OrcHandler → GoblinHandler → TrollHandler.",
   "concept": "A sender passes a request into a chain without choosing its receiver. Each handler either handles the request or forwards it to its next handler. In this example, the first match stops the chain; an unmatched request reaches the end without action.",
   "steps": [
     "Add classes and assign members",
-    "Connect contracts and next links",
+    "Connect class relationships and the request path",
     "Send a signal through the chain"
   ]
 }

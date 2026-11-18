@@ -10,6 +10,11 @@ assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'mediator', 
   'Discover every lesson from its config directory.');
 for (const config of configs)
 {
+  assert.deepEqual(
+    config.relationships.map(relationship => relationship.id).sort(),
+    [...new Set(config.expectedEdges.map(edge => edge.type))].sort(),
+    `${config.id}: the toolbar must offer only the relationship types declared by its classes.`,
+  );
   const solution = solutionConfiguredLesson(config);
   assert.deepEqual(getConfiguredLessonIssues(config, solution), [], `${config.id}: its configured solution must be valid.`);
   assert.ok(getConfiguredLessonIssues(config, emptyConfiguredLesson()).length > 0, `${config.id}: empty diagrams must be incomplete.`);

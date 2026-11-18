@@ -33,6 +33,9 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
   const { graph } = editor;
   const invalidMembers = new Set(editor.issues.flatMap(issue => issue.memberIds));
   const invalidEdges = new Set(editor.issues.flatMap(issue => issue.edgeIndices));
+  const emptyDescription = config.relationships.length
+    ? 'Add class cards, assign their members, then connect them.'
+    : 'Add class cards and assign their members.';
 
   useEffect(() =>
   {
@@ -134,7 +137,13 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
     }));
 
   const edges: Edge[] = graph.edges.map((edge, index) =>
-    createRelationshipEdge(edge, index, config.relationships, config.id, selectedEdges.has(index), invalidEdges.has(index)));
+  {
+    const selected = selectedEdges.has(index);
+    return {
+      ...createRelationshipEdge(edge, index, config.relationships, config.id, selected, invalidEdges.has(index)),
+      reconnectable: selected,
+    };
+  });
 
   function changeNodes(changes: NodeChange<ConfiguredClassNode>[])
   {
@@ -212,6 +221,7 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
               members={config.members}
               placedClasses={graph.classes}
               assignments={graph.members}
+              hideAssignedMembers
               category={category}
               onCategoryChange={setCategory}
               draggedMemberId={draggedMember}
@@ -244,12 +254,13 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
           markerNamespace={config.id}
           label={`${config.pattern} class diagram`}
           emptyTitle="Build your class diagram"
-          emptyDescription="Add class cards, assign their members, then connect them."
+          emptyDescription={emptyDescription}
           onNodesChange={changeNodes}
           onEdgesChange={changeEdges}
           onNodesDelete={deleted => editor.removeClasses(deleted.map(node => node.id))}
           onEdgesDelete={deleted => editor.removeEdges(deleted.map(edge => Number(edge.id)))}
           onConnect={connect}
+          onReconnect={(edge, connection) => editor.reconnect(Number(edge.id), connection)}
           onNodeClick={clickNode}
           onPaneClick={() => setConnectionSource(null)}
           relationships={config.relationships}

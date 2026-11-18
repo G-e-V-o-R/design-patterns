@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
-import { readConfiguredScenarios } from './scripts/scenarioConfigs';
+import { readConfiguredScenarios } from './scripts/scenarioConfigs.ts';
 
 const scenariosRoot = fileURLToPath(new URL('./src/scenarios', import.meta.url));
 

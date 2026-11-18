@@ -282,13 +282,16 @@
   pointer-events: none;
 }
 
-.mediator-scenario .med-direct-links path {
+.mediator-scenario .med-direct-link {
   fill: none;
   stroke: #e1ae80;
   stroke-width: 1.8;
-  stroke-dasharray: 5 5;
   opacity: .8;
   vector-effect: non-scaling-stroke;
+}
+
+.mediator-scenario .med-direct-arrowhead {
+  fill: #e1ae80;
 }
 
 .mediator-scenario .med-direct-scene .med-actor {

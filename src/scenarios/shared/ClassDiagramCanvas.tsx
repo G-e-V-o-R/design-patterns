@@ -10,6 +10,7 @@ import {
   type Node,
   type NodeChange,
   type NodeTypes,
+  type OnReconnect,
   type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -31,6 +32,7 @@ export type DiagramCanvasProps<NodeType extends Node> = RelationshipToolsProps &
   onNodesDelete: (nodes: NodeType[]) => void;
   onEdgesDelete: (edges: Edge[]) => void;
   onConnect: (connection: Connection) => void;
+  onReconnect?: OnReconnect<Edge>;
   onNodeClick: (event: MouseEvent, node: NodeType) => void;
   onPaneClick: () => void;
   onDragOver?: (event: DragEvent<HTMLDivElement>) => void;
@@ -57,6 +59,7 @@ export function ClassDiagramCanvas<NodeType extends Node>({
   onNodesDelete,
   onEdgesDelete,
   onConnect,
+  onReconnect,
   onNodeClick,
   onPaneClick,
   onDragOver,
@@ -105,6 +108,9 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         onNodesDelete={onNodesDelete}
         onEdgesDelete={onEdgesDelete}
         onConnect={handleConnect}
+        onReconnect={onReconnect}
+        edgesReconnectable={false}
+        elevateEdgesOnSelect
         onConnectStart={(_, state) =>
         {
           dragStartNode.current = state.nodeId;

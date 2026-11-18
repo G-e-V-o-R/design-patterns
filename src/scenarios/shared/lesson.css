@@ -902,6 +902,17 @@
   filter: drop-shadow(0 0 2px #fff0a8) drop-shadow(0 0 6px #f4c95d);
 }
 
+.pattern-canvas .react-flow__edge.selected .react-flow__edgeupdater {
+  cursor: grab;
+  fill: #102019;
+  stroke: #f4c95d;
+  stroke-width: 2px;
+}
+
+.pattern-canvas .react-flow__edge.selected .react-flow__edgeupdater:hover {
+  fill: #f4c95d;
+}
+
 @media (max-width: 720px) {
   .pattern-actions {
     padding: 15px;

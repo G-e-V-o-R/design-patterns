@@ -15,6 +15,7 @@ export type IntroContent = {
 };
 
 export type MemberKind = 'field' | 'method';
+export type MemberVisibility = 'public' | 'protected' | 'private';
 export type ClassVariant = 'class' | 'interface';
 
 export type ClassDefinition = {
@@ -30,6 +31,7 @@ export type MemberDefinition = {
   label: string;
   kind: MemberKind;
   description?: string;
+  visibility?: MemberVisibility;
 };
 
 export type ClassAppearance =

@@ -1,88 +1,120 @@
 [
   {
     "id": "handler",
-    "label": "SignalHandler",
+    "label": "IHandler",
     "kind": "interface",
-    "description": "Defines the shared request contract. Each spider can decide whether it handles the signal or passes it onward.",
+    "description": "Defines the operations for receiving a request and linking to another handler.",
     "position": {
-      "x": 360,
+      "x": 450,
       "y": 0
     },
-    "fields": [],
     "methods": [
       {
         "id": "handle-contract",
-        "label": "handle(request) · contract",
-        "description": "The interface contract all handlers implement."
+        "label": "Handle(request)",
+        "description": "Receives a request through the IHandler interface."
+      },
+      {
+        "id": "set-next-contract",
+        "label": "SetNext(handler: IHandler)",
+        "description": "Defines how to link an IHandler to the next handler."
       }
     ],
     "relationships": []
   },
   {
-    "id": "thread",
-    "label": "SilkThread",
+    "id": "enemy-handler",
+    "label": "EnemyHandler",
     "kind": "class",
-    "description": "A concrete entry handler that forwards requests through its next link.",
-    "image": "./resource/intro.png",
-    "imageAlt": "Faelina preparing the silk-thread trap that passes signals into the chain",
+    "description": "Abstract base class that stores the next handler and forwards unmatched requests.",
+    "image": "./resource/BaseHandler.png",
+    "imageAlt": "Pale spider resting in its web",
     "position": {
-      "x": 0,
-      "y": 0
+      "x": 450,
+      "y": 370
     },
     "fields": [
       {
         "id": "next",
-        "label": "next: SignalHandler | null",
-        "description": "The next handler in the decision chain."
+        "label": "next: IHandler | null",
+        "description": "EnemyHandler stores the next handler, or null at the end of the chain."
       }
     ],
     "methods": [
       {
+        "id": "base-set-next",
+        "label": "SetNext(handler: IHandler)",
+        "description": "Public method on EnemyHandler that stores the next handler.",
+        "visibility": "public"
+      },
+      {
         "id": "forward",
-        "label": "handle(request) · forward",
-        "description": "Pass the signal to the next handler if the current one cannot act."
+        "label": "forward(request)",
+        "description": "Protected method that calls Handle(request) on the next handler if one exists.",
+        "visibility": "protected"
       }
     ],
     "relationships": [
       {
         "type": "implements",
         "target": "handler"
-      },
+      }
+    ]
+  },
+  {
+    "id": "thread",
+    "label": "SilkThread",
+    "kind": "class",
+    "description": "The client sends requests through a single IHandler reference.",
+    "image": "./resource/intro.png",
+    "imageAlt": "Faelina preparing the silk-thread trap that passes signals into the chain",
+    "position": {
+      "x": 0,
+      "y": 370
+    },
+    "fields": [
       {
-        "type": "next",
-        "target": "blood"
+        "id": "entry-handler",
+        "label": "handler: IHandler",
+        "description": "SilkThread holds the entry point of the chain."
+      }
+    ],
+    "methods": [
+      {
+        "id": "send-signal",
+        "label": "SendSignal(request)",
+        "description": "Calls Handle(request) on the stored IHandler."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "handler"
       }
     ]
   },
   {
     "id": "blood",
-    "label": "BloodSpider",
+    "label": "OrcHandler",
     "kind": "class",
-    "description": "Recognizes blood-trail requests and stops the chain when the scent matches.",
-    "image": "./resource/blood-spider.png",
-    "imageAlt": "BloodSpider with a red marking on its back",
+    "description": "Recognizes orc blood trails and handles the matching request.",
+    "image": "./resource/OrcHandler.png",
+    "imageAlt": "Spider with a red marking on its back",
     "position": {
       "x": 0,
-      "y": 800
+      "y": 1040
     },
-    "fields": [
-      {
-        "id": "blood-next",
-        "label": "next: SignalHandler | null · blood",
-        "description": "The next handler, or null at the end of the chain."
-      }
-    ],
     "methods": [
       {
         "id": "blood-handle",
-        "label": "handle(request) · blood",
-        "description": "A blood spider reacts when the signal smells of orcs."
+        "label": "Handle(request)",
+        "description": "OrcHandler handles orc blood trails and calls the inherited forward method for other requests."
       }
     ],
     "relationships": [
       {
-        "type": "implements",
-        "target": "handler"
+        "type": "extends",
+        "target": "enemy-handler"
       },
       {
         "type": "next",
@@ -92,33 +124,26 @@
   },
   {
     "id": "step",
-    "label": "StepSpider",
+    "label": "GoblinHandler",
     "kind": "class",
-    "description": "Tracks goblin footsteps and handles the request when the signal matches its branch.",
-    "image": "./resource/step-spider.png",
-    "imageAlt": "StepSpider with a blue S-shaped marking on its back",
+    "description": "Recognizes goblin footsteps and handles the matching request.",
+    "image": "./resource/GoblinHandler.png",
+    "imageAlt": "Spider with a blue S-shaped marking on its back",
     "position": {
-      "x": 360,
-      "y": 800
+      "x": 450,
+      "y": 1040
     },
-    "fields": [
-      {
-        "id": "step-next",
-        "label": "next: SignalHandler | null · step",
-        "description": "The next handler, or null at the end of the chain."
-      }
-    ],
     "methods": [
       {
         "id": "step-handle",
-        "label": "handle(request) · step",
-        "description": "A step spider reacts when the signal matches goblin movement."
+        "label": "Handle(request)",
+        "description": "GoblinHandler handles goblin footsteps and calls the inherited forward method for other requests."
       }
     ],
     "relationships": [
       {
-        "type": "implements",
-        "target": "handler"
+        "type": "extends",
+        "target": "enemy-handler"
       },
       {
         "type": "next",
@@ -128,33 +153,26 @@
   },
   {
     "id": "iron",
-    "label": "IronSpider",
+    "label": "TrollHandler",
     "kind": "class",
-    "description": "Responds to iron and mercenary signals, finishing the chain when its target is found.",
-    "image": "./resource/iron-spider.png",
-    "imageAlt": "IronSpider with a pale circular marking on its back",
+    "description": "Recognizes the scent of trolls and handles the matching request.",
+    "image": "./resource/TrollHandler.png",
+    "imageAlt": "Spider with a pale circular marking on its back",
     "position": {
-      "x": 360,
-      "y": 1600
+      "x": 900,
+      "y": 1040
     },
-    "fields": [
-      {
-        "id": "iron-next",
-        "label": "next: SignalHandler | null · iron",
-        "description": "The next handler, or null at the end of the chain."
-      }
-    ],
     "methods": [
       {
         "id": "iron-handle",
-        "label": "handle(request) · iron",
-        "description": "An iron spider reacts when the signal matches a mercenary trail."
+        "label": "Handle(request)",
+        "description": "TrollHandler handles the scent of trolls and calls the inherited forward method for other requests."
       }
     ],
     "relationships": [
       {
-        "type": "implements",
-        "target": "handler"
+        "type": "extends",
+        "target": "enemy-handler"
       }
     ]
   }

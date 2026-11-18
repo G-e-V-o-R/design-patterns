@@ -10,7 +10,8 @@
         "label": "planRoute(destination): Route",
         "description": "The operation every travel strategy must provide."
       }
-    ]
+    ],
+    "relationships": []
   },
   {
     "id": "walking-strategy",

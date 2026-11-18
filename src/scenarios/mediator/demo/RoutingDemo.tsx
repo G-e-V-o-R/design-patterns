@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -65,7 +66,7 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
                 Back to Mediator demo
               </button>
             </div>
-            <DirectConnectionsScene reducedMotion={reducedMotion} active={active} />
+            <DirectConnectionsScene active={active} />
           </>
         )
         : (
@@ -138,8 +139,9 @@ const directConnections: [ParticipantId, ParticipantId][] = [
   ['faelina', 'saerenn'],
 ];
 
-function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: boolean; active: boolean })
+function DirectConnectionsScene({ active }: { active: boolean })
 {
+  const arrowMarkerId = useId();
   const sceneRef = useRef<HTMLDivElement>(null);
   const actorRefs = useRef<Record<ParticipantId, HTMLElement | null>>({
     'dre-kaar': null,
@@ -147,7 +149,7 @@ function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: bool
     faelina: null,
     saerenn: null,
   });
-  const [links, setLinks] = useState<string[]>([]);
+  const [links, setLinks] = useState<{ id: string; path: string }[]>([]);
   const participants: {
     id: ParticipantId;
     description: string;
@@ -186,9 +188,16 @@ function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: bool
 
         const sourceBounds = source.getBoundingClientRect();
         const targetBounds = target.getBoundingClientRect();
-        const start = getFacingPoint(sourceBounds, targetBounds, sceneBounds);
-        const end = getFacingPoint(targetBounds, sourceBounds, sceneBounds);
-        return [`M ${start.x} ${start.y} L ${end.x} ${end.y}`];
+        return [
+          {
+            id: `${sourceId}-to-${targetId}`,
+            path: getDirectArrowPath(sourceBounds, targetBounds, sceneBounds, 5),
+          },
+          {
+            id: `${targetId}-to-${sourceId}`,
+            path: getDirectArrowPath(targetBounds, sourceBounds, sceneBounds, -5),
+          },
+        ];
       });
 
       setLinks(nextLinks);
@@ -208,15 +217,12 @@ function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: bool
       <header>
         <p className="med-kicker">WITHOUT A MEDIATOR</p>
         <h3 id="med-direct-heading">Everyone must coordinate with everyone</h3>
-        <p>
-          Each companion now needs a direct connection to the other three.
-          That creates six links to manage instead of one shared coordinator.
-        </p>
+        <p>Each companion must coordinate directly with the other three.</p>
       </header>
       <div
         className="med-direct-scene"
         ref={sceneRef}
-        aria-label="Four companions with six direct connections"
+        aria-label="Four companions with six bidirectional connections"
       >
         {links.length > 0 && (
           <svg
@@ -225,11 +231,25 @@ function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: bool
             preserveAspectRatio="none"
             aria-hidden="true"
           >
-            {links.map((path, index) => (
+            <defs>
+              <marker
+                id={arrowMarkerId}
+                markerWidth="7"
+                markerHeight="8"
+                markerUnits="userSpaceOnUse"
+                refX="7"
+                refY="4"
+                orient="auto"
+              >
+                <path className="med-direct-arrowhead" d="M0 0 L7 4 L0 8 Z" />
+              </marker>
+            </defs>
+            {links.map(({ id, path }) => (
               <path
-                key={index}
+                key={id}
                 d={path}
-                className={reducedMotion ? '' : 'med-direct-link'}
+                className="med-direct-link"
+                markerEnd={`url(#${arrowMarkerId})`}
               />
             ))}
           </svg>
@@ -248,7 +268,7 @@ function DirectConnectionsScene({ reducedMotion, active }: { reducedMotion: bool
         ))}
       </div>
       <p className="med-direct-summary" role="status" aria-live="polite">
-        Six direct connections: every companion must track three peers.
+        Twelve arrows show the message directions across six direct connections.
       </p>
     </section>
   );
@@ -438,6 +458,7 @@ function getFacingPoint(
   from: DOMRect,
   to: DOMRect,
   sceneBounds: DOMRect,
+  edgeOffset = 0,
 )
 {
   const fromCenterX = from.left + from.width / 2;
@@ -449,14 +470,42 @@ function getFacingPoint(
   {
     return {
       x: (toCenterX > fromCenterX ? from.right : from.left) - sceneBounds.left,
-      y: fromCenterY - sceneBounds.top,
+      y: fromCenterY - sceneBounds.top + edgeOffset,
     };
   }
 
   return {
-    x: fromCenterX - sceneBounds.left,
+    x: fromCenterX - sceneBounds.left + edgeOffset,
     y: (toCenterY > fromCenterY ? from.bottom : from.top) - sceneBounds.top,
   };
+}
+
+function getDirectArrowPath(
+  from: DOMRect,
+  to: DOMRect,
+  sceneBounds: DOMRect,
+  edgeOffset: number,
+)
+{
+  const targetIsRight = from.right <= to.left;
+  const targetIsBelow = from.bottom <= to.top;
+  const columnsApart = targetIsRight || to.right <= from.left;
+  const rowsApart = targetIsBelow || to.bottom <= from.top;
+
+  if (columnsApart && rowsApart)
+  {
+    // Разные стороны угла разделяют встречные стрелки даже в узком зазоре.
+    const cornerInset = 8;
+    const startX = (targetIsRight ? from.right : from.left) - sceneBounds.left;
+    const startY = (targetIsBelow ? from.bottom - cornerInset : from.top + cornerInset) - sceneBounds.top;
+    const endX = (targetIsRight ? to.left + cornerInset : to.right - cornerInset) - sceneBounds.left;
+    const endY = (targetIsBelow ? to.top : to.bottom) - sceneBounds.top;
+    return `M ${startX} ${startY} L ${endX} ${endY}`;
+  }
+
+  const start = getFacingPoint(from, to, sceneBounds, edgeOffset);
+  const end = getFacingPoint(to, from, sceneBounds, edgeOffset);
+  return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 }
 
 function ActorCard({

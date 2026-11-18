@@ -1,8 +1,8 @@
-import type { IntroContent, MemberDefinition, PresentedClass } from './lessonTypes';
-import type { DiagramRelationship } from './connections';
-import type { RelationshipDefinition } from './relationships';
+import type { IntroContent, MemberDefinition, MemberVisibility, PresentedClass } from './lessonTypes.ts';
+import type { DiagramRelationship } from './connections.ts';
+import type { RelationshipDefinition } from './relationships.ts';
 
-export type ConfigMember = { id: string; label: string; description?: string };
+export type ConfigMember = { id: string; label: string; description?: string; visibility?: MemberVisibility };
 
 export type ScenarioConfig = {
   id: string;
@@ -217,9 +217,9 @@ export function compileScenarioConfig(
       fail(`${path}.id`, `Relationship "${relationshipId}" is already defined (implements and uses are built in).`);
     }
     const appearance = relationship.appearance ?? 'solid';
-    if (appearance !== 'solid' && appearance !== 'implementation')
+    if (appearance !== 'solid' && appearance !== 'implementation' && appearance !== 'inheritance')
     {
-      fail(`${path}.appearance`, 'Expected solid or implementation.');
+      fail(`${path}.appearance`, 'Expected solid, implementation, or inheritance.');
     }
     relationships.push({
       id: relationshipId,
@@ -289,14 +289,25 @@ export function compileScenarioConfig(
       array(card[property], `${path}.${property}`, true).forEach((memberValue, memberIndex) =>
       {
         const memberPath = `${path}.${property}[${memberIndex}]`;
-        const member = record(memberValue, memberPath, ['id', 'label', 'description']);
+        const member = record(memberValue, memberPath, ['id', 'label', 'description', 'visibility']);
         const memberId = identifier(member.id, `${memberPath}.id`);
         if (memberIds.has(memberId))
         {
           fail(`${memberPath}.id`, `Duplicate member ID "${memberId}". Member IDs must be unique across the lesson.`);
         }
         memberIds.add(memberId);
-        members.push({ id: memberId, label: string(member.label, `${memberPath}.label`), kind, description: optionalString(member.description, `${memberPath}.description`) });
+        const visibility = member.visibility;
+        if (visibility !== undefined && visibility !== 'public' && visibility !== 'protected' && visibility !== 'private')
+        {
+          return fail(`${memberPath}.visibility`, 'Expected public, protected, or private.');
+        }
+        members.push({
+          id: memberId,
+          label: string(member.label, `${memberPath}.label`),
+          kind,
+          description: optionalString(member.description, `${memberPath}.description`),
+          ...(visibility && { visibility }),
+        });
         memberOwners[memberId] = classId;
       });
     }
@@ -312,6 +323,7 @@ export function compileScenarioConfig(
   });
 
   const edgeKeys = new Set<string>();
+  const usedRelationshipIds = new Set<string>();
   for (const { edge, path } of pendingEdges)
   {
     if (!classIds.has(edge.target))
@@ -332,6 +344,7 @@ export function compileScenarioConfig(
       fail(path, 'Duplicate expected relationship.');
     }
     edgeKeys.add(key);
+    usedRelationshipIds.add(edge.type);
   }
 
   return {
@@ -356,7 +369,7 @@ export function compileScenarioConfig(
     memberOwners,
     expectedEdges: pendingEdges.map(({ edge }) => edge),
     positions,
-    relationships,
+    relationships: relationships.filter(relationship => usedRelationshipIds.has(relationship.id)),
     hints: strings(root.hints, 'hints', true),
   };
 }

@@ -6,12 +6,17 @@ export type RelationshipDefinition = {
   id: string;
   label: string;
   toolLabel?: string;
-  appearance?: 'solid' | 'implementation';
+  appearance?: 'solid' | 'implementation' | 'inheritance';
 };
 
 export function relationshipMarkerId(namespace: string, relationshipId: string, invalid = false)
 {
   return `${namespace}-${relationshipId}-arrow${invalid ? '-invalid' : ''}`;
+}
+
+export function hasHollowRelationshipMarker(appearance: RelationshipDefinition['appearance'])
+{
+  return appearance === 'implementation' || appearance === 'inheritance';
 }
 
 export function relationshipLabel(type: string, relationships: readonly RelationshipDefinition[])
@@ -49,7 +54,7 @@ export function createRelationshipEdge(
     className: invalid ? 'is-invalid' : undefined,
     labelStyle: invalid ? { fill: '#ffe0d7' } : undefined,
     labelBgStyle: invalid ? { fill: '#613b35' } : undefined,
-    markerEnd: isImplementation
+    markerEnd: hasHollowRelationshipMarker(definition?.appearance)
       ? relationshipMarkerId(markerNamespace, edge.type, invalid)
       : { type: MarkerType.ArrowClosed, color },
     style: {

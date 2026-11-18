@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { compileScenarioConfig } from '../src/scenarios/shared/scenarioConfig';
+import { compileScenarioConfig } from '../src/scenarios/shared/scenarioConfig.ts';
 
 export function readConfiguredScenarios(root: string)
 {

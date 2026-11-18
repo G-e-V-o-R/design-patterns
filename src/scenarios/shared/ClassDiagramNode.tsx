@@ -2,7 +2,7 @@ import type { DragEvent } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { connectionHandles } from './connections';
 import { requireClassArtwork } from './classArtwork';
-import type { ClassAppearance, MemberDefinition } from './lessonTypes';
+import type { ClassAppearance, MemberDefinition, MemberVisibility } from './lessonTypes';
 
 export type DiagramHandle = {
   id?: string;
@@ -33,6 +33,7 @@ const defaultHandles: readonly DiagramHandle[] = connectionHandles.map(side => (
 }));
 
 const handlePositions = { top: Position.Top, bottom: Position.Bottom, left: Position.Left, right: Position.Right };
+const visibilitySymbols = { public: '+', protected: '#', private: '−' } satisfies Record<MemberVisibility, string>;
 
 export function ClassDiagramCard(props: ClassDiagramCardProps)
 {
@@ -110,7 +111,13 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
 function MemberSection({ sectionKind, ...props }: ClassDiagramCardProps & { sectionKind: 'field' | 'method' })
 {
   const members = props.members.filter(member => member.kind === sectionKind);
+  if (sectionKind === 'field' && props.variant === 'interface' && members.length === 0)
+  {
+    return null;
+  }
+
   const heading = sectionKind === 'field' ? 'Fields' : 'Methods';
+  const defaultVisibility = sectionKind === 'field' ? 'private' : 'public';
   return (
     <div className="pattern-class-members">
       <small className="pattern-member-heading">{heading}</small>
@@ -124,7 +131,7 @@ function MemberSection({ sectionKind, ...props }: ClassDiagramCardProps & { sect
           onDragStart={event => props.onStartMemberDrag?.(event, member.id)}
           onDragEnd={props.onEndMemberDrag}
         >
-          <span>{sectionKind === 'field' ? '−' : '+'}</span>
+          <span title={member.visibility}>{visibilitySymbols[member.visibility ?? defaultVisibility]}</span>
           <code>{member.label}</code>
         </div>
       ))}
