@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import type { LessonGraph } from '../../shared/configuredLessonModel';
-import { simulateDiscovery, type DiscoveryResult } from './demoModel';
+import { simulateDiscovery, type DiscoveryResult, type ObserverId, type Subscriptions } from './demoModel';
 import { ObserverDemo } from './NotificationDemo';
 import './styles.css';
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
-  const [narionSubscribed, setNarionSubscribed] = useState(true);
+  const [subscriptions, setSubscriptions] = useState<Subscriptions>({ narion: true, 'dre-kaar': true });
   const [run, setRun] = useState<{ graph: LessonGraph; result: DiscoveryResult } | null>(null);
 
   if (run && run.graph !== graph)
@@ -21,13 +21,13 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
     {
       return;
     }
-    const result = simulateDiscovery(graph, { danger, narionSubscribed });
+    const result = simulateDiscovery(graph, { danger, subscriptions });
     setRun(result ? { graph, result } : null);
   }
 
-  function toggleBracelet()
+  function toggleBracelet(observer: ObserverId)
   {
-    setNarionSubscribed(subscribed => !subscribed);
+    setSubscriptions(previous => ({ ...previous, [observer]: !previous[observer] }));
     setRun(null);
   }
 
@@ -36,7 +36,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
       <ObserverDemo
         ready={ready}
         active={active}
-        narionSubscribed={narionSubscribed}
+        subscriptions={subscriptions}
         onToggleBracelet={toggleBracelet}
         onRun={startDiscovery}
         run={run?.graph === graph ? run : null}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import foxPortrait from '../resource/fox-card.png?url';
 import narionPortrait from '../resource/narion-card.png?url';
 import dreKaarPortrait from '../resource/dre-kaar-card.png?url';
-import type { DiscoveryResult } from './demoModel';
+import type { DiscoveryResult, ObserverId, Subscriptions } from './demoModel';
 
 const subscribers = [
   { id: 'narion', name: 'Narion', portrait: narionPortrait },
@@ -20,8 +20,8 @@ export type DemoRun = {
 type ObserverDemoProps = {
   ready: boolean;
   active: boolean;
-  narionSubscribed: boolean;
-  onToggleBracelet: () => void;
+  subscriptions: Subscriptions;
+  onToggleBracelet: (observer: ObserverId) => void;
   onRun: (danger: boolean) => void;
   run: DemoRun | null;
 };
@@ -37,7 +37,7 @@ function getStatus(phase: Phase, result: DiscoveryResult | undefined)
     case 'finished':
       return result?.summary;
     default:
-      return 'Choose what the fox finds. Try changing Narion’s bracelet between runs.';
+      return 'Choose what the fox finds. Try switching either bracelet on or off between runs.';
   }
 }
 
@@ -142,18 +142,16 @@ function SubscriberCard({ subscriber, subscribed, delivery, response, disabled, 
           {subscribed ? 'Subscribed' : 'Unsubscribed'}
         </p>
         <p>{response}</p>
-        {subscriber.id === 'narion' && (
-          <button
-            type="button"
-            className="observer-bracelet"
-            disabled={disabled}
-            aria-disabled={playing}
-            aria-pressed={subscribed}
-            onClick={onToggleBracelet}
-          >
-            Narion’s bracelet <span aria-hidden="true">{subscribed ? 'On' : 'Off'}</span>
-          </button>
-        )}
+        <button
+          type="button"
+          className="observer-bracelet"
+          disabled={disabled}
+          aria-disabled={playing}
+          aria-pressed={subscribed}
+          onClick={onToggleBracelet}
+        >
+          {subscriber.name}’s bracelet <span aria-hidden="true">{subscribed ? 'On' : 'Off'}</span>
+        </button>
       </div>
     </article>
   );
@@ -174,7 +172,7 @@ function DiscoveryTrace({ result }: { result: DiscoveryResult })
 export function ObserverDemo({
   ready,
   active,
-  narionSubscribed,
+  subscriptions,
   onToggleBracelet,
   onRun,
   run,
@@ -209,7 +207,7 @@ export function ObserverDemo({
       return;
     }
 
-    const nextPhase = phase === 'checking' && run.result.danger ? 'sending' : 'finished';
+    const nextPhase = phase === 'checking' && run.result.recipients.length > 0 ? 'sending' : 'finished';
     const delay = phase === 'checking' ? 540 : 900;
     const timer = window.setTimeout(() => setProgress({ run, phase: nextPhase }), delay);
 
@@ -242,11 +240,11 @@ export function ObserverDemo({
     }
   }
 
-  function toggleBracelet()
+  function toggleBracelet(observer: ObserverId)
   {
     if (!disabled && !playing)
     {
-      onToggleBracelet();
+      onToggleBracelet(observer);
     }
   }
 
@@ -262,7 +260,7 @@ export function ObserverDemo({
         <div className="observer-deliveries">
           {subscribers.map(subscriber =>
           {
-            const subscribed = subscriber.id !== 'narion' || narionSubscribed;
+            const subscribed = subscriptions[subscriber.id];
             const receivesMessage = result?.recipients.includes(subscriber.id) ?? false;
             const delivery = getDeliveryState(subscribed, receivesMessage, phase);
             let response = subscribed ? 'Waiting for a warning.' : 'Bracelet is off.';
@@ -287,7 +285,7 @@ export function ObserverDemo({
                   response={response}
                   disabled={disabled}
                   playing={playing}
-                  onToggleBracelet={toggleBracelet}
+                  onToggleBracelet={() => toggleBracelet(subscriber.id)}
                 />
               </div>
             );
