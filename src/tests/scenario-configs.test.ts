@@ -6,7 +6,7 @@ import { readConfiguredScenarios } from '../../scripts/scenarioConfigs';
 import { emptyConfiguredLesson, getConfiguredLessonIssues, solutionConfiguredLesson } from '../scenarios/shared/configuredLessonModel';
 
 const configs = readConfiguredScenarios(resolve('src/scenarios'));
-assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'mediator', 'observer', 'strategy'],
+assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'decorator', 'mediator', 'observer', 'strategy'],
   'Discover every lesson from its config directory.');
 for (const config of configs)
 {

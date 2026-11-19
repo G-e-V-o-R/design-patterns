@@ -1,0 +1,12 @@
+[
+  {
+    "id": "extends",
+    "label": "extends",
+    "appearance": "inheritance"
+  },
+  {
+    "id": "wraps",
+    "label": "wraps",
+    "appearance": "solid"
+  }
+]

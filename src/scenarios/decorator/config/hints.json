@@ -1,0 +1,5 @@
+[
+  "Put the speak() contract on Voice. LatveVoice implements that interface and returns the plain words with an empty list of effects.",
+  "JellyfishDecorator also implements Voice. Give it a private wrapped: Voice field, have speak() forward to the wrapped voice, and draw Wraps from JellyfishDecorator to Voice.",
+  "Draw Extends from each effect decorator to JellyfishDecorator. Each concrete speak() calls super.speak() and adds its own effect after any effects already present."
+]

@@ -1,0 +1,10 @@
+{
+  "id": "decorator",
+  "number": "05",
+  "title": "A wrapper for the voice",
+  "pattern": "Decorator",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json",
+  "relationshipTypes": "./relationships.json"
+}

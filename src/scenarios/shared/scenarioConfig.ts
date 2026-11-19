@@ -3,6 +3,8 @@ import type { DiagramRelationship } from './connections.ts';
 import type { RelationshipDefinition } from './relationships.ts';
 
 export type ConfigMember = { id: string; label: string; description?: string; visibility?: MemberVisibility };
+type ClassPosition = { x: number; y: number };
+type SolutionPosition = ClassPosition & { anchorY?: 'center' };
 
 export type ScenarioConfig = {
   id: string;
@@ -10,6 +12,7 @@ export type ScenarioConfig = {
   pattern: string;
   number?: string;
   intro: {
+    category?: string;
     paragraphs: string[];
     image: string;
     imageAlt?: string;
@@ -25,7 +28,8 @@ export type ScenarioConfig = {
     description?: string;
     image?: string;
     imageAlt?: string;
-    position?: { x: number; y: number };
+    position?: ClassPosition;
+    solutionPosition?: SolutionPosition;
     fields?: ConfigMember[];
     methods?: ConfigMember[];
     relationships?: { type: string; target: string }[];
@@ -44,7 +48,8 @@ export type CompiledScenario = {
   members: MemberDefinition[];
   memberOwners: Record<string, string>;
   expectedEdges: DiagramRelationship[];
-  positions: Record<string, { x: number; y: number }>;
+  positions: Record<string, ClassPosition>;
+  solutionPositions: Record<string, SolutionPosition>;
   relationships: RelationshipDefinition[];
   hints: string[];
 };
@@ -194,7 +199,8 @@ export function compileScenarioConfig(
   {
     fail('number', 'Expected a numeric string such as "04".');
   }
-  const intro = record(root.intro, 'intro', ['paragraphs', 'image', 'imageAlt', 'caption', 'task', 'concept', 'steps']);
+  const intro = record(root.intro, 'intro', ['category', 'paragraphs', 'image', 'imageAlt', 'caption', 'task', 'concept', 'steps']);
+  const category = optionalString(intro.category, 'intro.category');
   const paragraphs = strings(intro.paragraphs, 'intro.paragraphs');
   if (paragraphs.length === 0)
   {
@@ -233,7 +239,17 @@ export function compileScenarioConfig(
   const classes: PresentedClass[] = [];
   const members: MemberDefinition[] = [];
   const memberOwners: Record<string, string> = {};
-  const positions: Record<string, { x: number; y: number }> = {};
+  const positions: Record<string, ClassPosition> = {};
+  const solutionPositions: Record<string, SolutionPosition> = {};
+  function classPosition({ x, y }: Record<string, unknown>, path: string): ClassPosition
+  {
+    if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y))
+    {
+      return fail(path, 'x and y must be finite numbers.');
+    }
+    return { x, y };
+  }
+
   const pendingEdges: { edge: DiagramRelationship; path: string }[] = [];
   const classIds = new Set<string>();
   const memberIds = new Set<string>();
@@ -245,7 +261,7 @@ export function compileScenarioConfig(
   classValues.forEach((value, index) =>
   {
     const path = `classes[${index}]`;
-    const card = record(value, path, ['id', 'label', 'kind', 'description', 'image', 'imageAlt', 'position', 'fields', 'methods', 'relationships']);
+    const card = record(value, path, ['id', 'label', 'kind', 'description', 'image', 'imageAlt', 'position', 'solutionPosition', 'fields', 'methods', 'relationships']);
     const classId = identifier(card.id, `${path}.id`);
     if (classIds.has(classId))
     {
@@ -271,18 +287,24 @@ export function compileScenarioConfig(
       classes.push({ ...definition, variant: 'interface', artwork: card.image === undefined ? undefined : artwork(card.image, card.imageAlt, path, label) });
     }
 
-    let position = { x: (index % 3) * 380, y: Math.floor(index / 3) * 780 };
-    if (card.position !== undefined)
-    {
-      const supplied = record(card.position, `${path}.position`, ['x', 'y']);
-      if (typeof supplied.x !== 'number' || !Number.isFinite(supplied.x)
-        || typeof supplied.y !== 'number' || !Number.isFinite(supplied.y))
-      {
-        fail(`${path}.position`, 'x and y must be finite numbers.');
-      }
-      position = { x: supplied.x, y: supplied.y };
-    }
+    const position = card.position === undefined
+      ? { x: (index % 3) * 380, y: Math.floor(index / 3) * 780 }
+      : classPosition(record(card.position, `${path}.position`, ['x', 'y']), `${path}.position`);
     positions[classId] = position;
+    solutionPositions[classId] = position;
+    if (card.solutionPosition !== undefined)
+    {
+      const solutionPath = `${path}.solutionPosition`;
+      const solution = record(card.solutionPosition, solutionPath, ['x', 'y', 'anchorY']);
+      const coordinates = classPosition(solution, solutionPath);
+      if (solution.anchorY !== undefined && solution.anchorY !== 'center')
+      {
+        fail(`${solutionPath}.anchorY`, 'Expected center.');
+      }
+      solutionPositions[classId] = solution.anchorY === 'center'
+        ? { ...coordinates, anchorY: solution.anchorY }
+        : coordinates;
+    }
 
     for (const [property, kind] of [['fields', 'field'], ['methods', 'method']] as const)
     {
@@ -356,6 +378,7 @@ export function compileScenarioConfig(
       number: number ?? '',
       title,
       pattern,
+      ...(category === undefined ? {} : { category }),
       headingId: `${id}-heading`,
       artwork: artwork(intro.image, intro.imageAlt, 'intro', title),
       caption: optionalString(intro.caption, 'intro.caption') ?? title,
@@ -369,6 +392,7 @@ export function compileScenarioConfig(
     memberOwners,
     expectedEdges: pendingEdges.map(({ edge }) => edge),
     positions,
+    solutionPositions,
     relationships: relationships.filter(relationship => usedRelationshipIds.has(relationship.id)),
     hints: strings(root.hints, 'hints', true),
   };

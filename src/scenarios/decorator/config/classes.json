@@ -1,0 +1,127 @@
+[
+  {
+    "id": "voice",
+    "label": "Voice",
+    "kind": "interface",
+    "description": "Component interface shared by Latve’s plain voice and every decorated voice.",
+    "position": { "x": 200, "y": 0 },
+    "solutionPosition": { "x": 155, "y": 0 },
+    "methods": [
+      {
+        "id": "voice-speak",
+        "label": "speak() · contract",
+        "description": "Returns the spoken words and an ordered list of effects."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "latve-voice",
+    "label": "LatveVoice",
+    "kind": "class",
+    "description": "Concrete component that supplies Latve’s words.",
+    "image": "./resource/latve-voice.png",
+    "imageAlt": "Latve stands alone near the old tower",
+    "position": { "x": 0, "y": 360 },
+    "solutionPosition": { "x": 0, "y": 260 },
+    "methods": [
+      {
+        "id": "latve-speak",
+        "label": "speak() · plain voice",
+        "description": "Returns Latve’s words with no magical effect."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "voice" }
+    ]
+  },
+  {
+    "id": "jellyfish-decorator",
+    "label": "JellyfishDecorator",
+    "kind": "class",
+    "description": "Base decorator that holds a Voice and forwards speak() to it.",
+    "image": "./resource/jellyfish-decorator.png",
+    "imageAlt": "A green jellyfish with long glowing tentacles",
+    "position": { "x": 400, "y": 360 },
+    "solutionPosition": { "x": 310, "y": 260 },
+    "fields": [
+      {
+        "id": "wrapped-voice",
+        "label": "wrapped: Voice",
+        "description": "Holds a plain voice or another decorator through the Voice interface.",
+        "visibility": "private"
+      }
+    ],
+    "methods": [
+      {
+        "id": "jellyfish-speak",
+        "label": "speak() · forward",
+        "description": "Returns the result of wrapped.speak()."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "voice" },
+      { "type": "wraps", "target": "voice" }
+    ]
+  },
+  {
+    "id": "sleep-decorator",
+    "label": "SleepDecorator",
+    "kind": "class",
+    "description": "Concrete decorator that puts listeners to sleep.",
+    "image": "./resource/Sleep.png",
+    "imageAlt": "A soft blue jellyfish with wispy tentacles",
+    "position": { "x": 0, "y": 855 },
+    "solutionPosition": { "x": 0, "y": 555 },
+    "methods": [
+      {
+        "id": "sleep-speak",
+        "label": "speak() · add sleep",
+        "description": "Calls super.speak(), keeps the words and earlier effects, and appends sleep."
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "jellyfish-decorator" }
+    ]
+  },
+  {
+    "id": "hypnosis-decorator",
+    "label": "HypnosisDecorator",
+    "kind": "class",
+    "description": "Concrete decorator that puts listeners in a trance.",
+    "image": "./resource/Hypnosis.png",
+    "imageAlt": "A violet jellyfish surrounded by a purple glow",
+    "position": { "x": 400, "y": 855 },
+    "solutionPosition": { "x": 310, "y": 555 },
+    "methods": [
+      {
+        "id": "hypnosis-speak",
+        "label": "speak() · add hypnosis",
+        "description": "Calls super.speak(), keeps the words and earlier effects, and appends hypnosis."
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "jellyfish-decorator" }
+    ]
+  },
+  {
+    "id": "storm-decorator",
+    "label": "StormDecorator",
+    "kind": "class",
+    "description": "Concrete decorator that summons a storm.",
+    "image": "./resource/Storm.png",
+    "imageAlt": "A bright blue jellyfish surrounded by lightning",
+    "position": { "x": 800, "y": 855 },
+    "solutionPosition": { "x": 620, "y": 555 },
+    "methods": [
+      {
+        "id": "storm-speak",
+        "label": "speak() · add storm",
+        "description": "Calls super.speak(), keeps the words and earlier effects, and appends storm."
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "jellyfish-decorator" }
+    ]
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "category": "STRUCTURAL PATTERN",
+  "paragraphs": [
+    "Latve looks down at the old tower. “Will you destroy it?” Dre’Kaar asks. “It’ll amplify my voice,” Latve says. “Turn it into a weapon.”",
+    "A jellyfish rests on her shoulder. One kind puts listeners to sleep, another hypnotizes them, and a third summons a storm. Latve can layer several jellyfish around the same voice.",
+    "“It starts with the voice. It all depends on what you wrap it in,” says Latve.",
+    "How can Latve combine the effects and still speak through the same interface?"
+  ],
+  "image": "./resource/latve-at-the-old-tower.png",
+  "imageAlt": "Latve stands beside Dre’Kaar above an old tower with a glowing jellyfish on her shoulder",
+  "caption": "Latve and Dre’Kaar by the old tower",
+  "task": "Build the diagram for Latve’s voice, the base jellyfish decorator, and the three concrete decorators. Then try stacking their effects.",
+  "concept": "Both LatveVoice and JellyfishDecorator implement Voice. The base decorator holds a Voice and forwards speak() to it. Each concrete decorator extends the base and adds its own effect after the wrapped voice speaks. Because each wrapper is itself a Voice, the effects can be stacked.",
+  "steps": [
+    "Add classes and assign members",
+    "Connect the interface and decorators",
+    "Try plain and stacked voices"
+  ]
+}
