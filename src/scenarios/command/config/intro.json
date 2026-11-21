@@ -1,0 +1,16 @@
+{
+  "paragraphs": [
+    "Dre’Kaar gives the Commander Beetle three orders. Latve must wake everyone, Faelina must set the traps, and Narion must guard the flank. Each order is an object that carries its own receiver and knows what to ask that receiver to do.",
+    "Three child beetles gather beside the Commander Beetle, one for each queued order. Dre’Kaar chooses which one to send, and the Commander Beetle calls execute() on that order at delivery. When the lookout reports that the flank is clear, Dre’Kaar can recall Narion’s order while it is still in flight. Narion stays at his original post.",
+    "If Narion has already moved to the flank, Dre’Kaar can undo the executed order. The command saved Narion’s previous post when it ran, so it can send him back there."
+  ],
+  "image": "./resource/7.0.png",
+  "imageAlt": "Dre’Kaar riding a large beetle with golden wings",
+  "task": "Build the class diagram for the three orders. Show how Dre’Kaar hands them to the Commander Beetle and how each order delegates work to its receiver.",
+  "concept": "The Command pattern encapsulates a request in an object. The invoker uses the same execute() interface for every order, so it can queue and run different requests without knowing the receiver’s methods. An application can also keep a history and support undo for commands that know how to reverse their effects.",
+  "steps": [
+    "Identify the client, invoker, commands, and receivers",
+    "Connect the invoker to Command and each concrete order to its receiver",
+    "Compare recalling an order with undoing it after execution"
+  ]
+}

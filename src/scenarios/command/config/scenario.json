@@ -1,0 +1,10 @@
+{
+  "id": "command",
+  "number": "07",
+  "title": "The Commander Beetle",
+  "pattern": "Command",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json",
+  "relationshipTypes": "./relationships.json"
+}

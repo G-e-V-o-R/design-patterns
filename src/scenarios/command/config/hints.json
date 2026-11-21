@@ -1,0 +1,6 @@
+[
+  "Dre’Kaar gives the orders to the Commander Beetle. Put register(), dispatch(orderId), cancel(orderId), and deliver(orderId) on the beetle.",
+  "The Commander Beetle stores orders through the Command interface. Its deliver(orderId) method calls execute() without needing to know which receiver does the work.",
+  "Each order implements Command and has its own version of execute(). The order uses one receiver: Latve, Faelina, or Narion.",
+  "The receivers do the work. Give wakeEveryone() to Latve, setTraps() to Faelina, and holdFlank() to Narion."
+]

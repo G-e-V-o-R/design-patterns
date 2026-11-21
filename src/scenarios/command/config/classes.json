@@ -1,0 +1,310 @@
+[
+  {
+    "id": "dre-kaar",
+    "label": "Dre’Kaar",
+    "kind": "class",
+    "description": "The client. Creates each command with its receiver and passes it to the Commander Beetle.",
+    "image": "./resource/dre-kaar.webp",
+    "imageAlt": "Portrait of Dre’Kaar",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "solutionPosition": {
+      "x": 0,
+      "y": 0,
+      "anchorY": "center"
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "give-orders",
+        "label": "giveOrders()",
+        "description": "Create the orders and register them with the Commander Beetle."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "uses",
+        "target": "commander"
+      }
+    ]
+  },
+  {
+    "id": "commander",
+    "label": "CommanderBeetle",
+    "kind": "class",
+    "description": "The invoker. Queues Command objects and calls their shared execute() method on delivery.",
+    "image": "./resource/7.0.png",
+    "imageAlt": "A large beetle with Dre’Kaar on its back",
+    "position": {
+      "x": 340,
+      "y": 0
+    },
+    "solutionPosition": {
+      "x": 340,
+      "y": 0,
+      "anchorY": "center"
+    },
+    "fields": [
+      {
+        "id": "orders",
+        "label": "orders: Command[]",
+        "description": "The list of registered orders."
+      }
+    ],
+    "methods": [
+      {
+        "id": "register",
+        "label": "register(command)",
+        "description": "Save an order as pending."
+      },
+      {
+        "id": "dispatch",
+        "label": "dispatch(orderId)",
+        "description": "Send a messenger beetle with the selected pending order."
+      },
+      {
+        "id": "cancel",
+        "label": "cancel(orderId)",
+        "description": "Cancel a saved order before it is carried out."
+      },
+      {
+        "id": "deliver",
+        "label": "deliver(orderId)",
+        "description": "Call execute() on the selected order in flight. The command delegates to its own receiver."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "stores",
+        "target": "command"
+      }
+    ]
+  },
+  {
+    "id": "command",
+    "label": "Command",
+    "kind": "interface",
+    "description": "The shared interface for any order the Commander Beetle can run.",
+    "position": {
+      "x": 680,
+      "y": 0
+    },
+    "solutionPosition": {
+      "x": 680,
+      "y": 0,
+      "anchorY": "center"
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "execute-contract",
+        "label": "execute() · contract",
+        "description": "Every concrete order must provide this method."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "wake",
+    "label": "WakeEveryoneCommand",
+    "kind": "class",
+    "description": "An order for Latve to wake everyone.",
+    "image": "./resource/7.1.png",
+    "imageAlt": "Messenger beetle carrying an order for Latve",
+    "position": {
+      "x": 340,
+      "y": 360
+    },
+    "solutionPosition": {
+      "x": 340,
+      "y": 360,
+      "anchorY": "center"
+    },
+    "fields": [
+      {
+        "id": "wake-receiver",
+        "label": "receiver: Latve",
+        "description": "The person who carries out this order."
+      }
+    ],
+    "methods": [
+      {
+        "id": "wake-execute",
+        "label": "execute() · Latve’s order",
+        "description": "Ask Latve to wake everyone."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "implements",
+        "target": "command"
+      },
+      {
+        "type": "uses",
+        "target": "latve"
+      }
+    ]
+  },
+  {
+    "id": "traps",
+    "label": "SetTrapsCommand",
+    "kind": "class",
+    "description": "An order for Faelina to set traps.",
+    "image": "./resource/7.1.png",
+    "imageAlt": "Messenger beetle carrying an order for Faelina",
+    "position": {
+      "x": 680,
+      "y": 360
+    },
+    "solutionPosition": {
+      "x": 680,
+      "y": 360,
+      "anchorY": "center"
+    },
+    "fields": [
+      {
+        "id": "traps-receiver",
+        "label": "receiver: Faelina",
+        "description": "The person who carries out this order."
+      }
+    ],
+    "methods": [
+      {
+        "id": "traps-execute",
+        "label": "execute() · Faelina’s order",
+        "description": "Ask Faelina to set traps."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "implements",
+        "target": "command"
+      },
+      {
+        "type": "uses",
+        "target": "faelina"
+      }
+    ]
+  },
+  {
+    "id": "flank",
+    "label": "HoldFlankCommand",
+    "kind": "class",
+    "description": "An order for Narion to leave the hill post and guard the flank.",
+    "image": "./resource/7.1.png",
+    "imageAlt": "Messenger beetle carrying an order for Narion",
+    "position": {
+      "x": 1020,
+      "y": 360
+    },
+    "solutionPosition": {
+      "x": 1020,
+      "y": 360,
+      "anchorY": "center"
+    },
+    "fields": [
+      {
+        "id": "flank-receiver",
+        "label": "receiver: Narion",
+        "description": "The person who carries out this order."
+      }
+    ],
+    "methods": [
+      {
+        "id": "flank-execute",
+        "label": "execute() · Narion’s order",
+        "description": "Ask Narion to move to the flank."
+      }
+    ],
+    "relationships": [
+      {
+        "type": "implements",
+        "target": "command"
+      },
+      {
+        "type": "uses",
+        "target": "narion"
+      }
+    ]
+  },
+  {
+    "id": "latve",
+    "label": "Latve",
+    "kind": "class",
+    "description": "The receiver. Wakes everyone.",
+    "image": "./resource/latve.webp",
+    "imageAlt": "Portrait of Latve",
+    "position": {
+      "x": 340,
+      "y": 680
+    },
+    "solutionPosition": {
+      "x": 340,
+      "y": 680,
+      "anchorY": "center"
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "latve-action",
+        "label": "wakeEveryone()",
+        "description": "Wakes everyone."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "faelina",
+    "label": "Faelina",
+    "kind": "class",
+    "description": "The receiver. Sets the traps.",
+    "image": "./resource/faelina.webp",
+    "imageAlt": "Portrait of Faelina",
+    "position": {
+      "x": 680,
+      "y": 680
+    },
+    "solutionPosition": {
+      "x": 680,
+      "y": 680,
+      "anchorY": "center"
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "faelina-action",
+        "label": "setTraps()",
+        "description": "Sets the traps."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "narion",
+    "label": "Narion",
+    "kind": "class",
+    "description": "The receiver. Starts at the hill post and moves to the flank when ordered.",
+    "image": "./resource/narion.webp",
+    "imageAlt": "Portrait of Narion",
+    "position": {
+      "x": 1020,
+      "y": 680
+    },
+    "solutionPosition": {
+      "x": 1020,
+      "y": 680,
+      "anchorY": "center"
+    },
+    "fields": [],
+    "methods": [
+      {
+        "id": "narion-action",
+        "label": "holdFlank()",
+        "description": "Moves Narion from the hill post to the flank."
+      }
+    ],
+    "relationships": []
+  }
+]

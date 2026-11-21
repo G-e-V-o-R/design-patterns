@@ -1,0 +1,510 @@
+.command-demo {
+  --command-gold: #e9bc74;
+  --command-text: #f2e4cb;
+  --command-muted: #c3baa2;
+  container-type: inline-size;
+  margin: 0 8px 20px;
+  padding: clamp(12px, 2.5vw, 24px);
+  border: 1px solid #776141;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at top left, #343020, transparent 55%), #151c19;
+  color: var(--command-text);
+}
+
+.command-demo .command-demo-header {
+  margin-bottom: 18px;
+}
+
+.command-demo h2 {
+  margin: 0 0 6px;
+  color: #ffe3b0;
+  font-family: Georgia, serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.command-demo p {
+  margin: 0;
+  color: var(--command-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.command-demo .command-scene {
+  --command-travel: 650ms;
+  --command-highlight: 220ms;
+  --command-gather-duration: 780ms;
+  --command-flight-duration: 1600ms;
+  display: grid;
+  grid-template-columns: minmax(145px, 23%) minmax(0, 1fr);
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid #695237;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 25px, #eec18c0a 25px 26px),
+    repeating-linear-gradient(90deg, transparent 0 25px, #eec18c0a 25px 26px),
+    radial-gradient(ellipse at 10% 35%, #553b28, transparent 70%),
+    linear-gradient(140deg, #23231c, #13211c);
+}
+
+.command-demo .command-source {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  margin: 0;
+  isolation: isolate;
+}
+
+.command-demo .command-source-art,
+.command-demo .command-source::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.command-demo .command-source-art {
+  object-fit: cover;
+  object-position: 50% 36%;
+}
+
+.command-demo .command-source::after {
+  background: linear-gradient(0deg, #11140ff5 2%, transparent 62%),
+    linear-gradient(90deg, transparent 75%, #332b20 100%);
+  content: '';
+}
+
+.command-demo .command-source figcaption {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+}
+
+.command-demo .command-dock {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  display: flex;
+  gap: 4px;
+}
+
+.command-demo .command-dock-slot {
+  width: 36px;
+  height: 36px;
+}
+
+.command-demo .command-child {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e9bc74;
+  border-radius: 50%;
+  background: #24271e;
+  box-shadow: 0 0 10px #12140e;
+  object-fit: cover;
+}
+
+.command-demo .command-child[data-phase="approaching"] {
+  z-index: 1;
+  position: relative;
+  animation: command-fly-in var(--command-gather-duration) ease-out both;
+}
+
+.command-demo .command-source strong {
+  font-family: Georgia, serif;
+  font-size: clamp(17px, 2.5vw, 25px);
+  font-weight: 500;
+}
+
+.command-demo .command-source figcaption span {
+  color: #f3cc93;
+  font-size: 12px;
+}
+
+.command-demo .command-routes {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 12px 12px 10px;
+  list-style: none;
+}
+
+.command-demo .command-route {
+  --route-color: #9d8a62;
+  --flight-progress: 0%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(175px, 35%);
+  gap: 10px;
+  min-width: 0;
+}
+
+.command-demo .command-route[data-order-status="pending"],
+.command-demo .command-route[data-order-status="in-flight"] {
+  --route-color: #f2c270;
+}
+
+.command-demo .command-route[data-order-status="in-flight"] {
+  --flight-progress: 100%;
+}
+
+.command-demo .command-route[data-order-status="executed"] {
+  --route-color: #bbdf94;
+  --flight-progress: 100%;
+}
+
+.command-demo .command-route[data-order-status="canceled"] {
+  --route-color: #e9a48c;
+}
+
+.command-demo .command-route[data-order-status="undone"] {
+  --route-color: #b9caef;
+  --flight-progress: 100%;
+}
+
+.command-demo .command-track {
+  --card-width: min(174px, 75%);
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 76px;
+}
+
+.command-demo .command-track-line,
+.command-demo .command-track-trail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+}
+
+.command-demo .command-track-line {
+  width: 100%;
+  background: repeating-linear-gradient(90deg, var(--route-color) 0 4px, transparent 4px 9px);
+  opacity: .52;
+}
+
+.command-demo .command-track-trail {
+  width: var(--flight-progress);
+  background: var(--route-color);
+  box-shadow: 0 0 12px var(--route-color);
+  transition: width var(--command-travel) ease;
+}
+
+.command-demo .command-card {
+  position: relative;
+  left: var(--flight-progress);
+  transform: translateX(calc(-1 * var(--flight-progress)));
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: var(--card-width);
+  padding: 6px;
+  border: 1px solid var(--route-color);
+  border-radius: 7px;
+  background: #24271e;
+  box-shadow: 0 3px 8px #15140eab;
+  transition: left var(--command-travel) ease, transform var(--command-travel) ease;
+}
+
+.command-demo .command-route[data-order-status="in-flight"] .command-card {
+  animation: command-fly-out var(--command-flight-duration) ease-in-out both;
+}
+
+.command-demo .command-route[data-order-status="in-flight"] .command-track-trail {
+  transition-duration: var(--command-flight-duration);
+}
+
+.command-demo .command-card-copy {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  color: var(--command-muted);
+  font-size: 10px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.command-demo .command-card-copy strong {
+  color: var(--command-text);
+  font-size: 11px;
+}
+
+.command-demo .command-messenger-frame {
+  overflow: hidden;
+  border: 1px solid var(--route-color);
+  border-radius: 50%;
+}
+
+.command-demo .command-messenger-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.command-demo .command-route[data-order-status="canceled"] .command-messenger-frame {
+  transform: scaleX(-1);
+}
+
+.command-demo .command-receiver {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 78px;
+  padding: 6px;
+  border: 1px solid #a8844a68;
+  border-radius: 7px;
+  background: linear-gradient(110deg, #393024, #1a2720 87%);
+  transition: border-color var(--command-highlight) ease, box-shadow var(--command-highlight) ease;
+}
+
+.command-demo .command-receiver > img {
+  display: block;
+  width: 100%;
+  height: 64px;
+  border-radius: 4px;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.command-demo .command-receiver-copy {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.command-demo .command-receiver strong {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.command-demo .command-action,
+.command-demo .command-receiver-state {
+  color: var(--command-muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.command-demo .command-order-status {
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  color: var(--route-color);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.command-demo .command-receiver-state {
+  display: grid;
+}
+
+.command-demo .command-receiver-state > span {
+  grid-area: 1 / 1;
+}
+
+.command-demo .command-receiver-state[data-completed="true"] .command-before {
+  visibility: hidden;
+}
+
+.command-demo .command-outcome {
+  color: #d5efb6;
+}
+
+.command-demo .command-route[data-order-status="executed"] .command-receiver {
+  border-color: #adce82;
+  box-shadow: inset 0 0 24px #9cca7826, 0 0 13px #9cca782d;
+}
+
+.command-demo .command-route[data-order-status="undone"] .command-receiver {
+  border-color: var(--route-color);
+}
+
+.command-demo .command-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.command-demo .command-history {
+  border-top: 1px solid #a8936866;
+  margin-top: 14px;
+  padding-top: 12px;
+  font-size: 13px;
+}
+
+.command-demo .command-history h3,
+.command-demo .command-history p {
+  margin: 0 0 6px;
+}
+
+.command-demo .command-history ol {
+  margin: 0;
+  padding-inline-start: 24px;
+}
+
+.command-demo .command-history li {
+  padding-block: 3px;
+}
+
+.command-demo .command-history li span {
+  display: inline-block;
+  margin-inline-start: 8px;
+}
+
+.command-demo .command-controls button {
+  min-height: 40px;
+  padding: 7px 12px;
+  border: 1px solid #c99e61;
+  border-radius: 6px;
+  background: #e9bc74;
+  color: #21190f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.command-demo .command-launches button {
+  padding-inline: 10px;
+}
+
+.command-demo .command-controls .command-recall {
+  border-color: #be8068;
+  background: #54342a;
+  color: #ffe1cd;
+}
+
+.command-demo .command-controls .command-reset {
+  border-color: #a89368;
+  background: transparent;
+  color: var(--command-text);
+}
+
+.command-demo .command-controls button:hover:enabled {
+  filter: brightness(1.18);
+  cursor: pointer;
+}
+
+.command-demo .command-controls button:focus-visible {
+  outline: 2px solid #ffe1a6;
+  outline-offset: 2px;
+}
+
+.command-demo .command-controls button:disabled {
+  border-color: #615b4a;
+  background: #262820;
+  color: #aaa38f;
+}
+
+.command-demo .command-status {
+  min-height: 1.5em;
+  margin-top: 12px;
+  color: #ffdc9f;
+}
+
+.command-demo .command-scene[data-active="false"] .command-child,
+.command-demo .command-scene[data-active="false"] .command-card {
+  animation-play-state: paused;
+}
+
+@keyframes command-fly-in {
+  from {
+    opacity: 0;
+    transform: translate(68px, 28px) scale(.65);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate(43px, -8px) scale(1.1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes command-fly-out {
+  from {
+    left: 0;
+    transform: translateX(0);
+  }
+
+  40% {
+    transform: translate(-40%, -8px);
+  }
+
+  to {
+    left: 100%;
+    transform: translateX(-100%);
+  }
+}
+
+@container (max-width: 760px) {
+  .command-demo .command-scene {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .command-demo .command-source {
+    min-height: 152px;
+  }
+
+  .command-demo .command-source-art {
+    object-position: 50% 31%;
+  }
+
+  .command-demo .command-source::after {
+    background: linear-gradient(0deg, #161710 0%, transparent 80%);
+  }
+
+  .command-demo .command-source figcaption {
+    padding: 12px;
+  }
+
+  .command-demo .command-routes {
+    padding: 8px;
+  }
+
+  .command-demo .command-receiver {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 64px;
+  }
+
+  .command-demo .command-receiver > img {
+    height: 50px;
+  }
+}
+
+@container (max-width: 470px) {
+  .command-demo .command-route {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .command-demo .command-track {
+    min-height: 68px;
+  }
+
+  .command-demo .command-receiver {
+    justify-self: end;
+    width: min(175px, 90%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .command-demo .command-scene {
+    --command-travel: 0ms;
+    --command-highlight: 0ms;
+  }
+}
