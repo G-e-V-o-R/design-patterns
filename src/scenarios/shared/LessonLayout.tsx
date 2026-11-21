@@ -1,9 +1,13 @@
-import type { ReactNode } from 'react';
+import type { DragEventHandler, ReactNode } from 'react';
 
-export function LessonWorkspace({ tray, children }: { tray: ReactNode; children: ReactNode })
+export function LessonWorkspace({ tray, children, onDragEnd }: {
+  tray: ReactNode;
+  children: ReactNode;
+  onDragEnd?: DragEventHandler<HTMLDivElement>;
+})
 {
   return (
-    <div className="pattern-workspace">
+    <div className="pattern-workspace" onDragEnd={onDragEnd}>
       {tray}
       <div className="pattern-board">{children}</div>
     </div>
@@ -47,7 +51,7 @@ export function LessonStatus({ children }: { children: ReactNode })
 
 export function LessonAction({ label, description, ready, onRun }: {
   label: string;
-  description: string;
+  description?: string;
   ready: boolean;
   onRun: () => void;
 })
@@ -55,7 +59,7 @@ export function LessonAction({ label, description, ready, onRun }: {
   return (
     <div className="pattern-actions">
       <button disabled={!ready} onClick={onRun}>{label}</button>
-      <span>{description}</span>
+      {description && <span>{description}</span>}
     </div>
   );
 }

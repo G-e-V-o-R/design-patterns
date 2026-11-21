@@ -1,3 +1,33 @@
 .configured-lesson .configured-tray {
   min-width: 0;
 }
+
+.configured-lesson .configured-lesson-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.configured-lesson .configured-lesson-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.configured-lesson .configured-lesson-tabs [aria-selected="true"] {
+  border-color: #d2b980;
+  background: #374b36;
+}
+
+.configured-lesson .configured-lesson-tabs [aria-disabled="true"] {
+  cursor: default;
+  color: #a6b3a2;
+  border-color: #a8997159;
+  background: #233129;
+}
+
+.configured-lesson .configured-lesson-navigation p {
+  color: #bbc6b6;
+  font-size: 13px;
+}

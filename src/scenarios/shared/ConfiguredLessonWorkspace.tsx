@@ -1,13 +1,12 @@
-import { useEffect, useState, type DragEvent, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useState, type DragEvent, type MouseEvent } from 'react';
 import { applyNodeChanges, type Connection, type Edge, type EdgeChange, type NodeChange } from '@xyflow/react';
 import { ClassDiagramCanvas } from './ClassDiagramCanvas';
 import { configuredNodeTypes, type ConfiguredClassNode } from './ConfiguredClassNode';
 import { facingConnectionHandles } from './connections';
 import { DiagramBuilderPanel, type CardCategory } from './DiagramBuilderPanel';
-import { BoardToolbar, LessonStatus, LessonWorkspace, SolutionNotice } from './LessonLayout';
+import { BoardToolbar, LessonAction, LessonStatus, LessonWorkspace, SolutionNotice } from './LessonLayout';
 import { RelationshipList } from './RelationshipList';
 import { parallelRelationshipEdgeTypes, parallelRelationshipOffsets } from './ParallelRelationshipEdge';
-import { ConceptCallout, StoryIntro } from './StoryIntro';
 import { createRelationshipEdge } from './relationships';
 import type { CompiledScenario } from './scenarioConfig';
 import type { ConfiguredLessonEditor } from './useConfiguredLesson';
@@ -16,12 +15,12 @@ type WorkspaceProps = {
   config: CompiledScenario;
   editor: ConfiguredLessonEditor;
   active: boolean;
-  children?: ReactNode;
+  onRunDemo?: () => void;
 };
 
 type NodePresentation = Pick<ConfiguredClassNode, 'selected' | 'measured'>;
 
-export function ConfiguredLessonWorkspace({ config, editor, active, children }: WorkspaceProps)
+export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }: WorkspaceProps)
 {
   const [category, setCategory] = useState<CardCategory>('classes');
   const [relationship, setRelationship] = useState(config.relationships[0]?.id ?? '');
@@ -243,89 +242,86 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
   }
 
   return (
-    <section className="configured-lesson pattern-lesson" aria-labelledby={config.intro.headingId} onDragEnd={endDrag}>
-      <StoryIntro content={config.intro} />
-      <LessonWorkspace
-        tray={
-          <div className="configured-tray" onDragOver={allowReturn} onDrop={returnMember}>
-            <DiagramBuilderPanel
-              classes={config.classes}
-              members={config.members}
-              placedClasses={graph.classes}
-              assignments={graph.members}
-              hideAssignedMembers
-              category={category}
-              onCategoryChange={setCategory}
-              draggedMemberId={draggedMember}
-              hints={config.hints}
-              hintIndex={editor.hint}
-              onAddClass={editor.addClass}
-              onStartDrag={startDrag}
-              onEndDrag={endDrag}
-              onShowHint={editor.showHint}
-              onShowSolution={showSolution}
-            />
-          </div>
-        }
-      >
-        <BoardToolbar
-          placedMembers={Object.keys(graph.members).length}
-          totalMembers={config.members.length}
-          relationships={graph.edges.length}
-          canUndo={editor.canUndo}
-          onUndo={editor.undo}
-          onReset={reset}
-        />
-        {editor.worked && <SolutionNotice>Example solution · study how the members and relationships fit together.</SolutionNotice>}
-        <ClassDiagramCanvas
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={configuredNodeTypes}
-          edgeTypes={parallelRelationshipEdgeTypes}
-          classKey={`${editor.fitRevision}:${graph.classes.join(',')}`}
-          active={active}
-          compact={layout.compact}
-          markerNamespace={config.id}
-          label={`${config.pattern} class diagram`}
-          emptyTitle="Build your class diagram"
-          emptyDescription={emptyDescription}
-          onNodesChange={changeNodes}
-          onEdgesChange={changeEdges}
-          onNodesDelete={deleted => editor.removeClasses(deleted.map(node => node.id))}
-          onEdgesDelete={deleted => editor.removeEdges(deleted.map(edge => Number(edge.id)))}
-          onConnect={connect}
-          onReconnect={(edge, connection) => editor.reconnect(Number(edge.id), connection)}
-          onNodeClick={clickNode}
-          onPaneClick={() => setConnectionSource(null)}
-          relationships={config.relationships}
-          drawing={drawing}
-          relationship={relationship}
-          connectionSource={connectionSource}
-          classLabel={classLabel}
-          onMoveMode={() =>
-          {
-            setDrawing(false);
-            setConnectionSource(null);
-          }}
-          onSelectRelationship={type =>
-          {
-            setRelationship(type);
-            setDrawing(true);
-            setConnectionSource(null);
-          }}
-        />
-        <RelationshipList
-          edges={graph.edges}
-          relationships={config.relationships}
-          classLabel={classLabel}
-          invalidEdgeIndices={invalidEdges}
-          onRemove={index => editor.removeEdges([index])}
-        />
-        <ConfiguredLessonStatus editor={editor} />
-        {children}
-      </LessonWorkspace>
-      {config.intro.concept && <ConceptCallout>{config.intro.concept}</ConceptCallout>}
-    </section>
+    <LessonWorkspace
+      onDragEnd={endDrag}
+      tray={
+        <div className="configured-tray" onDragOver={allowReturn} onDrop={returnMember}>
+          <DiagramBuilderPanel
+            classes={config.classes}
+            members={config.members}
+            placedClasses={graph.classes}
+            assignments={graph.members}
+            hideAssignedMembers
+            category={category}
+            onCategoryChange={setCategory}
+            draggedMemberId={draggedMember}
+            hints={config.hints}
+            hintIndex={editor.hint}
+            onAddClass={editor.addClass}
+            onStartDrag={startDrag}
+            onEndDrag={endDrag}
+            onShowHint={editor.showHint}
+            onShowSolution={showSolution}
+          />
+        </div>
+      }
+    >
+      <BoardToolbar
+        placedMembers={Object.keys(graph.members).length}
+        totalMembers={config.members.length}
+        relationships={graph.edges.length}
+        canUndo={editor.canUndo}
+        onUndo={editor.undo}
+        onReset={reset}
+      />
+      {editor.worked && <SolutionNotice>Example solution · study how the members and relationships fit together.</SolutionNotice>}
+      <ClassDiagramCanvas
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={configuredNodeTypes}
+        edgeTypes={parallelRelationshipEdgeTypes}
+        classKey={`${editor.fitRevision}:${graph.classes.join(',')}`}
+        active={active}
+        compact={layout.compact}
+        markerNamespace={config.id}
+        label={`${config.pattern} class diagram`}
+        emptyTitle="Build your class diagram"
+        emptyDescription={emptyDescription}
+        onNodesChange={changeNodes}
+        onEdgesChange={changeEdges}
+        onNodesDelete={deleted => editor.removeClasses(deleted.map(node => node.id))}
+        onEdgesDelete={deleted => editor.removeEdges(deleted.map(edge => Number(edge.id)))}
+        onConnect={connect}
+        onReconnect={(edge, connection) => editor.reconnect(Number(edge.id), connection)}
+        onNodeClick={clickNode}
+        onPaneClick={() => setConnectionSource(null)}
+        relationships={config.relationships}
+        drawing={drawing}
+        relationship={relationship}
+        connectionSource={connectionSource}
+        classLabel={classLabel}
+        onMoveMode={() =>
+        {
+          setDrawing(false);
+          setConnectionSource(null);
+        }}
+        onSelectRelationship={type =>
+        {
+          setRelationship(type);
+          setDrawing(true);
+          setConnectionSource(null);
+        }}
+      />
+      <RelationshipList
+        edges={graph.edges}
+        relationships={config.relationships}
+        classLabel={classLabel}
+        invalidEdgeIndices={invalidEdges}
+        onRemove={index => editor.removeEdges([index])}
+      />
+      <ConfiguredLessonStatus editor={editor} />
+      {onRunDemo && <LessonAction label="Run demo" ready={editor.ready} onRun={onRunDemo} />}
+    </LessonWorkspace>
   );
 }
 
