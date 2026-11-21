@@ -7,6 +7,8 @@ import {
   type Connection,
   type Edge,
   type EdgeChange,
+  type EdgeTypes,
+  type FitViewOptions,
   type Node,
   type NodeChange,
   type NodeTypes,
@@ -21,8 +23,10 @@ export type DiagramCanvasProps<NodeType extends Node> = RelationshipToolsProps &
   nodes: NodeType[];
   edges: Edge[];
   nodeTypes: NodeTypes;
+  edgeTypes?: EdgeTypes;
   classKey: string;
   active?: boolean;
+  compact?: boolean;
   markerNamespace: string;
   label: string;
   emptyTitle: string;
@@ -44,12 +48,20 @@ export type ScenarioDiagramProps<NodeType extends Node> = Omit<
   'nodeTypes' | 'markerNamespace' | 'label' | 'emptyTitle' | 'emptyDescription' | 'relationships' | 'classLabel'
 >;
 
+const compactFit = {
+  padding: { x: '20px', top: '26px', bottom: '125px' },
+  minZoom: 0.16,
+  maxZoom: 0.9,
+} satisfies FitViewOptions;
+
 export function ClassDiagramCanvas<NodeType extends Node>({
   nodes,
   edges,
   nodeTypes,
+  edgeTypes,
   classKey,
   active = true,
+  compact = false,
   markerNamespace,
   label,
   emptyTitle,
@@ -88,11 +100,11 @@ export function ClassDiagramCanvas<NodeType extends Node>({
 
     const timerId = window.setTimeout(() =>
     {
-      void flow?.fitView({ padding: 0.2, maxZoom: 0.9 });
+      void flow?.fitView(compact ? compactFit : { padding: 0.2, maxZoom: 0.9 });
     }, 100);
 
     return () => window.clearTimeout(timerId);
-  }, [flow, classKey, active]);
+  }, [flow, classKey, active, compact]);
 
   return (
     <div className="pattern-canvas" aria-label={label} onDragOver={onDragOver} onDrop={onDrop}>
@@ -102,6 +114,7 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onInit={setFlow}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -131,13 +144,13 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         onPaneClick={onPaneClick}
         nodesDraggable={!relationshipTools.drawing}
         deleteKeyCode={['Backspace', 'Delete']}
-        minZoom={0.25}
+        minZoom={compact ? compactFit.minZoom : 0.25}
         maxZoom={1.5}
         defaultViewport={{ x: 30, y: 30, zoom: 0.65 }}
         colorMode="dark"
       >
         <Background gap={22} color="#314338" />
-        <Controls position="bottom-right" showInteractive={false} />
+        <Controls position="bottom-right" showInteractive={false} fitViewOptions={compact ? compactFit : undefined} />
         <RelationshipTools {...relationshipTools} />
       </ReactFlow>
       {nodes.length === 0 && (

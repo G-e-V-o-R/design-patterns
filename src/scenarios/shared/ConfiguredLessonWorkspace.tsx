@@ -2,9 +2,11 @@ import { useEffect, useState, type DragEvent, type MouseEvent, type ReactNode } 
 import { applyNodeChanges, type Connection, type Edge, type EdgeChange, type NodeChange } from '@xyflow/react';
 import { ClassDiagramCanvas } from './ClassDiagramCanvas';
 import { configuredNodeTypes, type ConfiguredClassNode } from './ConfiguredClassNode';
+import { facingConnectionHandles } from './connections';
 import { DiagramBuilderPanel, type CardCategory } from './DiagramBuilderPanel';
 import { BoardToolbar, LessonStatus, LessonWorkspace, SolutionNotice } from './LessonLayout';
 import { RelationshipList } from './RelationshipList';
+import { parallelRelationshipEdgeTypes, parallelRelationshipOffsets } from './ParallelRelationshipEdge';
 import { ConceptCallout, StoryIntro } from './StoryIntro';
 import { createRelationshipEdge } from './relationships';
 import type { CompiledScenario } from './scenarioConfig';
@@ -17,7 +19,7 @@ type WorkspaceProps = {
   children?: ReactNode;
 };
 
-type NodePresentation = Pick<ConfiguredClassNode, 'position' | 'selected' | 'measured'>;
+type NodePresentation = Pick<ConfiguredClassNode, 'selected' | 'measured'>;
 
 export function ConfiguredLessonWorkspace({ config, editor, active, children }: WorkspaceProps)
 {
@@ -30,7 +32,8 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
   const [draggedMember, setDraggedMember] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const dragType = `application/x-${config.id}-member`;
-  const { graph } = editor;
+  const { graph, layout } = editor;
+  const defaultPositions = layout.compact ? config.solutionPositions : config.positions;
   const invalidMembers = new Set(editor.issues.flatMap(issue => issue.memberIds));
   const invalidEdges = new Set(editor.issues.flatMap(issue => issue.edgeIndices));
   const emptyDescription = config.relationships.length
@@ -104,11 +107,13 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
     .map(card => ({
       id: card.id,
       type: 'configuredClass',
-      position: config.positions[card.id] ?? { x: 0, y: 0 },
+      position: layout.positions[card.id] ?? defaultPositions[card.id] ?? { x: 0, y: 0 },
+      origin: layout.compact && config.solutionPositions[card.id]?.anchorY === 'center' ? [0, 0.5] : undefined,
       ...nodeState[card.id],
       className: connectionSource === card.id ? 'pattern-connection-source' : '',
       data: {
         ...card,
+        showArtwork: !layout.compact,
         dragType,
         members: config.members.filter(member => graph.members[member.id] === card.id),
         invalidMemberIds: invalidMembers,
@@ -139,17 +144,31 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
   const edges: Edge[] = graph.edges.map((edge, index) =>
   {
     const selected = selectedEdges.has(index);
+    const relationshipEdge = createRelationshipEdge(edge, index, config.relationships, config.id, selected, invalidEdges.has(index));
     return {
-      ...createRelationshipEdge(edge, index, config.relationships, config.id, selected, invalidEdges.has(index)),
+      ...relationshipEdge,
+      type: layout.compact ? 'straight' : relationshipEdge.type,
       reconnectable: selected,
     };
+  });
+  const parallelOffsets = parallelRelationshipOffsets(edges);
+  parallelOffsets.forEach((offset, index) =>
+  {
+    const edge = edges[index]!;
+    edges[index] = { ...edge, type: 'parallelRelationship', data: { offset } };
   });
 
   function changeNodes(changes: NodeChange<ConfiguredClassNode>[])
   {
+    const positions = Object.fromEntries(changes.flatMap(change =>
+      change.type === 'position' && change.position ? [[change.id, change.position]] : [],
+    ));
+    if (Object.keys(positions).length)
+    {
+      editor.moveClasses(positions);
+    }
     const nextNodes = applyNodeChanges(changes, nodes);
     setNodeState(Object.fromEntries(nextNodes.map(node => [node.id, {
-      position: node.position,
       selected: node.selected,
       measured: node.measured,
     }])));
@@ -198,13 +217,26 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
       setConnectionSource(node.id);
       return;
     }
-    editor.connect({ source: connectionSource, target: node.id }, relationship);
+    const source = nodes.find(card => card.id === connectionSource);
+    if (source)
+    {
+      const handles = facingConnectionHandles(source.position, node.position);
+      editor.connect({ source: source.id, target: node.id, ...handles }, relationship);
+    }
     setConnectionSource(null);
   }
 
   function reset()
   {
     editor.reset();
+    setNodeState({});
+    setDrawing(false);
+    endDrag();
+  }
+
+  function showSolution()
+  {
+    editor.showSolution();
     setNodeState({});
     setDrawing(false);
     endDrag();
@@ -231,7 +263,7 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
               onStartDrag={startDrag}
               onEndDrag={endDrag}
               onShowHint={editor.showHint}
-              onShowSolution={editor.showSolution}
+              onShowSolution={showSolution}
             />
           </div>
         }
@@ -249,8 +281,10 @@ export function ConfiguredLessonWorkspace({ config, editor, active, children }: 
           nodes={nodes}
           edges={edges}
           nodeTypes={configuredNodeTypes}
-          classKey={graph.classes.join(',')}
+          edgeTypes={parallelRelationshipEdgeTypes}
+          classKey={`${editor.fitRevision}:${graph.classes.join(',')}`}
           active={active}
+          compact={layout.compact}
           markerNamespace={config.id}
           label={`${config.pattern} class diagram`}
           emptyTitle="Build your class diagram"

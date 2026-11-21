@@ -1,0 +1,17 @@
+{
+  "paragraphs": [
+    "On the sixth day of the journey, the group stops at the foot of the cliffs. Dre’Kaar sets a pot over the fire. “Start with meat in cold water and let it simmer into broth. Then add the seasoning. Finish with vegetables sautéed until golden.”",
+    "“I’d crush a clove of garlic,” says Faelina. Latve holds up a bunch of fresh herbs. “I’d use these.” Dre’Kaar grins and reaches for the smoked pepper. “We each like a different flavor. The steps stay in the same order.”",
+    "What do you call a method that fixes the order of the steps while letting each cook put their own spin on a step?"
+  ],
+  "image": "./resource/Dre_Kaar.png",
+  "imageAlt": "Dre’Kaar stirs a pot of soup over a fire at the foot of the cliffs",
+  "caption": "Dre’Kaar at the campfire",
+  "task": "Build a class diagram that gives the three recipes a shared cooking sequence and lets each cook season the soup their own way.",
+  "concept": "In the Template Method pattern, the base class defines the order of the steps in cookSoup(). Subclasses inherit that method and override addSeasoning() to change the flavor of the soup.",
+  "steps": [
+    "Add classes and assign methods",
+    "Connect the recipes with inheritance arrows",
+    "Try all three recipes"
+  ]
+}

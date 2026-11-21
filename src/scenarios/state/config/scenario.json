@@ -1,0 +1,9 @@
+{
+  "id": "state",
+  "number": "04",
+  "title": "Hissing under the skin",
+  "pattern": "State",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json"
+}

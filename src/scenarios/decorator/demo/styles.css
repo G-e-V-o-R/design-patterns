@@ -238,6 +238,53 @@
   box-shadow: 0 6px 16px #070e19b0;
 }
 
+.decorator-demo .decorator-layer-label,
+.decorator-demo .decorator-core {
+  border-radius: 5px;
+}
+
+.decorator-demo .decorator-layer-label[data-current="true"],
+.decorator-demo .decorator-core[data-current="true"] {
+  outline: 1px solid var(--effect-color);
+  outline-offset: 2px;
+  background: var(--effect-glow);
+}
+
+.decorator-demo .decorator-core {
+  --effect-color: #ffd28c;
+  --effect-glow: #ffd28c26;
+}
+
+.decorator-demo .decorator-voice-preview {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  margin: 15px auto 13px;
+}
+
+.decorator-demo .decorator-voice-preview .decorator-wave-ring {
+  --ring-inset: calc((var(--effect-index) + 1) * 4px);
+  border-width: 1.5px;
+  box-shadow: none;
+  animation: decorator-preview-ring-arrive 480ms ease-out;
+}
+
+@keyframes decorator-preview-ring-arrive {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  64% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 .decorator-demo .decorator-voice-heading {
   display: flex;
   min-height: 36px;
@@ -258,10 +305,6 @@
   --listener-x: 87%;
   --portrait-y: 71%;
   --portrait-size: clamp(36px, 13cqi, 84px);
-  --jellyfish-arrival: 460ms;
-  --voice-delay: 0ms;
-  --voice-duration: 1250ms;
-  --effect-stagger: 260ms;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -269,10 +312,6 @@
   border: 1px solid var(--decorator-border);
   border-radius: 10px;
   background: #101a28;
-}
-
-.decorator-demo .decorator-voice-stage[data-adding="true"] {
-  --voice-delay: var(--jellyfish-arrival);
 }
 
 .decorator-demo .decorator-voice-stage::after {
@@ -419,7 +458,7 @@
   aspect-ratio: 1;
   opacity: 0;
   pointer-events: none;
-  animation: decorator-voice-expand var(--voice-duration) ease-out var(--voice-delay);
+  animation: decorator-voice-expand var(--voice-duration) ease-out;
 }
 
 .decorator-demo .decorator-wave-ring {
@@ -434,6 +473,10 @@
 .decorator-demo .decorator-wave-core {
   --effect-index: -1;
   --effect-color: #ffd28c;
+}
+
+.decorator-demo .decorator-voice-wave .decorator-wave-ring {
+  inset: 0;
 }
 
 @keyframes decorator-voice-expand {
@@ -454,8 +497,7 @@
 }
 
 .decorator-demo .decorator-voice-stage [data-changed="true"] {
-  --effect-start: calc(var(--voice-delay) + var(--voice-duration) + var(--effect-index) * var(--effect-stagger));
-  animation: decorator-reveal 230ms ease-out var(--effect-start) forwards;
+  animation: decorator-reveal 230ms ease-out var(--voice-duration) forwards;
 }
 
 @keyframes decorator-reveal {
@@ -551,6 +593,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .decorator-demo .decorator-stack > .decorator-layer,
+  .decorator-demo .decorator-voice-preview .decorator-wave-ring,
   .decorator-demo .decorator-jellyfish-stack [data-arriving="true"],
   .decorator-demo .decorator-voice-wave,
   .decorator-demo .decorator-voice-stage [data-changed="true"] {

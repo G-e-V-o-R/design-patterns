@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
-import { changeOrders, createSimulation, executionHistory, lastExecution, orderDetails } from './demoModel';
+import { changeOrders, createSimulation, executionHistory, orderDetails, undoForOrder } from './demoModel';
 import type { DemoAction, OrderId } from './demoModel';
 import { FlightScene, orderIds } from './FlightScene';
+import { childBeetleArt } from './childBeetleArt';
 import './styles.css';
 
 const commandLabels: Record<OrderId, string> = {
   wake: 'Wake everyone',
   traps: 'Set traps',
-  flank: 'Guard the flank',
+  flank: 'Move to right flank',
 };
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
   const [session, setSession] = useState(() => ({
-    graph, orders: createSimulation(graph), gathered: 0, runId: 0,
+    graph, orders: createSimulation(graph), gathered: 0, registrationStarted: false, runId: 0,
   }));
   const enabled = ready && active;
 
@@ -36,16 +37,21 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
           {
             return current;
           }
-          if (current.gathered < orderIds.length)
+          if (current.registrationStarted && current.gathered < orderIds.length)
           {
             return { ...current, gathered: orderIds.length, orders: changeOrders(current.orders, { type: 'register' }) };
           }
-          const inFlight = current.orders.filter(order => order.status === 'in-flight');
-          if (inFlight.length === 0)
+          const arriving = current.orders.filter(order => order.status === 'launching' || order.status === 'in-flight' || order.status === 'handoff');
+          if (arriving.length === 0)
           {
             return current;
           }
-          const orders = inFlight.reduce((orders, order) => changeOrders(orders, { type: 'deliver', id: order.id }), current.orders);
+          const orders = arriving.reduce((orders, { id }) =>
+          {
+            const launched = changeOrders(orders, { type: 'launch', id });
+            const delivered = changeOrders(launched, { type: 'deliver', id });
+            return changeOrders(delivered, { type: 'execute', id });
+          }, current.orders);
           return { ...current, orders };
         });
       }
@@ -58,18 +64,18 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   if (session.graph !== graph)
   {
-    setSession({ graph, orders: createSimulation(graph), gathered: 0, runId: session.runId + 1 });
+    setSession({ graph, orders: createSimulation(graph), gathered: 0, registrationStarted: false, runId: session.runId + 1 });
   }
 
-  const { orders, gathered, runId } = session;
+  const { orders, gathered, registrationStarted, runId } = session;
   if (!orders)
   {
     return null;
   }
 
-  const gathering = gathered < orderIds.length;
+  const gathering = registrationStarted && gathered < orderIds.length;
   const history = executionHistory(orders);
-  const canUndo = Boolean(lastExecution(orders)?.execution?.undo);
+  const canUndo = Boolean(undoForOrder(orders, 'flank'));
 
   function run(action: DemoAction)
   {
@@ -92,7 +98,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
     {
       setSession(current =>
       {
-        if (!current.orders || current.graph !== graph || current.runId !== runId || current.gathered !== gathered || !gathering)
+        if (!current.orders || current.graph !== graph || current.runId !== runId || current.gathered !== gathered || !current.registrationStarted || !gathering)
         {
           return current;
         }
@@ -110,39 +116,42 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
     <section className="command-demo" aria-labelledby="command-demo-title">
       <header className="command-demo-header">
         <h2 id="command-demo-title">Send the beetles</h2>
-        <p>Watch the three child beetles gather, then choose an order. Its beetle flies to the receiver and the command runs on arrival.</p>
+        <p>Register the child beetles, then choose an order. The Commander sends a copy and keeps the registered beetle.</p>
       </header>
-      <FlightScene key={runId} orders={orders} active={enabled} gathered={gathered}
-        onGather={finishGatheringFlight} onDeliver={id => run({ type: 'deliver', id })} />
-      {gathering ? (
-        <p className="command-status" role="status">{gathered} of {orderIds.length} child beetles at the Commander Beetle.</p>
-      ) : (
-        <div className="command-controls command-launches" role="group" aria-label="Run a command">
-          {orders.map(order => (
-            <button key={order.id} type="button" disabled={!enabled || order.status !== 'pending'}
-              onClick={() => run({ type: 'dispatch', id: order.id })}>
-              {commandLabels[order.id]}
-            </button>
-          ))}
-        </div>
-      )}
+      <FlightScene key={runId} orders={orders} active={enabled} gathered={gathered} gathering={gathering}
+        onGather={finishGatheringFlight} onLaunch={id => run({ type: 'launch', id })}
+        onDeliver={id => run({ type: 'deliver', id })}
+        onExecute={id => run({ type: 'execute', id })} />
       <div className="command-controls" role="group" aria-label="Order controls">
-        {orders.filter(order => order.status === 'in-flight').map(order => (
-          <button key={order.id} className="command-recall" type="button" disabled={!enabled}
-            onClick={() => run({ type: 'cancel', id: order.id })}>
-            Recall {orderDetails[order.id].receiver}’s order
+        {!registrationStarted && (
+          <button type="button" disabled={!enabled} onClick={() =>
+          {
+            setSession(current => ({ ...current, registrationStarted: true }));
+          }}>
+            Register
+          </button>
+        )}
+        {gathering && (
+          <p role="status">{gathered} of {orderIds.length} child beetles registered.</p>
+        )}
+        {orders.map(order => (
+          <button key={order.id} className="command-launch" type="button" disabled={!enabled || order.status !== 'pending'}
+            onClick={() => run({ type: 'dispatch', id: order.id })}>
+            <img src={childBeetleArt[order.id]} alt="" draggable={false} />
+            {commandLabels[order.id]}
           </button>
         ))}
-        <button type="button" disabled={!enabled || !canUndo} onClick={() => run({ type: 'undo-last' })}>
-          Undo last execution
+        <button type="button" disabled={!enabled || !canUndo} onClick={() => run({ type: 'undo', id: 'flank' })}>
+          Undo Narion’s order
         </button>
         <button className="command-reset" type="button" disabled={!enabled} onClick={() =>
         {
-          setSession({ graph, orders: [], gathered: 0, runId: runId + 1 });
+          setSession({ graph, orders: [], gathered: 0, registrationStarted: false, runId: runId + 1 });
         }}>
           Start over
         </button>
       </div>
+      <p className="command-status">Execute Narion’s order to reveal the feint. Undo Narion’s order to return him to the left flank.</p>
       <section className="command-history" aria-labelledby="command-history-title" aria-live="polite">
         <h3 id="command-history-title">Execution history</h3>
         {history.length === 0 && <p>No orders executed yet.</p>}

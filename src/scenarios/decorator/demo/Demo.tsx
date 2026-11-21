@@ -1,11 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import hypnosis from '../resource/Hypnosis.png?url';
 import latve from '../resource/latve-voice.png?url';
 import sleep from '../resource/Sleep.png?url';
 import storm from '../resource/Storm.png?url';
 import { speakWithEffects, voiceEffects, type VoiceEffect } from './demoModel';
-import VoiceScene from './VoiceScene';
+import VoiceScene, { jellyfishArrivalMs, voiceWaveMs } from './VoiceScene';
 import './styles.css';
 
 const effects: Record<VoiceEffect, { label: string; decorator: string; outcome: string; image: string }> = {
@@ -36,9 +36,48 @@ type DemoRun = {
   addedEffect?: VoiceEffect;
 };
 
+const speakStepMs = 750;
+const wavePauseMs = 250;
+
+function useSpeakStep(playbackId: number | undefined, effectCount: number, addingEffect: boolean)
+{
+  const [progress, setProgress] = useState<{ playbackId: number; step: number }>();
+  const firstStep = addingEffect ? -1 : 0;
+
+  useEffect(() =>
+  {
+    if (playbackId === undefined)
+    {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const arrivalDelay = addingEffect && !reducedMotion ? jellyfishArrivalMs : 0;
+    const waveStepMs = reducedMotion ? speakStepMs : voiceWaveMs + wavePauseMs;
+    const finalStep = 2 * effectCount + 1;
+    const timers = Array.from({ length: finalStep - firstStep }, (_, index) =>
+    {
+      const step = firstStep + index + 1;
+      const callTime = Math.min(step, effectCount) * speakStepMs;
+      const waveTime = Math.max(0, step - effectCount) * waveStepMs;
+      return window.setTimeout(() => setProgress({ playbackId, step }), arrivalDelay + callTime + waveTime);
+    });
+
+    return () => timers.forEach(timer => window.clearTimeout(timer));
+  }, [playbackId, effectCount, addingEffect, firstStep]);
+
+  if (playbackId === undefined)
+  {
+    return undefined;
+  }
+
+  return progress?.playbackId === playbackId ? progress.step : firstStep;
+}
+
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
   const [run, setRun] = useState<DemoRun | null>(null);
+  const nextPlaybackId = useRef(0);
   if (run && run.graph !== graph)
   {
     setRun(null);
@@ -46,6 +85,10 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   const utterance = run?.graph === graph ? run.utterance : null;
   const selectedEffects = utterance?.effects ?? [];
+  const playbackId = utterance ? run?.id : undefined;
+  const addedEffect = utterance ? run?.addedEffect : undefined;
+  const speakStep = useSpeakStep(playbackId, selectedEffects.length, addedEffect !== undefined);
+  const voiceStep = speakStep === undefined ? -1 : speakStep - selectedEffects.length;
   const disabled = !ready || !active;
 
   function speak(selected: readonly VoiceEffect[], addedEffect?: VoiceEffect)
@@ -58,7 +101,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
     const result = speakWithEffects(graph, selected);
     if (result)
     {
-      setRun(previous => ({ id: (previous?.id ?? 0) + 1, graph, utterance: result, addedEffect }));
+      setRun({ id: ++nextPlaybackId.current, graph, utterance: result, addedEffect });
     }
   }
 
@@ -119,9 +162,10 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
             </button>
           </div>
           <VoiceScene
-            playbackId={utterance ? run?.id : undefined}
+            playbackId={playbackId}
             selectedEffects={selectedEffects}
-            addedEffect={utterance ? run?.addedEffect : undefined}
+            addedEffect={addedEffect}
+            voiceStep={voiceStep}
             effects={effects}
           />
         </div>
@@ -129,7 +173,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
         <div className="decorator-scene">
           <h3>Voice composition</h3>
           <div className="decorator-stack">
-            <VoiceComposition selectedEffects={selectedEffects} />
+            <VoiceComposition playbackId={playbackId} selectedEffects={selectedEffects} step={speakStep} />
           </div>
         </div>
       </div>
@@ -142,24 +186,56 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
   );
 }
 
-function VoiceComposition({ selectedEffects }: { selectedEffects: readonly VoiceEffect[] })
+type VoiceCompositionProps = {
+  playbackId?: number;
+  selectedEffects: readonly VoiceEffect[];
+  step?: number;
+};
+
+function VoiceComposition({ playbackId, selectedEffects, step }: VoiceCompositionProps)
 {
+  const depth = selectedEffects.length;
+  const returning = step !== undefined && step > depth && step <= 2 * depth;
+  const calling = step !== undefined && step >= 0 && step < depth;
+  const returnedCount = step === undefined ? 0 : Math.min(depth, Math.max(0, step - depth));
+  const currentEffect = calling ? selectedEffects[depth - step - 1] : selectedEffects[returning ? returnedCount - 1 : -1];
   const core = (
-    <div className="decorator-core">
+    <div className="decorator-core" data-current={step === depth}>
       <img src={latve} alt="" draggable={false} />
       <code>LatveVoice</code>
     </div>
   );
 
-  return selectedEffects.reduce<ReactNode>((wrapped, effect) => (
+  const layers = selectedEffects.reduce<ReactNode>((wrapped, effect) => (
     <div className="decorator-layer" data-effect={effect} key={effect}>
-      <div className="decorator-layer-label">
+      <div className="decorator-layer-label" data-current={effect === currentEffect}>
         <img src={effects[effect].image} alt="" draggable={false} />
         <code>{effects[effect].decorator}</code>
       </div>
       {wrapped}
     </div>
   ), core);
+
+  return (
+    <>
+      {layers}
+      <div className="decorator-voice-preview" key={playbackId} aria-hidden="true">
+        {step !== undefined && step >= depth && (
+          <>
+            <span className="decorator-wave-ring decorator-wave-core" />
+            {selectedEffects.slice(0, returnedCount).map((effect, index) => (
+              <span
+                key={effect}
+                className="decorator-wave-ring"
+                data-effect={effect}
+                style={{ '--effect-index': index } as CSSProperties}
+              />
+            ))}
+          </>
+        )}
+      </div>
+    </>
+  );
 }
 
 function VoiceOutcome({ utterance }: Pick<DemoRun, 'utterance'>)
@@ -192,11 +268,19 @@ function CallTrace({ selectedEffects }: { selectedEffects: readonly VoiceEffect[
     (wrapped, effect) => `new ${effects[effect].decorator}(${wrapped})`,
     'new LatveVoice()',
   );
+  const callOrder = selectedEffects.map(effect => `${effects[effect].decorator}.speak()`).reverse();
+  callOrder.push('LatveVoice.speak()');
 
   return (
     <details className="decorator-trace">
       <summary>See the speak() call</summary>
       <p><code>({voice}).speak()</code></p>
+      {selectedEffects.length > 0 && (
+        <>
+          <p><strong>Calls inward</strong> <code>{callOrder.join(' → ')}</code></p>
+          <p><strong>Effects added on return</strong> {selectedEffects.map(effect => effects[effect].label).join(' → ')}</p>
+        </>
+      )}
     </details>
   );
 }

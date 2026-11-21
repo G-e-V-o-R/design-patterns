@@ -4,7 +4,7 @@
   --command-muted: #c3baa2;
   container-type: inline-size;
   margin: 0 8px 20px;
-  padding: clamp(12px, 2.5vw, 24px);
+  padding: clamp(12px, 1.5vw, 18px);
   border: 1px solid #776141;
   border-radius: 12px;
   background: radial-gradient(ellipse at top left, #343020, transparent 55%), #151c19;
@@ -12,14 +12,14 @@
 }
 
 .command-demo .command-demo-header {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .command-demo h2 {
   margin: 0 0 6px;
   color: #ffe3b0;
   font-family: Georgia, serif;
-  font-size: clamp(24px, 4vw, 34px);
+  font-size: clamp(23px, 3vw, 28px);
   font-weight: 500;
   line-height: 1.1;
 }
@@ -33,7 +33,8 @@
 
 .command-demo .command-scene {
   --command-travel: 650ms;
-  --command-highlight: 220ms;
+  --command-highlight: 300ms;
+  --command-dialogue-duration: 1500ms;
   --command-gather-duration: 780ms;
   --command-flight-duration: 1600ms;
   display: grid;
@@ -127,10 +128,10 @@
 
 .command-demo .command-routes {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   margin: 0;
-  padding: 12px 12px 12px 10px;
+  padding: 8px;
   list-style: none;
 }
 
@@ -138,27 +139,25 @@
   --route-color: #9d8a62;
   --flight-progress: 0%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(175px, 35%);
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 57%);
   gap: 10px;
   min-width: 0;
 }
 
 .command-demo .command-route[data-order-status="pending"],
+.command-demo .command-route[data-order-status="launching"],
 .command-demo .command-route[data-order-status="in-flight"] {
   --route-color: #f2c270;
 }
 
-.command-demo .command-route[data-order-status="in-flight"] {
+.command-demo .command-route[data-order-status="in-flight"],
+.command-demo .command-route[data-order-status="handoff"] {
   --flight-progress: 100%;
 }
 
 .command-demo .command-route[data-order-status="executed"] {
   --route-color: #bbdf94;
   --flight-progress: 100%;
-}
-
-.command-demo .command-route[data-order-status="canceled"] {
-  --route-color: #e9a48c;
 }
 
 .command-demo .command-route[data-order-status="undone"] {
@@ -200,7 +199,7 @@
   left: var(--flight-progress);
   transform: translateX(calc(-1 * var(--flight-progress)));
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: 6px;
   box-sizing: border-box;
@@ -211,6 +210,20 @@
   background: #24271e;
   box-shadow: 0 3px 8px #15140eab;
   transition: left var(--command-travel) ease, transform var(--command-travel) ease;
+}
+
+.command-demo .command-route[data-order-status="launching"] .command-card,
+.command-demo .command-route[data-order-status="in-flight"] .command-card,
+.command-demo .command-route[data-order-status="handoff"] .command-card {
+  grid-template-columns: 26px minmax(0, 1fr);
+}
+
+.command-demo .command-route[data-order-status="launching"] .command-card {
+  animation: command-launch-cue var(--command-dialogue-duration) ease-out both;
+}
+
+.command-demo .command-route[data-order-status="handoff"] .command-card {
+  animation: command-handoff var(--command-dialogue-duration) ease-out both;
 }
 
 .command-demo .command-route[data-order-status="in-flight"] .command-card {
@@ -236,6 +249,30 @@
   font-size: 11px;
 }
 
+.command-demo .command-dialogue {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: #f6dfb4;
+  color: #2d2317;
+}
+
+.command-demo .command-dialogue::before {
+  position: absolute;
+  top: 8px;
+  left: -4px;
+  border-block: 4px solid transparent;
+  border-right: 5px solid #f6dfb4;
+  content: '';
+}
+
+.command-demo .command-dialogue code {
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .command-demo .command-messenger-frame {
   overflow: hidden;
   border: 1px solid var(--route-color);
@@ -249,13 +286,9 @@
   object-fit: cover;
 }
 
-.command-demo .command-route[data-order-status="canceled"] .command-messenger-frame {
-  transform: scaleX(-1);
-}
-
 .command-demo .command-receiver {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-columns: clamp(76px, 32%, 104px) minmax(0, 1fr);
   gap: 10px;
   align-items: center;
   min-height: 78px;
@@ -266,13 +299,129 @@
   transition: border-color var(--command-highlight) ease, box-shadow var(--command-highlight) ease;
 }
 
-.command-demo .command-receiver > img {
+.command-demo .command-effect {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 4px;
+}
+
+.command-demo .command-effect img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.command-demo .command-effect-after {
+  opacity: 0;
+  transition: opacity var(--command-highlight) ease;
+}
+
+.command-demo .command-effect[data-completed="true"] .command-effect-after {
+  opacity: 1;
+}
+
+.command-demo .command-route[data-order="flank"] .command-receiver {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.command-demo .command-flank-map {
+  position: relative;
+  width: min(100%, 240px);
+  overflow: hidden;
+  aspect-ratio: 2;
+  border-radius: 4px;
+  background: #182119;
+}
+
+.command-demo .command-camp-art {
   display: block;
   width: 100%;
-  height: 64px;
+  height: 100%;
+}
+
+.command-demo .command-narion-marker {
+  position: absolute;
+  top: 53%;
+  left: 17%;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #a5dcff;
+  border-radius: 50%;
+  background: #233544;
+  box-shadow: 0 0 7px #14354a;
+  transform: translate(-50%, -50%);
+  transition: left var(--command-travel) ease, top var(--command-travel) ease;
+}
+
+.command-demo .command-narion-marker img {
+  position: absolute;
+  width: 300%;
+  max-width: none;
+  left: -98%;
+  top: -31%;
+}
+
+.command-demo .command-flank-map[data-right-post="true"] .command-narion-marker {
+  top: 45%;
+  left: 83%;
+}
+
+.command-demo .command-flank-label,
+.command-demo .command-flank-threat {
+  position: absolute;
+  padding: 2px 5px;
   border-radius: 4px;
-  object-fit: cover;
-  object-position: center 25%;
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.command-demo .command-flank-label {
+  bottom: 6%;
+  color: #fff0d4;
+  background: #20281b;
+}
+
+.command-demo .command-flank-label-left,
+.command-demo .command-flank-threat-left {
+  left: 4%;
+}
+
+.command-demo .command-flank-label-right,
+.command-demo .command-flank-threat-right {
+  right: 4%;
+}
+
+.command-demo .command-flank-threat {
+  top: 9%;
+  border: 1px solid currentColor;
+  color: #ffd2bf;
+  background: #57241d;
+  transition: opacity var(--command-highlight) ease var(--command-travel),
+    transform var(--command-highlight) ease var(--command-travel);
+}
+
+.command-demo .command-flank-threat::before {
+  content: "◆ ◆";
+  margin-right: 4px;
+}
+
+.command-demo .command-flank-threat-left,
+.command-demo .command-flank-map[data-feint-revealed="true"] .command-flank-threat-right {
+  opacity: 0;
+}
+
+.command-demo .command-flank-map[data-feint-revealed="true"] .command-flank-threat-right {
+  transform: translateX(65%);
+}
+
+.command-demo .command-flank-map[data-feint-revealed="true"] .command-flank-threat-left {
+  opacity: 1;
 }
 
 .command-demo .command-receiver-copy {
@@ -306,14 +455,12 @@
 
 .command-demo .command-receiver-state {
   display: grid;
+  gap: 3px;
 }
 
-.command-demo .command-receiver-state > span {
-  grid-area: 1 / 1;
-}
-
-.command-demo .command-receiver-state[data-completed="true"] .command-before {
-  visibility: hidden;
+.command-demo .command-route[data-order-status="handoff"] .command-receiver {
+  border-color: var(--command-gold);
+  box-shadow: 0 0 12px #f2c27055;
 }
 
 .command-demo .command-outcome {
@@ -331,15 +478,16 @@
 
 .command-demo .command-controls {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 .command-demo .command-history {
   border-top: 1px solid #a8936866;
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
   font-size: 13px;
 }
 
@@ -374,14 +522,17 @@
   font-weight: 650;
 }
 
-.command-demo .command-launches button {
+.command-demo .command-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding-inline: 10px;
 }
 
-.command-demo .command-controls .command-recall {
-  border-color: #be8068;
-  background: #54342a;
-  color: #ffe1cd;
+.command-demo .command-launch img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .command-demo .command-controls .command-reset {
@@ -408,7 +559,7 @@
 
 .command-demo .command-status {
   min-height: 1.5em;
-  margin-top: 12px;
+  margin-top: 8px;
   color: #ffdc9f;
 }
 
@@ -434,6 +585,16 @@
   }
 }
 
+@keyframes command-launch-cue {
+  from {
+    box-shadow: 0 0 14px var(--route-color);
+  }
+
+  to {
+    box-shadow: 0 3px 8px #15140eab;
+  }
+}
+
 @keyframes command-fly-out {
   from {
     left: 0;
@@ -450,7 +611,50 @@
   }
 }
 
-@container (max-width: 760px) {
+@keyframes command-handoff {
+  from {
+    box-shadow: 0 0 14px var(--route-color);
+  }
+
+  to {
+    box-shadow: 0 3px 8px #15140eab;
+  }
+}
+
+@container (min-width: 621px) {
+  .command-demo .command-route[data-order="flank"] .command-receiver {
+    grid-template-columns: clamp(150px, 54%, 240px) minmax(0, 1fr);
+  }
+
+  .command-demo .command-history ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
+    column-gap: 24px;
+  }
+
+  .command-demo .command-history li span {
+    display: block;
+    margin-inline-start: 0;
+  }
+}
+
+@media (min-height: 768px) {
+  @container (min-width: 850px) {
+    .command-demo .command-receiver {
+      grid-template-columns: clamp(76px, 32%, 125px) minmax(0, 1fr);
+    }
+
+    .command-demo .command-route[data-order="flank"] .command-receiver {
+      grid-template-columns: min(65%, 288px) minmax(0, 1fr);
+    }
+
+    .command-demo .command-flank-map {
+      width: 100%;
+    }
+  }
+}
+
+@container (width < 621px) {
   .command-demo .command-scene {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -470,20 +674,6 @@
   .command-demo .command-source figcaption {
     padding: 12px;
   }
-
-  .command-demo .command-routes {
-    padding: 8px;
-  }
-
-  .command-demo .command-receiver {
-    grid-template-columns: 40px minmax(0, 1fr);
-    gap: 8px;
-    min-height: 64px;
-  }
-
-  .command-demo .command-receiver > img {
-    height: 50px;
-  }
 }
 
 @container (max-width: 470px) {
@@ -498,7 +688,8 @@
 
   .command-demo .command-receiver {
     justify-self: end;
-    width: min(175px, 90%);
+    box-sizing: border-box;
+    width: min(280px, 100%);
   }
 }
 
@@ -506,5 +697,8 @@
   .command-demo .command-scene {
     --command-travel: 0ms;
     --command-highlight: 0ms;
+    --command-gather-duration: 0ms;
+    --command-flight-duration: 0ms;
+    --command-dialogue-duration: 0ms;
   }
 }

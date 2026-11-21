@@ -1,0 +1,10 @@
+{
+  "id": "template",
+  "number": "06",
+  "title": "The fire of seven flavors",
+  "pattern": "Template Method",
+  "intro": "./intro.json",
+  "classes": "./classes.json",
+  "hints": "./hints.json",
+  "relationshipTypes": "./relationships.json"
+}

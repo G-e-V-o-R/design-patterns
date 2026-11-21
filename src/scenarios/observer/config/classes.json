@@ -3,6 +3,10 @@
     "id": "publisher",
     "label": "FoxSubject",
     "kind": "class",
+    "solutionPosition": {
+      "x": 0,
+      "y": 0
+    },
     "description": "Looks for danger and keeps a list of observers. When it finds danger, it publishes the discovery through the Observer interface.",
     "image": "./resource/fox-card.png",
     "imageAlt": "Fox — the Subject",
@@ -50,6 +54,10 @@
     "id": "subscriber",
     "label": "Observer",
     "kind": "interface",
+    "solutionPosition": {
+      "x": 425,
+      "y": 0
+    },
     "description": "The shared update(discovery) contract. Every concrete observer implements it to receive notifications.",
     "position": {
       "x": 390,
@@ -69,6 +77,10 @@
     "id": "narion",
     "label": "NarionObserver",
     "kind": "class",
+    "solutionPosition": {
+      "x": 240,
+      "y": 415
+    },
     "description": "Implements Observer. Gets the discovery and helps Narion plan a safer path.",
     "image": "./resource/narion-card.png",
     "imageAlt": "Narion — a concrete Observer",
@@ -100,6 +112,10 @@
     "id": "dre-kaar",
     "label": "DreKaarObserver",
     "kind": "class",
+    "solutionPosition": {
+      "x": 615,
+      "y": 415
+    },
     "description": "Implements Observer. Gets the same discovery and helps Dre’Kaar protect the group.",
     "image": "./resource/dre-kaar-card.png",
     "imageAlt": "Dre’Kaar — a concrete Observer",

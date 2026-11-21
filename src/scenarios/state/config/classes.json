@@ -1,0 +1,161 @@
+[
+  {
+    "id": "jararis",
+    "label": "Jararis",
+    "kind": "class",
+    "description": "Passes story events to the snake that shares his feelings.",
+    "image": "./resource/4.0.png",
+    "imageAlt": "Jararis with his snake coiled around his shoulder",
+    "position": { "x": 0, "y": 0 },
+    "solutionPosition": { "x": 0, "y": 150, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "jararis-snake",
+        "label": "snake: Snake",
+        "description": "Keep a reference to the snake that shares his feelings."
+      }
+    ],
+    "methods": [
+      {
+        "id": "jararis-handle",
+        "label": "handle(event: StoryEvent) · forward",
+        "description": "Pass the story event to snake.handle(event)."
+      }
+    ],
+    "relationships": [
+      { "type": "uses", "target": "snake" }
+    ]
+  },
+  {
+    "id": "snake",
+    "label": "Snake",
+    "kind": "class",
+    "description": "Keeps the current state and asks it how to handle events and react.",
+    "image": "./resource/snake.png",
+    "imageAlt": "Jararis’s snake on its own",
+    "position": { "x": 360, "y": 0 },
+    "solutionPosition": { "x": 320, "y": 150, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "snake-current-state",
+        "label": "state: SnakeState",
+        "description": "Store the current state through the shared interface."
+      }
+    ],
+    "methods": [
+      {
+        "id": "snake-handle",
+        "label": "handle(event: StoryEvent) · update state",
+        "description": "Ask the current state for its nextState(event) and store the result."
+      },
+      {
+        "id": "snake-react",
+        "label": "react() · delegate",
+        "description": "Return the result of the current state’s react() method."
+      }
+    ],
+    "relationships": [
+      { "type": "uses", "target": "snake-state" }
+    ]
+  },
+  {
+    "id": "snake-state",
+    "label": "SnakeState",
+    "kind": "interface",
+    "description": "Defines how each state chooses its successor and gives a reaction.",
+    "position": { "x": 720, "y": 0 },
+    "solutionPosition": { "x": 640, "y": 150, "anchorY": "center" },
+    "fields": [],
+    "methods": [
+      {
+        "id": "state-next-state",
+        "label": "nextState(event) · contract",
+        "description": "Define nextState(event: StoryEvent): SnakeState for every state."
+      },
+      {
+        "id": "state-react",
+        "label": "react() · contract",
+        "description": "Define the method that Snake calls on every state."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "calm",
+    "label": "CalmState",
+    "kind": "class",
+    "description": "Keeps the snake quiet while Jararis is calm.",
+    "image": "./resource/4.2.png",
+    "imageAlt": "The snake rests quietly on a calm Jararis’s shoulders",
+    "position": { "x": 0, "y": 720 },
+    "solutionPosition": { "x": 320, "y": 440 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "calm-next-state",
+        "label": "nextState(event) · calm rules",
+        "description": "Dre’Kaar’s approach leads to WaryState. Latve’s reassurance keeps CalmState."
+      },
+      {
+        "id": "calm-react",
+        "label": "react() · stay quiet",
+        "description": "Return the quiet response."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "snake-state" }
+    ]
+  },
+  {
+    "id": "wary",
+    "label": "WaryState",
+    "kind": "class",
+    "description": "Makes the snake hiss when Jararis feels distrust.",
+    "image": "./resource/4.1.png",
+    "imageAlt": "The snake hisses behind a wary Jararis by the fire",
+    "position": { "x": 360, "y": 720 },
+    "solutionPosition": { "x": 640, "y": 440 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "wary-next-state",
+        "label": "nextState(event) · wary rules",
+        "description": "Dre’Kaar’s approach leads to FuriousState. Latve’s reassurance leads back to CalmState."
+      },
+      {
+        "id": "wary-react",
+        "label": "react() · hiss",
+        "description": "Return the warning hiss."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "snake-state" }
+    ]
+  },
+  {
+    "id": "furious",
+    "label": "FuriousState",
+    "kind": "class",
+    "description": "Makes the snake lunge when Jararis feels rage.",
+    "image": "./resource/4.3.png",
+    "imageAlt": "The snake lunges with its jaws open in front of a furious Jararis",
+    "position": { "x": 720, "y": 720 },
+    "solutionPosition": { "x": 960, "y": 440 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "furious-next-state",
+        "label": "nextState(event) · furious rules",
+        "description": "Dre’Kaar’s approach keeps FuriousState. Latve’s reassurance leads back to WaryState."
+      },
+      {
+        "id": "furious-react",
+        "label": "react() · lunge",
+        "description": "Return the lunge response."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "snake-state" }
+    ]
+  }
+]

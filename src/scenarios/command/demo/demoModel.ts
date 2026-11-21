@@ -4,8 +4,8 @@ import { config } from '../config/config';
 const latve = { wakeEveryone: () => 'Latve wakes everyone.' };
 const faelina = { setTraps: () => 'Faelina sets the traps.' };
 const narion = {
-  post: 'Narion is at the hill post.',
-  holdFlank: () => 'Narion guards the flank.',
+  post: 'Narion guards the left flank.',
+  holdFlank: () => 'Narion reaches the right lookout. The right advance was a feint. The orcs are attacking on the left.',
   returnTo: (previousPost: string) => previousPost,
 };
 
@@ -56,13 +56,13 @@ class HoldFlankCommand implements Command {
 }
 
 export const orderDetails = {
-  wake: { name: 'WakeEveryoneCommand', receiver: 'Latve', before: 'Everyone is asleep.' },
-  traps: { name: 'SetTrapsCommand', receiver: 'Faelina', before: 'The traps are unset.' },
-  flank: { name: 'HoldFlankCommand', receiver: 'Narion', before: narion.post },
+  wake: { name: 'WakeEveryoneCommand', receiver: 'Latve', method: 'wakeEveryone()', before: 'Everyone is asleep.' },
+  traps: { name: 'SetTrapsCommand', receiver: 'Faelina', method: 'setTraps()', before: 'The traps are unset.' },
+  flank: { name: 'HoldFlankCommand', receiver: 'Narion', method: 'holdFlank()', before: 'Narion guards the left flank. Dre’Kaar spots orcs approaching on the right.' },
 } as const;
 
 export type OrderId = keyof typeof orderDetails;
-export type OrderStatus = 'pending' | 'in-flight' | 'canceled' | 'executed' | 'undone';
+export type OrderStatus = 'pending' | 'launching' | 'in-flight' | 'handoff' | 'executed' | 'undone';
 
 type Order = {
   id: OrderId;
@@ -74,8 +74,8 @@ type Order = {
 
 export type DemoState = readonly Order[];
 export type DemoAction =
-  | { type: 'register' | 'undo-last' }
-  | { type: 'dispatch' | 'deliver' | 'cancel'; id: OrderId };
+  | { type: 'register' }
+  | { type: 'dispatch' | 'launch' | 'deliver' | 'execute' | 'undo'; id: OrderId };
 
 export function createSimulation(graph: LessonGraph): DemoState | null
 {
@@ -86,20 +86,15 @@ export function createSimulation(graph: LessonGraph): DemoState | null
   return [];
 }
 
-export function canCancel(status: OrderStatus | undefined)
-{
-  return status === 'pending' || status === 'in-flight';
-}
-
 export function executionHistory(orders: DemoState)
 {
   return orders.flatMap(order => order.execution ? [{ ...order, execution: order.execution }] : [])
     .sort((first, second) => first.execution.sequence - second.execution.sequence);
 }
 
-export function lastExecution(orders: DemoState)
+export function undoForOrder(orders: DemoState, id: OrderId)
 {
-  return executionHistory(orders).filter(order => order.status === 'executed').at(-1);
+  return orders.find(order => order.id === id && order.status === 'executed')?.execution?.undo;
 }
 
 export function changeOrders(orders: DemoState, action: DemoAction): DemoState
@@ -118,17 +113,21 @@ export function changeOrders(orders: DemoState, action: DemoAction): DemoState
       ];
     case 'dispatch':
       return orders.map(order => order.id === action.id && order.status === 'pending'
+        ? { ...order, status: 'launching' }
+        : order);
+    case 'launch':
+      return orders.map(order => order.id === action.id && order.status === 'launching'
         ? { ...order, status: 'in-flight' }
         : order);
-    case 'cancel':
-      return orders.map(order => order.id === action.id && canCancel(order.status)
-        ? { ...order, status: 'canceled' }
+    case 'deliver':
+      return orders.map(order => order.id === action.id && order.status === 'in-flight'
+        ? { ...order, status: 'handoff' }
         : order);
-    case 'deliver': {
+    case 'execute': {
       const sequence = orders.filter(order => order.execution).length;
       return orders.map(order =>
       {
-        if (order.id !== action.id || order.status !== 'in-flight')
+        if (order.id !== action.id || order.status !== 'handoff')
         {
           return order;
         }
@@ -136,14 +135,14 @@ export function changeOrders(orders: DemoState, action: DemoAction): DemoState
         return { ...order, status: 'executed', outcome: execution.outcome, execution };
       });
     }
-    case 'undo-last': {
-      const order = lastExecution(orders);
-      if (!order?.execution?.undo)
+    case 'undo': {
+      const undo = undoForOrder(orders, action.id);
+      if (!undo)
       {
         return orders;
       }
-      const outcome = order.execution.undo();
-      return orders.map(entry => entry.id === order.id ? { ...entry, status: 'undone', outcome } : entry);
+      const outcome = undo();
+      return orders.map(entry => entry.id === action.id ? { ...entry, status: 'undone', outcome } : entry);
     }
   }
 }

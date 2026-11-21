@@ -38,6 +38,23 @@ export type DiagramConnection = {
 
 export type DiagramRelationship = DiagramConnection & { type: string };
 
+export function facingConnectionHandles(
+  source: { x: number; y: number },
+  target: { x: number; y: number },
+): { sourceHandle: ConnectionHandle; targetHandle: ConnectionHandle }
+{
+  if (source.y === target.y)
+  {
+    return source.x < target.x
+      ? { sourceHandle: 'right', targetHandle: 'left' }
+      : { sourceHandle: 'left', targetHandle: 'right' };
+  }
+
+  return source.y < target.y
+    ? { sourceHandle: 'bottom', targetHandle: 'top' }
+    : { sourceHandle: 'top', targetHandle: 'bottom' };
+}
+
 export function orientConnection<Connection extends DiagramConnection>(
   connection: Connection,
   firstNodeId: string | null,

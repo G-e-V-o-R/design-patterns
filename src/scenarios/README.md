@@ -2,7 +2,7 @@
 
 ## Config-first authoring
 
-For a new diagram lesson, copy [the scenario template](../../docs/scenario-template/README.md) into a scenario directory and fill in `scenario.json`. Shared code owns the editor, validation, history, solution, and layout; automatic discovery and tests include the new directory without registry or package edits. The [Strategy scenario](./strategy/scenario.json) is a working config-only example. A custom `Demo.tsx` is optional.
+For a new diagram lesson, follow the [manifest and content recipe](./REFERENCE_SCENARIO.md) and use the [Observer config](./observer/config/scenario.json) as a working example. Shared code owns the editor, validation, history, solution, and layout. Automatic discovery and tests include the new directory without registry or package edits.
 
 Observer, Mediator, and Chain also use this config infrastructure, with local `Demo.tsx` components for their simulations. Config-only lessons use shared model checks and finish with diagram completion feedback; they do not require a bespoke simulation.
 
@@ -56,7 +56,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Adding a scenario
 
-1. Copy `docs/scenario-template/` into `src/scenarios/<id>/` and set a unique matching config ID.
+1. Create `src/scenarios/<id>/config/scenario.json` and set a unique matching config ID.
 2. Adapt the scenario idea into clear story copy, diagram definitions, targeted hints, and local artwork in `scenario.json`.
 3. Add an optional `Demo.tsx` and focused simulation helpers when the pattern needs a custom demonstration. Registration is automatic.
 4. Include custom demo tests in `npm test`; config validation already covers every scenario directory.
@@ -65,7 +65,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Observer as the reference
 
-Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [scenario.json](./observer/scenario.json) as a complete lesson definition and [Demo.tsx](./observer/Demo.tsx) as the custom demo entry example. The Observer reference is valuable because it combines:
+Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe and checklist. Use [scenario.json](./observer/config/scenario.json) as a complete lesson definition and [Demo.tsx](./observer/demo/Demo.tsx) as the custom demo entry example. The Observer reference is valuable because it combines:
 
 - A memorable story with a specific, testable learning goal.
 - A build sequence and clear descriptions for class, member, and relationship cards, with scenario artwork on the concrete class cards.

@@ -8,22 +8,47 @@ import {
 } from './configuredLessonModel';
 import type { CompiledScenario } from './scenarioConfig';
 
-type EditorState = {
+type CardPositions = Record<string, { x: number; y: number }>;
+
+type LessonLayout = {
+  id: number;
+  compact: boolean;
+  positions: CardPositions;
+};
+
+type LessonSnapshot = {
   graph: LessonGraph;
-  history: LessonGraph[];
-  message: string;
-  hint: number;
+  layout: LessonLayout;
   worked: boolean;
 };
 
+type EditorState = LessonSnapshot & {
+  history: LessonSnapshot[];
+  message: string;
+  hint: number;
+  fitRevision: number;
+};
+
 type EditorAction =
-  | { type: 'edit'; update: (graph: LessonGraph) => LessonGraph; message?: string; worked?: boolean }
+  | { type: 'edit'; update: (graph: LessonGraph) => LessonGraph; message?: string; layout?: 'solution' | 'reset' }
+  | { type: 'move'; positions: CardPositions; layoutId: number }
   | { type: 'message'; message: string }
   | { type: 'hint'; count: number }
   | { type: 'undo' };
 
 function reduceEditor(state: EditorState, action: EditorAction): EditorState
 {
+  if (action.type === 'move')
+  {
+    if (action.layoutId !== state.layout.id)
+    {
+      return state;
+    }
+    return {
+      ...state,
+      layout: { ...state.layout, positions: { ...state.layout.positions, ...action.positions } },
+    };
+  }
   if (action.type === 'message')
   {
     return { ...state, message: action.message };
@@ -39,7 +64,15 @@ function reduceEditor(state: EditorState, action: EditorAction): EditorState
     {
       return state;
     }
-    return { ...state, graph: previous, history: state.history.slice(0, -1), message: 'Last edit undone.', worked: false };
+    const sameLayout = previous.layout.id === state.layout.id;
+    return {
+      ...state,
+      ...previous,
+      layout: sameLayout ? state.layout : previous.layout,
+      fitRevision: state.fitRevision + (sameLayout ? 0 : 1),
+      history: state.history.slice(0, -1),
+      message: 'Last edit undone.',
+    };
   }
 
   const graph = action.update(state.graph);
@@ -47,12 +80,19 @@ function reduceEditor(state: EditorState, action: EditorAction): EditorState
   {
     return state;
   }
+  const fitRevision = state.fitRevision + (action.layout ? 1 : 0);
+  const layout = action.layout
+    ? { id: fitRevision, compact: action.layout === 'solution', positions: {} }
+    : state.layout;
+  const snapshot = { graph: state.graph, layout: state.layout, worked: state.worked };
   return {
     ...state,
     graph,
-    history: [...state.history.slice(-29), state.graph],
+    layout,
+    fitRevision,
+    history: [...state.history.slice(-29), snapshot],
     message: action.message ?? '',
-    worked: action.worked ?? false,
+    worked: action.layout === 'solution',
   };
 }
 
@@ -60,10 +100,12 @@ export function useConfiguredLesson(config: CompiledScenario)
 {
   const [state, dispatch] = useReducer(reduceEditor, undefined, (): EditorState => ({
     graph: emptyConfiguredLesson(),
+    layout: { id: 0, compact: false, positions: {} },
     history: [],
     message: '',
     hint: -1,
     worked: false,
+    fitRevision: 0,
   }));
   const issues = getConfiguredLessonIssues(config, state.graph);
 
@@ -198,7 +240,7 @@ export function useConfiguredLesson(config: CompiledScenario)
 
   function showSolution()
   {
-    dispatch({ type: 'edit', update: () => solutionConfiguredLesson(config), worked: true, message: 'Example solution loaded.' });
+    dispatch({ type: 'edit', update: () => solutionConfiguredLesson(config), layout: 'solution', message: 'Example solution loaded.' });
   }
 
   return {
@@ -212,10 +254,11 @@ export function useConfiguredLesson(config: CompiledScenario)
     connect,
     reconnect,
     removeEdges,
+    moveClasses: (positions: CardPositions) => dispatch({ type: 'move', positions, layoutId: state.layout.id }),
     showSolution,
     showHint: () => dispatch({ type: 'hint', count: config.hints.length }),
     undo: () => dispatch({ type: 'undo' }),
-    reset: () => edit(() => emptyConfiguredLesson()),
+    reset: () => dispatch({ type: 'edit', update: emptyConfiguredLesson, layout: 'reset' }),
   };
 }
 

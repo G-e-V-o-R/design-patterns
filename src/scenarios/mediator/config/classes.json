@@ -3,6 +3,10 @@
     "id": "mediator",
     "label": "Mediator",
     "kind": "interface",
+    "solutionPosition": {
+      "x": 540,
+      "y": 760
+    },
     "description": "The contract companions use to report a request.",
     "position": {
       "x": 360,
@@ -22,6 +26,10 @@
     "id": "raven",
     "label": "RavenMediator",
     "kind": "class",
+    "solutionPosition": {
+      "x": 540,
+      "y": 0
+    },
     "description": "Knows the companions and chooses who should handle each request.",
     "image": "./resource/raven-card.png",
     "imageAlt": "RavenMediator — the concrete mediator",
@@ -70,6 +78,10 @@
     "id": "dre-kaar",
     "label": "DreKaar",
     "kind": "class",
+    "solutionPosition": {
+      "x": 0,
+      "y": 380
+    },
     "description": "Asks the mediator for cover without knowing who will provide it.",
     "image": "./resource/dre-kaar-card.png",
     "imageAlt": "Dre’Kaar — asks the raven for cover",
@@ -102,6 +114,10 @@
     "id": "narion",
     "label": "Narion",
     "kind": "class",
+    "solutionPosition": {
+      "x": 325,
+      "y": 380
+    },
     "description": "Provides covering fire when the raven asks.",
     "image": "./resource/narion-card.png",
     "imageAlt": "Narion — provides covering fire when asked",
@@ -134,6 +150,10 @@
     "id": "faelina",
     "label": "Faelina",
     "kind": "class",
+    "solutionPosition": {
+      "x": 755,
+      "y": 380
+    },
     "description": "Asks the mediator for shelter without contacting a companion directly.",
     "image": "./resource/faelina-card.png",
     "imageAlt": "Faelina — asks the raven for shelter",
@@ -166,6 +186,10 @@
     "id": "saerenn",
     "label": "Saerenn",
     "kind": "class",
+    "solutionPosition": {
+      "x": 1080,
+      "y": 380
+    },
     "description": "Provides shelter when the raven asks.",
     "image": "./resource/saerenn-card.png",
     "imageAlt": "Saerenn — provides shelter when asked",

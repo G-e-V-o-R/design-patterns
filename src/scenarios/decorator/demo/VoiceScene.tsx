@@ -8,32 +8,41 @@ import towerCalm from '../resource/tower-calm.png?url';
 import towerStorm from '../resource/tower-storm.png?url';
 import type { VoiceEffect } from './demoModel';
 
+export const jellyfishArrivalMs = 460;
+export const voiceWaveMs = 1250;
+
 type Props = {
   playbackId?: number;
   selectedEffects: readonly VoiceEffect[];
   addedEffect?: VoiceEffect;
+  voiceStep: number;
   effects: Record<VoiceEffect, { image: string }>;
 };
 
-function effectTiming(index: number): CSSProperties & { '--effect-index': number }
-{
-  return { '--effect-index': index };
-}
-
-export default function VoiceScene({ playbackId, selectedEffects, addedEffect, effects }: Props)
+export default function VoiceScene({ playbackId, selectedEffects, addedEffect, voiceStep, effects }: Props)
 {
   const sleepIndex = selectedEffects.indexOf('sleep');
   const hypnosisIndex = selectedEffects.indexOf('hypnosis');
   const stormIndex = selectedEffects.indexOf('storm');
+  const currentEffect = selectedEffects[voiceStep - 1];
+  const showWave = voiceStep === 0 || currentEffect !== undefined;
+  const ringClass = voiceStep === 0 ? 'decorator-wave-ring decorator-wave-core' : 'decorator-wave-ring';
+  const stageTiming = {
+    '--jellyfish-arrival': `${jellyfishArrivalMs}ms`,
+    '--voice-duration': `${voiceWaveMs}ms`,
+  } as CSSProperties;
 
   return (
-    <div className="decorator-voice-stage" data-adding={addedEffect !== undefined} aria-hidden="true">
+    <div
+      className="decorator-voice-stage"
+      style={stageTiming}
+      aria-hidden="true"
+    >
       <img className="decorator-landscape" src={towerCalm} alt="" draggable={false} />
       <img
         key={playbackId}
         className="decorator-landscape decorator-storm-landscape"
-        data-changed={stormIndex >= 0}
-        style={effectTiming(stormIndex)}
+        data-changed={stormIndex >= 0 && stormIndex < voiceStep}
         src={towerStorm}
         alt=""
         draggable={false}
@@ -59,7 +68,7 @@ export default function VoiceScene({ playbackId, selectedEffects, addedEffect, e
         label="Fox"
         before={foxAwake}
         after={foxAsleep}
-        effectIndex={sleepIndex}
+        effectApplied={sleepIndex >= 0 && sleepIndex < voiceStep}
         playbackId={playbackId}
       />
       <TargetPortrait
@@ -67,15 +76,12 @@ export default function VoiceScene({ playbackId, selectedEffects, addedEffect, e
         label="Listener"
         before={listenerAlert}
         after={listenerHypnotized}
-        effectIndex={hypnosisIndex}
+        effectApplied={hypnosisIndex >= 0 && hypnosisIndex < voiceStep}
         playbackId={playbackId}
       />
-      {playbackId !== undefined && (
-        <div className="decorator-voice-wave" key={`wave-${playbackId}`}>
-          <span className="decorator-wave-ring decorator-wave-core" />
-          {selectedEffects.map((effect, index) => (
-            <span className="decorator-wave-ring" data-effect={effect} style={effectTiming(index)} key={effect} />
-          ))}
+      {showWave && (
+        <div className="decorator-voice-wave" key={`wave-${playbackId}-${voiceStep}`}>
+          <span className={ringClass} data-effect={currentEffect} />
         </div>
       )}
     </div>
@@ -87,11 +93,11 @@ type TargetPortraitProps = {
   label: string;
   before: string;
   after: string;
-  effectIndex: number;
+  effectApplied: boolean;
   playbackId?: number;
 };
 
-function TargetPortrait({ target, label, before, after, effectIndex, playbackId }: TargetPortraitProps)
+function TargetPortrait({ target, label, before, after, effectApplied, playbackId }: TargetPortraitProps)
 {
   return (
     <div className={`decorator-portrait decorator-portrait-${target}`}>
@@ -100,8 +106,7 @@ function TargetPortrait({ target, label, before, after, effectIndex, playbackId 
         <img
           key={playbackId}
           className="decorator-portrait-after"
-          data-changed={effectIndex >= 0}
-          style={effectTiming(effectIndex)}
+          data-changed={effectApplied}
           src={after}
           alt=""
           draggable={false}

@@ -60,7 +60,7 @@ For the reusable adapters, see `ConfiguredLessonWorkspace.tsx` and `ConfiguredCl
 
 ## Start a new pattern with data
 
-Copy `src/scenarios/strategy/` into a scenario directory and edit its manifest and section files. The configured runtime imports the shared styles and supplies the node, canvas, tray, relationships, validation, and history adapters. Do not copy those adapters into the scenario.
+Use the [Observer config](../observer/config/scenario.json) as a reference for a new scenario's manifest and section files. The configured runtime imports the shared styles and supplies the node, canvas, tray, relationships, validation, and history adapters. Do not copy those adapters into the scenario.
 
 For a custom demonstration, add `Demo.tsx` with a default export accepting `ConfiguredDemoProps`. Observer, Mediator, and Chain show how to separate demo state, simulation, presentation, and scoped styles. Their demo models validate graphs against the same JSON through `configuredLessonModel` before simulating.
 

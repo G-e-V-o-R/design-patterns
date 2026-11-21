@@ -9,6 +9,14 @@ const docsRoot = resolve('docs');
 const modules = readdirSync(scenariosRoot, { withFileTypes: true })
     .filter(entry => entry.isDirectory() && entry.name !== 'shared')
     .map(entry => entry.name)
+    .filter(module => {
+        const moduleRoot = join(scenariosRoot, module);
+        const resourceRoot = join(moduleRoot, 'resource');
+        const moduleFiles = files(moduleRoot);
+        const hasOnlyArtwork = moduleFiles.length > 0
+            && moduleFiles.every(file => isInside(resourceRoot, file) && /\.(png|jpe?g|svg|webp|avif|gif)$/i.test(file));
+        return !hasOnlyArtwork;
+    })
     .sort();
 assert.ok(!modules.includes('shared'), 'shared resources must not be registered as a scenario');
 

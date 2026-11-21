@@ -2,24 +2,24 @@
 
 ## Recommended: a manifest and focused content files
 
-Copy `src/scenarios/strategy/` to `src/scenarios/<id>/`, then update the manifest ID, metadata, content files, and artwork. Its `id` must equal the directory name. See [the working Strategy manifest](./strategy/scenario.json).
+Use the [Observer config](./observer/config/scenario.json) as a reference for the manifest, content files, and artwork. The manifest `id` must equal the scenario directory name.
 
 Keep `scenario.json` focused on metadata and local section references:
 
 ```json
 {
-  "id": "strategy",
+  "id": "example",
   "number": "04",
-  "title": "Choose a route through the forest",
-  "pattern": "Strategy",
+  "title": "Example lesson",
+  "pattern": "Example pattern",
   "intro": "./intro.json",
   "classes": "./classes.json",
   "hints": "./hints.json"
 }
 ```
 
-- `intro.json` contains the story object: paragraphs, image, task, and optional imageAlt, caption, concept, and three steps.
-- `classes.json` contains the class/interface array. Keep fields, methods, and positions nested inside their owning class. Each class or interface lists its expected outgoing arrows in `relationships`, with a `type` and a `target` class ID for each arrow. Use `"relationships": []` when there are no outgoing arrows.
+- `intro.json` contains the story object: paragraphs, image, task, and optional category, imageAlt, caption, concept, and three steps.
+- `classes.json` contains the class/interface array. Keep fields, methods, and positions nested inside their owning class. Use `position` for the starting position in the editor and optional `solutionPosition` for the compact worked example. Set `"anchorY": "center"` in the solution positions of cards that should share a midpoint at the same y-coordinate. Cards with the same solution y-coordinate connect from their sides. Cards on different rows connect from their top or bottom. Each class or interface lists its expected outgoing arrows in `relationships`, with a `type` and a `target` class ID for each arrow. Use `"relationships": []` when there are no outgoing arrows.
 - `hints.json` contains an array of progressive hint strings.
 - Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in. The toolbar offers a relationship type only when a class declares an arrow of that type in `classes.json`.
 
@@ -33,7 +33,7 @@ An optional scenario-local `Demo.tsx` default export receives `ConfiguredDemoPro
 
 ## Existing examples
 
-All four lessons use the shared configured runtime. [Strategy](./strategy/scenario.json) needs only a config and artwork. [Observer](./observer/scenario.json), [Mediator](./mediator/scenario.json), and [Chain](./chain/scenario.json) also supply custom demonstrations.
+[Observer](./observer/config/scenario.json), [Mediator](./mediator/config/scenario.json), and [Chain](./chain/config/scenario.json) use the shared configured runtime and supply custom demonstrations.
 
 ## File layout
 

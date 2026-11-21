@@ -1,5 +1,0 @@
-[
-  "Both the interface and the concrete strategy have a planRoute method.",
-  "The planner owns the strategy field and planJourney method.",
-  "WalkingStrategy implements TravelStrategy. JourneyPlanner uses TravelStrategy."
-]

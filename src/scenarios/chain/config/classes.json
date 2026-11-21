@@ -3,6 +3,11 @@
     "id": "handler",
     "label": "IHandler",
     "kind": "interface",
+    "solutionPosition": {
+      "x": 400,
+      "y": 110,
+      "anchorY": "center"
+    },
     "description": "Defines the operations for receiving a request and linking to another handler.",
     "position": {
       "x": 450,
@@ -26,6 +31,10 @@
     "id": "enemy-handler",
     "label": "EnemyHandler",
     "kind": "class",
+    "solutionPosition": {
+      "x": 400,
+      "y": 260
+    },
     "description": "Abstract base class that stores the next handler and forwards unmatched requests.",
     "image": "./resource/BaseHandler.png",
     "imageAlt": "Pale spider resting in its web",
@@ -65,6 +74,11 @@
     "id": "thread",
     "label": "SilkThread",
     "kind": "class",
+    "solutionPosition": {
+      "x": 0,
+      "y": 110,
+      "anchorY": "center"
+    },
     "description": "The client sends requests through a single IHandler reference.",
     "image": "./resource/intro.png",
     "imageAlt": "Faelina preparing the silk-thread trap that passes signals into the chain",
@@ -97,6 +111,10 @@
     "id": "blood",
     "label": "OrcHandler",
     "kind": "class",
+    "solutionPosition": {
+      "x": 0,
+      "y": 640
+    },
     "description": "Recognizes orc blood trails and handles the matching request.",
     "image": "./resource/OrcHandler.png",
     "imageAlt": "Spider with a red marking on its back",
@@ -126,6 +144,10 @@
     "id": "step",
     "label": "GoblinHandler",
     "kind": "class",
+    "solutionPosition": {
+      "x": 400,
+      "y": 640
+    },
     "description": "Recognizes goblin footsteps and handles the matching request.",
     "image": "./resource/GoblinHandler.png",
     "imageAlt": "Spider with a blue S-shaped marking on its back",
@@ -155,6 +177,10 @@
     "id": "iron",
     "label": "TrollHandler",
     "kind": "class",
+    "solutionPosition": {
+      "x": 800,
+      "y": 640
+    },
     "description": "Recognizes the scent of trolls and handles the matching request.",
     "image": "./resource/TrollHandler.png",
     "imageAlt": "Spider with a pale circular marking on its back",

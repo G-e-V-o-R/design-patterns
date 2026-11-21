@@ -1,4 +1,4 @@
-import { createDiagramRelationship, type DiagramRelationship } from './connections';
+import { createDiagramRelationship, facingConnectionHandles, type DiagramRelationship } from './connections';
 import type { CompiledScenario } from './scenarioConfig';
 
 export type LessonGraph = {
@@ -24,7 +24,11 @@ export function solutionConfiguredLesson(scenario: CompiledScenario): LessonGrap
   return {
     classes: scenario.classes.map(card => card.id),
     members: { ...scenario.memberOwners },
-    edges: scenario.expectedEdges.map(edge => createDiagramRelationship(edge, edge.type)),
+    edges: scenario.expectedEdges.map(edge =>
+    {
+      const handles = facingConnectionHandles(scenario.solutionPositions[edge.source]!, scenario.solutionPositions[edge.target]!);
+      return createDiagramRelationship({ ...edge, ...handles }, edge.type);
+    }),
   };
 }
 

@@ -65,11 +65,6 @@
         "description": "Send a messenger beetle with the selected pending order."
       },
       {
-        "id": "cancel",
-        "label": "cancel(orderId)",
-        "description": "Cancel a saved order before it is carried out."
-      },
-      {
         "id": "deliver",
         "label": "deliver(orderId)",
         "description": "Call execute() on the selected order in flight. The command delegates to its own receiver."
@@ -192,7 +187,7 @@
     "id": "flank",
     "label": "HoldFlankCommand",
     "kind": "class",
-    "description": "An order for Narion to leave the hill post and guard the flank.",
+    "description": "An order for Narion to move from the left flank to the right lookout.",
     "image": "./resource/7.1.png",
     "imageAlt": "Messenger beetle carrying an order for Narion",
     "position": {
@@ -215,7 +210,7 @@
       {
         "id": "flank-execute",
         "label": "execute() · Narion’s order",
-        "description": "Ask Narion to move to the flank."
+        "description": "Ask Narion to guard the right flank."
       }
     ],
     "relationships": [
@@ -285,7 +280,7 @@
     "id": "narion",
     "label": "Narion",
     "kind": "class",
-    "description": "The receiver. Starts at the hill post and moves to the flank when ordered.",
+    "description": "The receiver. Guards the left flank until ordered to move to the right lookout.",
     "image": "./resource/narion.webp",
     "imageAlt": "Portrait of Narion",
     "position": {
@@ -302,7 +297,7 @@
       {
         "id": "narion-action",
         "label": "holdFlank()",
-        "description": "Moves Narion from the hill post to the flank."
+        "description": "Moves Narion from the left flank to the right lookout."
       }
     ],
     "relationships": []

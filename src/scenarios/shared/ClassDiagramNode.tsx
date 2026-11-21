@@ -15,6 +15,7 @@ export type ClassDiagramCardProps = ClassAppearance & {
   kind: string;
   members: readonly MemberDefinition[];
   invalidMemberIds?: ReadonlySet<string>;
+  showArtwork?: boolean;
   handles?: readonly DiagramHandle[];
   dragType: string;
   isDropTarget: boolean;
@@ -99,7 +100,7 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
       {(['field', 'method'] as const).map(kind => (
         <MemberSection key={kind} sectionKind={kind} {...props} />
       ))}
-      {props.artwork && (
+      {props.artwork && props.showArtwork !== false && (
         <div className="scenario-class-artwork">
           <img src={props.artwork.src} alt={props.artwork.alt} draggable={false} />
         </div>

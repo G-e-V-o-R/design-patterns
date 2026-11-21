@@ -33,12 +33,34 @@ function compile(config: unknown)
 }
 
 const scenario = compile(fixture());
+assert.equal(scenario.intro.category, undefined);
 assert.equal(scenario.members.length, 3);
 assert.equal(scenario.memberOwners.speed, 'walker');
 assert.equal(scenario.classes[1]?.artwork?.src, '/resolved/resource/walker.svg');
 assert.deepEqual(getConfiguredLessonIssues(scenario, solutionConfiguredLesson(scenario)), []);
 assert.ok(getConfiguredLessonIssues(scenario, emptyConfiguredLesson()).length > 0);
 assert.notDeepEqual(scenario.positions.route, scenario.positions.walker);
+assert.deepEqual(scenario.solutionPositions, scenario.positions);
+
+const structural = fixture();
+structural.intro.category = 'STRUCTURAL PATTERN';
+assert.equal(compile(structural).intro.category, 'STRUCTURAL PATTERN');
+structural.intro.category = ' ';
+assert.throws(() => compile(structural), /intro\.category/);
+
+const layout = fixture();
+layout.classes[0]!.solutionPosition = { x: 0, y: 0 };
+layout.classes[1]!.solutionPosition = { x: 0, y: 300 };
+const up = solutionConfiguredLesson(compile(layout)).edges[0];
+assert.equal(up?.sourceHandle, 'top');
+assert.equal(up?.targetHandle, 'bottom');
+layout.classes[0]!.solutionPosition = { x: 0, y: 110, anchorY: 'center' };
+layout.classes[1]!.solutionPosition = { x: 380, y: 110, anchorY: 'center' };
+const centeredLayout = compile(layout);
+assert.deepEqual(centeredLayout.solutionPositions.walker, { x: 380, y: 110, anchorY: 'center' });
+const left = solutionConfiguredLesson(centeredLayout).edges[0];
+assert.equal(left?.sourceHandle, 'left');
+assert.equal(left?.targetHandle, 'right');
 
 const first = solutionConfiguredLesson(scenario);
 const second = solutionConfiguredLesson(scenario);
@@ -160,6 +182,10 @@ invalid(config =>
 {
   config.classes[1]!.position = { x: Number.NaN, y: 0 };
 }, 'classes[1].position');
+invalid(config =>
+{
+  config.classes[1]!.solutionPosition = { x: 0, y: Number.POSITIVE_INFINITY };
+}, 'classes[1].solutionPosition');
 invalid(config =>
 {
   config.relationshipTypes = [{ id: 'uses', label: 'duplicate' }];

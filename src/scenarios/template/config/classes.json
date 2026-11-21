@@ -1,0 +1,101 @@
+[
+  {
+    "id": "soup-recipe",
+    "label": "«abstract» SoupRecipe",
+    "kind": "class",
+    "description": "Defines the cooking sequence and lets subclasses choose the seasoning.",
+    "image": "./resource/Dre_Kaar.png",
+    "imageAlt": "Dre’Kaar’s soup pot over the campfire",
+    "position": { "x": 400, "y": 0 },
+    "solutionPosition": { "x": 310, "y": 0 },
+    "methods": [
+      {
+        "id": "recipe-cook",
+        "label": "cookSoup() · fixed sequence",
+        "description": "Calls cookMeat(), addSeasoning(), and addVegetables() in that order."
+      },
+      {
+        "id": "recipe-broth",
+        "label": "cookMeat()",
+        "description": "Put the meat in cold water and simmer to make the broth.",
+        "visibility": "private"
+      },
+      {
+        "id": "recipe-season",
+        "label": "addSeasoning() · abstract",
+        "description": "Declares the step that each subclass implements.",
+        "visibility": "protected"
+      },
+      {
+        "id": "recipe-garnish",
+        "label": "addVegetables()",
+        "description": "Sauté the vegetables until golden and stir them into the soup.",
+        "visibility": "private"
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "faelina-recipe",
+    "label": "FaelinaRecipe",
+    "kind": "class",
+    "description": "Faelina seasons the broth with crushed garlic.",
+    "image": "./resource/Faelina.png",
+    "imageAlt": "Faelina holds a bulb of garlic beside the soup pot",
+    "position": { "x": 0, "y": 780 },
+    "solutionPosition": { "x": 0, "y": 485 },
+    "methods": [
+      {
+        "id": "faelina-season",
+        "label": "addSeasoning() · garlic",
+        "description": "Crush a clove of garlic and add it to the broth.",
+        "visibility": "protected"
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "soup-recipe" }
+    ]
+  },
+  {
+    "id": "latve-recipe",
+    "label": "LatveRecipe",
+    "kind": "class",
+    "description": "Latve seasons the broth with fresh herbs.",
+    "image": "./resource/Latve.png",
+    "imageAlt": "Latve holds a bunch of fresh herbs beside the soup pot",
+    "position": { "x": 400, "y": 780 },
+    "solutionPosition": { "x": 310, "y": 485 },
+    "methods": [
+      {
+        "id": "latve-season",
+        "label": "addSeasoning() · fresh herbs",
+        "description": "Add fresh herbs to the broth.",
+        "visibility": "protected"
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "soup-recipe" }
+    ]
+  },
+  {
+    "id": "dre-kaar-recipe",
+    "label": "DreKaarRecipe",
+    "kind": "class",
+    "description": "Dre’Kaar seasons the broth with smoked pepper.",
+    "image": "./resource/Dre_Kaar.png",
+    "imageAlt": "Dre’Kaar cooks soup beside a bowl of red seasoning",
+    "position": { "x": 800, "y": 780 },
+    "solutionPosition": { "x": 620, "y": 485 },
+    "methods": [
+      {
+        "id": "dre-kaar-season",
+        "label": "addSeasoning() · smoked pepper",
+        "description": "Add a pinch of smoked pepper to the broth.",
+        "visibility": "protected"
+      }
+    ],
+    "relationships": [
+      { "type": "extends", "target": "soup-recipe" }
+    ]
+  }
+]
