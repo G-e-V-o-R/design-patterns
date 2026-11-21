@@ -1,0 +1,5 @@
+[
+  "Start with the Audience interface. Give it the requestHelp(request) contract. The guard and the Elder each have their own version of that method.",
+  "Put contact: Audience and askForCure() on Narion. Give DenGuardProxy the Elder reference and canPass(request), which checks that the letter really came from Orven.",
+  "Draw a Uses arrow from the party to Audience and another from the guard to the Elder. Draw Implements arrows from both the guard and the Elder to Audience."
+]

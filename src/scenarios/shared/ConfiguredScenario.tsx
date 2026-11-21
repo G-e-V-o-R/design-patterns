@@ -29,7 +29,8 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
   const showingDemo = demoReady && view === 'demo';
   const diagramId = `${config.id}-diagram-panel`;
   const demoId = `${config.id}-demo-panel`;
-  const lockMessageId = `${config.id}-demo-lock`;
+  const demoStatusId = `${config.id}-demo-status`;
+  const demoStatus = Demo ? 'Complete the class diagram to unlock the demo.' : 'Demo unavailable for this lesson.';
 
   if (!demoReady && view !== 'diagram')
   {
@@ -92,49 +93,45 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
   return (
     <section className="configured-lesson pattern-lesson" aria-labelledby={config.intro.headingId}>
       <StoryIntro content={config.intro} />
-      {Demo ? (
-        <>
-          <div className="configured-lesson-navigation">
-            <div className="configured-lesson-tabs" role="tablist" aria-label="Lesson workspace" onKeyDown={moveTabFocus}>
-              <button
-                ref={diagramTab}
-                type="button"
-                role="tab"
-                id={`${diagramId}-tab`}
-                aria-controls={diagramId}
-                aria-selected={!showingDemo}
-                tabIndex={showingDemo ? -1 : 0}
-                onClick={openDiagram}
-              >
-                Class diagram
-              </button>
-              <button
-                ref={demoTab}
-                type="button"
-                role="tab"
-                id={`${demoId}-tab`}
-                aria-controls={demoId}
-                aria-selected={showingDemo}
-                aria-disabled={!demoReady}
-                aria-describedby={demoReady ? undefined : lockMessageId}
-                tabIndex={showingDemo ? 0 : -1}
-                onClick={openDemo}
-              >
-                Demo
-              </button>
-            </div>
-            {!demoReady && <p id={lockMessageId}>Complete the class diagram to unlock the demo.</p>}
-          </div>
-          <div id={diagramId} role="tabpanel" aria-labelledby={`${diagramId}-tab`} hidden={showingDemo}>
-            {workspace}
-          </div>
-          <div id={demoId} role="tabpanel" aria-labelledby={`${demoId}-tab`} hidden={!showingDemo}>
-            {demoReady && view !== 'diagram' && (
-              <Demo graph={editor.graph} ready={editor.ready} active={active && showingDemo} />
-            )}
-          </div>
-        </>
-      ) : workspace}
+      <div className="configured-lesson-navigation">
+        <div className="configured-lesson-tabs" role="tablist" aria-label="Lesson workspace" onKeyDown={moveTabFocus}>
+          <button
+            ref={diagramTab}
+            type="button"
+            role="tab"
+            id={`${diagramId}-tab`}
+            aria-controls={diagramId}
+            aria-selected={!showingDemo}
+            tabIndex={showingDemo ? -1 : 0}
+            onClick={openDiagram}
+          >
+            Class diagram
+          </button>
+          <button
+            ref={demoTab}
+            type="button"
+            role="tab"
+            id={`${demoId}-tab`}
+            aria-controls={demoId}
+            aria-selected={showingDemo}
+            aria-disabled={!demoReady}
+            aria-describedby={demoReady ? undefined : demoStatusId}
+            tabIndex={showingDemo ? 0 : -1}
+            onClick={openDemo}
+          >
+            Demo
+          </button>
+        </div>
+        {!demoReady && <p id={demoStatusId}>{demoStatus}</p>}
+      </div>
+      <div id={diagramId} role="tabpanel" aria-labelledby={`${diagramId}-tab`} hidden={showingDemo}>
+        {workspace}
+      </div>
+      <div id={demoId} role="tabpanel" aria-labelledby={`${demoId}-tab`} hidden={!showingDemo}>
+        {Demo && demoReady && view !== 'diagram' && (
+          <Demo graph={editor.graph} ready={editor.ready} active={active && showingDemo} />
+        )}
+      </div>
       {config.intro.concept && <ConceptCallout>{config.intro.concept}</ConceptCallout>}
     </section>
   );

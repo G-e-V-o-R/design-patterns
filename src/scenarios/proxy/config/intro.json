@@ -1,0 +1,18 @@
+{
+  "category": "STRUCTURAL PATTERN",
+  "paragraphs": [
+    "In your last fight, a poisoned arrow hit one of your companions. The poison came from Tish-Karr captives. Only the Tish-Karr have the antidote, so you bring your wounded friend to their den.",
+    "Before you set out, Orven the wizard gave Narion a letter. Orven is an old friend of the Tish-Karr. In the letter, he asks them to help whoever brings it.",
+    "At the den, Narion tells the guard about the poisoned arrow and asks for the antidote. He is so worried about his friend that he forgets the letter in his coat. “The Elder doesn’t meet strangers without a word from someone we trust,” the guard says. Narion reaches into his pocket."
+  ],
+  "image": "./resource/tish-karr-den-entrance.png",
+  "imageAlt": "An armored guard stands at the cave entrance, with Tish-Karr creatures behind him",
+  "caption": "The guard speaks for the Elder at the entrance to the den.",
+  "task": "What do you call someone who receives requests for another person and checks who is allowed to reach them? Build a class diagram that shows how the guard protects access to the Elder.",
+  "concept": "A protection proxy controls access to another object. Narion asks for help through the Audience interface. The guard checks that the letter is really from Orven before he passes the request to the Elder. The Elder decides whether to help.",
+  "steps": [
+    "Add the cards and assign their members",
+    "Connect the party, guard, and Elder",
+    "Ask for the antidote without the letter, then try again with it"
+  ]
+}

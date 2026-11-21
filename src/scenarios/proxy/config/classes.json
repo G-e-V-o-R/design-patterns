@@ -1,0 +1,99 @@
+[
+  {
+    "id": "party",
+    "label": "Narion",
+    "kind": "class",
+    "description": "The client. Asks for help on behalf of the party through the Audience interface. At the den, the guard receives the request.",
+    "image": "./resource/narion-party-spokesperson.webp",
+    "imageAlt": "Portrait of Narion, who speaks for the party",
+    "position": { "x": 0, "y": 0 },
+    "solutionPosition": { "x": 0, "y": 0, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "party-audience",
+        "label": "contact: Audience",
+        "description": "Narion’s point of contact. At the den, it is the guard."
+      }
+    ],
+    "methods": [
+      {
+        "id": "party-ask",
+        "label": "askForCure()",
+        "description": "Calls contact.requestHelp(request) to ask for the antidote. Narion can include Orven’s letter."
+      }
+    ],
+    "relationships": [
+      { "type": "uses", "target": "audience" }
+    ]
+  },
+  {
+    "id": "audience",
+    "label": "Audience",
+    "kind": "interface",
+    "description": "The shared way to ask for help. Both the guard and the Elder implement it.",
+    "position": { "x": 420, "y": 0 },
+    "solutionPosition": { "x": 360, "y": 0, "anchorY": "center" },
+    "methods": [
+      {
+        "id": "audience-request",
+        "label": "requestHelp(request) · contract",
+        "description": "Receives the party’s request and any letter they send with it, then returns a reply."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "guard",
+    "label": "DenGuardProxy",
+    "kind": "class",
+    "description": "The protection proxy. Speaks for the Elder and decides which requests reach her.",
+    "image": "./resource/tish-karr-guard.png",
+    "imageAlt": "The armored guard stands alone in the cave entrance",
+    "position": { "x": 0, "y": 470 },
+    "solutionPosition": { "x": 0, "y": 390, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "guard-elder",
+        "label": "elder: TishKarrElder",
+        "description": "The Elder who receives approved requests.",
+        "visibility": "private"
+      }
+    ],
+    "methods": [
+      {
+        "id": "guard-request",
+        "label": "requestHelp(request) · guard",
+        "description": "Checks the request. If it passes, calls elder.requestHelp(request) and passes back the reply. Otherwise, returns a refusal."
+      },
+      {
+        "id": "guard-check",
+        "label": "canPass(request)",
+        "description": "Checks that Narion brought a letter and compares its signature and wax seal with one of Orven’s old letters."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "audience" },
+      { "type": "uses", "target": "elder" }
+    ]
+  },
+  {
+    "id": "elder",
+    "label": "TishKarrElder",
+    "kind": "class",
+    "description": "The real subject. Has the antidote and decides whether to share it when a request reaches her.",
+    "image": "./resource/tish-karr-inside-the-den.png",
+    "imageAlt": "Three Tish-Karr creatures wait inside the den",
+    "position": { "x": 420, "y": 470 },
+    "solutionPosition": { "x": 360, "y": 390, "anchorY": "center" },
+    "methods": [
+      {
+        "id": "elder-request",
+        "label": "requestHelp(request) · Elder",
+        "description": "Hears the request and decides what reply or help to offer."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "audience" }
+    ]
+  }
+]
