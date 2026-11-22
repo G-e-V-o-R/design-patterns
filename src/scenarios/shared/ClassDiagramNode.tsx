@@ -86,6 +86,8 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
     props.variant === 'interface' && 'is-interface',
     props.isDropTarget && 'is-drop-target',
   ].filter(Boolean).join(' ');
+  const artwork = props.artwork;
+  const framing = artwork?.framing;
 
   return (
     <div className={className} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
@@ -100,9 +102,14 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
       {(['field', 'method'] as const).map(kind => (
         <MemberSection key={kind} sectionKind={kind} {...props} />
       ))}
-      {props.artwork && props.showArtwork !== false && (
-        <div className="scenario-class-artwork">
-          <img src={props.artwork.src} alt={props.artwork.alt} draggable={false} />
+      {artwork && props.showArtwork !== false && (
+        <div className="scenario-class-artwork" style={artwork.height === undefined ? undefined : { height: artwork.height }}>
+          <img
+            src={artwork.src}
+            alt={artwork.alt}
+            draggable={false}
+            style={framing === undefined ? undefined : { objectPosition: `center ${framing}%` }}
+          />
         </div>
       )}
     </div>

@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
-import narion from '../resource/narion-party-spokesperson.webp';
+import narion from '../../shared/resource/portraits/narion.png';
 import guard from '../resource/tish-karr-guard.png';
 import elder from '../resource/tish-karr-inside-the-den.png';
-import { antidoteRequest, simulateRequest, wizardLetter, type Phase } from './demoModel';
+import { antidoteRequest, getMessageDuration, oldLetter, simulateRequest, wizardLetter, type Phase } from './demoModel';
 import './styles.css';
+
+const minimumVerificationDuration = 2400;
+const minimumHandoffDuration = 1550;
 
 const actors = [
   { id: 'narion', name: 'Narion', role: 'Client', image: narion },
@@ -12,33 +15,86 @@ const actors = [
   { id: 'elder', name: 'Elder', role: 'Real subject', image: elder },
 ] as const;
 
-const defaultMessageDuration = 4000;
-const letterMessageDurations: Partial<Record<Phase, number>> = {
-  'check-letter': 4500,
-  'verify-letter': 6000,
-  verified: 4500,
-};
-
 function RequestScene({ phase, hasLetter }: { phase: Phase | 'idle'; hasLetter: boolean })
 {
+  const checking = phase === 'verify-letter';
+  const showCloseUp = checking || phase === 'verified';
+  const showAntidote = phase === 'answer' || phase === 'relay';
+  const showSignal = !showAntidote && phase !== 'helped';
+  const closeUp = useRef<HTMLDivElement>(null);
+  const portraits = useRef<HTMLDivElement>(null);
+
+  useEffect(() =>
+  {
+    if (phase === 'verify-letter')
+    {
+      closeUp.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    }
+    if (phase === 'answer')
+    {
+      portraits.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    }
+  }, [phase]);
+
   return (
     <div className="proxy-scene" data-phase={phase} data-letter={hasLetter}>
-      <div className="proxy-actors">
-        {actors.map(actor => (
-          <div key={actor.id} className="proxy-actor" data-actor={actor.id}>
-            <img src={actor.image} alt="" draggable={false} />
-            <div className="proxy-actor-label">
-              <strong>{actor.name}</strong>
-              <span>{actor.role}</span>
+      {showCloseUp ? (
+        <div className="proxy-close-up" ref={closeUp}>
+          <LetterComparison checking={checking} />
+        </div>
+      ) : (
+        <div className="proxy-actors" ref={portraits}>
+          {actors.map(actor => (
+            <div key={actor.id} className="proxy-actor" data-actor={actor.id}>
+              <img src={actor.image} alt="" draggable={false} />
+              <div className="proxy-actor-label">
+                <strong>{actor.name}</strong>
+                <span>{actor.role}</span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+          {showAntidote && (
+            <div key={phase} className="proxy-antidote" aria-hidden="true">
+              <span className="proxy-vial" />
+              Antidote
+            </div>
+          )}
+        </div>
+      )}
       <div className="proxy-route" aria-hidden="true">
         <div className="proxy-track" />
         {actors.map(actor => <span key={actor.id} className="proxy-stop" data-actor={actor.id} />)}
         <span className="proxy-block" />
-        <span key={phase} className="proxy-signal" />
+        {showSignal && <span key={phase} className="proxy-signal" />}
+      </div>
+    </div>
+  );
+}
+
+function LetterComparison({ checking }: { checking: boolean })
+{
+  return (
+    <div className="proxy-comparison" data-checking={checking}>
+      <div className="proxy-proof-columns">
+        <strong>Presented letter</strong>
+        <strong>Orven’s old letter</strong>
+      </div>
+      <div className="proxy-proof-row">
+        <div className="proxy-proof-label">{checking ? 'Signature' : 'Signature matches ✓'}</div>
+        <div className="proxy-proof-columns">
+          <span className="proxy-proof-mark proxy-signature">{wizardLetter.signature}</span>
+          <span className="proxy-proof-mark proxy-signature">{oldLetter.signature}</span>
+        </div>
+      </div>
+      <div className="proxy-proof-row" data-proof="seal">
+        <div className="proxy-proof-label">{checking ? 'Wax seal' : 'Wax seal matches ✓'}</div>
+        <div className="proxy-proof-columns">
+          {[wizardLetter.seal, oldLetter.seal].map((seal, index) => (
+            <span key={index} className="proxy-proof-mark">
+              <span className="proxy-wax-seal" data-seal={seal} role="img" aria-label={`${seal} wax seal`} />
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -67,7 +123,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   useEffect(() =>
   {
-    if (!enabled || !run || !phase || !playing || run.graph !== graph)
+    if (!enabled || !run || !stage || !playing || run.graph !== graph)
     {
       return;
     }
@@ -95,14 +151,23 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
     finishWithoutMotion();
     motion.addEventListener('change', finishWithoutMotion);
-    const messageDuration = letterMessageDurations[phase] ?? defaultMessageDuration;
-    const timer = window.setTimeout(() => advance(motion.matches), messageDuration);
+    const messageDuration = getMessageDuration(stage.message);
+    let stageDuration = messageDuration;
+    if (stage.phase === 'verify-letter')
+    {
+      stageDuration = Math.max(messageDuration, minimumVerificationDuration);
+    }
+    else if (stage.phase === 'answer' || stage.phase === 'relay')
+    {
+      stageDuration = Math.max(messageDuration, minimumHandoffDuration);
+    }
+    const timer = window.setTimeout(() => advance(motion.matches), stageDuration);
     return () =>
     {
       window.clearTimeout(timer);
       motion.removeEventListener('change', finishWithoutMotion);
     };
-  }, [enabled, graph, phase, playing, run]);
+  }, [enabled, graph, playing, run, stage]);
 
   function startRequest(hasLetter: boolean)
   {
@@ -138,10 +203,10 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
       </div>
       <RequestScene phase={phase ?? 'idle'} hasLetter={run?.hasLetter ?? false} />
       <div className="proxy-feedback" data-result={phase}>
-        <p role="status" aria-atomic="true">{stage?.message ?? 'The guard is waiting at the entrance.'}</p>
+        <p role="status" aria-atomic="true">{stage?.message ?? 'The guard waits at the entrance.'}</p>
         <code>{stage?.call ?? 'Audience.requestHelp(request)'}</code>
       </div>
-      {run?.hasLetter && (
+      {playing && run?.hasLetter && (
         <figure className="proxy-letter">
           <figcaption>Orven’s letter</figcaption>
           <blockquote>{wizardLetter.message}</blockquote>

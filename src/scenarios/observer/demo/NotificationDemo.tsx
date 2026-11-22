@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import foxPortrait from '../resource/fox-card.png?url';
-import narionPortrait from '../resource/narion-card.png?url';
-import dreKaarPortrait from '../resource/dre-kaar-card.png?url';
+import narionPortrait from '../../shared/resource/portraits/narion.png?url';
+import dreKaarPortrait from '../../shared/resource/portraits/dre-kaar.png?url';
 import type { DiscoveryResult, ObserverId, Subscriptions } from './demoModel';
 
 const subscribers = [

@@ -6,13 +6,13 @@ type LetterProof = {
   seal: string;
 };
 
-const oldLetter = { signature: 'Orven', seal: 'split-star' };
+export const oldLetter = { signature: 'Orven', seal: 'split-star' };
 export const wizardLetter = {
   ...oldLetter,
-  message: 'My friends, please help whoever brings you this letter. They have my trust.',
+  message: 'Please help the bearer. They have my trust.',
 };
 
-export const antidoteRequest = '“Our friend was hit by a poisoned arrow. Can you give us the antidote?”';
+export const antidoteRequest = '“Our friend was poisoned. We need an antidote.”';
 
 export type Phase = 'request' | 'check-letter' | 'verify-letter' | 'verified' | 'forward' | 'answer' | 'relay' | 'refuse' | 'helped' | 'denied';
 
@@ -21,6 +21,13 @@ type Stage = {
   call: string;
   message: string;
 };
+
+export function getMessageDuration(message: string): number
+{
+  const wordCount = message.match(/\S+/g)?.length ?? 0;
+  // Минимум даёт анимации маршрута закончиться даже с короткой репликой.
+  return Math.max(1200, 650 + wordCount * 220);
+}
 
 export function simulateRequest(graph: LessonGraph, letter: LetterProof | null): readonly Stage[] | null
 {
@@ -34,15 +41,15 @@ export function simulateRequest(graph: LessonGraph, letter: LetterProof | null):
       phase: 'request',
       call: 'contact.requestHelp(request)',
       message: letter
-        ? 'Narion hands over Orven’s letter and asks for the antidote.'
-        : 'Narion asks for the antidote. He forgets the letter in his coat.',
+        ? 'Narion asks for the antidote and shows Orven’s letter.'
+        : 'Narion asks for the antidote.',
     },
     {
       phase: 'check-letter',
       call: 'canPass(request)',
       message: letter
-        ? 'The guard takes the letter and goes inside to check it.'
-        : 'The guard asks if anyone he knows can vouch for the party.',
+        ? 'The guard takes the letter inside.'
+        : '“Who can vouch for you?” asks the guard.',
     },
   ];
 
@@ -51,7 +58,7 @@ export function simulateRequest(graph: LessonGraph, letter: LetterProof | null):
     route.push({
       phase: 'verify-letter',
       call: 'canPass(request)',
-      message: 'Inside the den, the guard compares the signature and wax seal with an old letter from Orven.',
+      message: 'Checking signature and wax seal…',
     });
   }
 
@@ -62,15 +69,15 @@ export function simulateRequest(graph: LessonGraph, letter: LetterProof | null):
         phase: 'refuse',
         call: 'return refusal',
         message: letter
-          ? 'The signature or seal doesn’t match. The guard turns Narion away.'
-          : '“I can’t take you to the Elder without a word from someone we trust,” says the guard.',
+          ? '“The signature or seal doesn’t match.”'
+          : '“I need someone to vouch for you.”',
       },
       {
         phase: 'denied',
         call: 'return refusal',
         message: letter
-          ? 'The guard can’t verify the letter, so the Elder never hears the request.'
-          : 'The guard refuses and the Elder never hears the request. Narion suddenly remembers the letter in his coat.',
+          ? 'The letter fails verification. The Elder never hears the request.'
+          : 'The Elder never hears the request. Narion remembers the letter.',
       },
     ];
   }
@@ -79,27 +86,27 @@ export function simulateRequest(graph: LessonGraph, letter: LetterProof | null):
     {
       phase: 'verified',
       call: 'canPass(request)',
-      message: 'The signature and seal match. Orven is an old friend of the Tish-Karr.',
+      message: 'Signature and seal match.',
     },
     {
       phase: 'forward',
       call: 'elder.requestHelp(request)',
-      message: 'Now that he knows the letter is real, the guard takes Narion’s request to the Elder.',
+      message: 'The guard asks the Elder for help.',
     },
     {
       phase: 'answer',
       call: 'return reply',
-      message: 'The Elder gives the guard the antidote to take back to Narion.',
+      message: 'The Elder gives the guard the antidote.',
     },
     {
       phase: 'relay',
       call: 'return reply',
-      message: 'The guard brings the antidote back to Narion.',
+      message: 'The guard hands the antidote to Narion.',
     },
     {
       phase: 'helped',
       call: 'return reply',
-      message: 'Narion has the antidote for his wounded friend.',
+      message: 'Narion has the antidote.',
     },
   ];
 }

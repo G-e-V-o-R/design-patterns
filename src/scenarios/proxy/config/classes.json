@@ -4,8 +4,9 @@
     "label": "Narion",
     "kind": "class",
     "description": "The client. Asks for help on behalf of the party through the Audience interface. At the den, the guard receives the request.",
-    "image": "./resource/narion-party-spokesperson.webp",
+    "image": "shared/resource/portraits/narion.png",
     "imageAlt": "Portrait of Narion, who speaks for the party",
+    "imageFraming": 22,
     "position": { "x": 0, "y": 0 },
     "solutionPosition": { "x": 0, "y": 0, "anchorY": "center" },
     "fields": [
@@ -49,6 +50,7 @@
     "description": "The protection proxy. Speaks for the Elder and decides which requests reach her.",
     "image": "./resource/tish-karr-guard.png",
     "imageAlt": "The armored guard stands alone in the cave entrance",
+    "imageFraming": 23,
     "position": { "x": 0, "y": 470 },
     "solutionPosition": { "x": 0, "y": 390, "anchorY": "center" },
     "fields": [
@@ -83,6 +85,8 @@
     "description": "The real subject. Has the antidote and decides whether to share it when a request reaches her.",
     "image": "./resource/tish-karr-inside-the-den.png",
     "imageAlt": "Three Tish-Karr creatures wait inside the den",
+    "imageFraming": 18,
+    "imageHeight": 220,
     "position": { "x": 420, "y": 470 },
     "solutionPosition": { "x": 360, "y": 390, "anchorY": "center" },
     "methods": [

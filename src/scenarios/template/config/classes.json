@@ -4,8 +4,10 @@
     "label": "«abstract» SoupRecipe",
     "kind": "class",
     "description": "Defines the cooking sequence and lets subclasses choose the seasoning.",
-    "image": "./resource/Dre_Kaar.png",
-    "imageAlt": "Dre’Kaar’s soup pot over the campfire",
+    "image": "./resource/soup-recipe.png",
+    "imageAlt": "A pot of soup simmering over a campfire",
+    "imageFraming": 100,
+    "imageHeight": 258,
     "position": { "x": 400, "y": 0 },
     "solutionPosition": { "x": 310, "y": 0 },
     "methods": [
@@ -42,6 +44,8 @@
     "description": "Faelina seasons the broth with crushed garlic.",
     "image": "./resource/Faelina.png",
     "imageAlt": "Faelina holds a bulb of garlic beside the soup pot",
+    "imageFraming": 14,
+    "imageHeight": 258,
     "position": { "x": 0, "y": 780 },
     "solutionPosition": { "x": 0, "y": 485 },
     "methods": [
@@ -63,6 +67,8 @@
     "description": "Latve seasons the broth with fresh herbs.",
     "image": "./resource/Latve.png",
     "imageAlt": "Latve holds a bunch of fresh herbs beside the soup pot",
+    "imageFraming": 11,
+    "imageHeight": 258,
     "position": { "x": 400, "y": 780 },
     "solutionPosition": { "x": 310, "y": 485 },
     "methods": [
@@ -84,6 +90,8 @@
     "description": "Dre’Kaar seasons the broth with smoked pepper.",
     "image": "./resource/Dre_Kaar.png",
     "imageAlt": "Dre’Kaar cooks soup beside a bowl of red seasoning",
+    "imageFraming": 13,
+    "imageHeight": 258,
     "position": { "x": 800, "y": 780 },
     "solutionPosition": { "x": 620, "y": 485 },
     "methods": [

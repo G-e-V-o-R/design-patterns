@@ -33,6 +33,7 @@
     "description": "Knows the companions and chooses who should handle each request.",
     "image": "./resource/raven-card.png",
     "imageAlt": "RavenMediator — the concrete mediator",
+    "imageFraming": 26,
     "position": {
       "x": 0,
       "y": 0
@@ -83,8 +84,9 @@
       "y": 380
     },
     "description": "Asks the mediator for cover without knowing who will provide it.",
-    "image": "./resource/dre-kaar-card.png",
+    "image": "shared/resource/portraits/dre-kaar.png",
     "imageAlt": "Dre’Kaar — asks the raven for cover",
+    "imageFraming": 22,
     "position": {
       "x": 0,
       "y": 760
@@ -119,8 +121,9 @@
       "y": 380
     },
     "description": "Provides covering fire when the raven asks.",
-    "image": "./resource/narion-card.png",
+    "image": "shared/resource/portraits/narion.png",
     "imageAlt": "Narion — provides covering fire when asked",
+    "imageFraming": 22,
     "position": {
       "x": 360,
       "y": 760
@@ -155,8 +158,9 @@
       "y": 380
     },
     "description": "Asks the mediator for shelter without contacting a companion directly.",
-    "image": "./resource/faelina-card.png",
+    "image": "shared/resource/portraits/faelina.png",
     "imageAlt": "Faelina — asks the raven for shelter",
+    "imageFraming": 22,
     "position": {
       "x": 0,
       "y": 1500
@@ -191,8 +195,9 @@
       "y": 380
     },
     "description": "Provides shelter when the raven asks.",
-    "image": "./resource/saerenn-card.png",
+    "image": "shared/resource/portraits/saerenn.png",
     "imageAlt": "Saerenn — provides shelter when asked",
+    "imageFraming": 22,
     "position": {
       "x": 360,
       "y": 1500

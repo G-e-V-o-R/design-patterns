@@ -17,7 +17,9 @@ export function createConfiguredScenarios(
     const directory = path.split('/')[1];
     const config = compileScenarioConfig(input, path, relativePath =>
     {
-      const assetPath = `./${directory}/${relativePath.replace(/^\.\//, '')}`;
+      const assetPath = relativePath.startsWith('shared/')
+        ? `./${relativePath}`
+        : `./${directory}/${relativePath.replace(/^\.\//, '')}`;
       const asset = assets[assetPath];
       if (!asset)
       {

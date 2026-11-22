@@ -20,8 +20,9 @@
     "label": "LatveVoice",
     "kind": "class",
     "description": "Concrete component that supplies Latve’s words.",
-    "image": "./resource/latve-voice.png",
+    "image": "shared/resource/portraits/latve-v2.png",
     "imageAlt": "Latve stands alone near the old tower",
+    "imageFraming": 8,
     "position": { "x": 0, "y": 360 },
     "solutionPosition": { "x": 0, "y": 260 },
     "methods": [
@@ -42,6 +43,7 @@
     "description": "Base decorator that holds a Voice and forwards speak() to it.",
     "image": "./resource/jellyfish-decorator.png",
     "imageAlt": "A green jellyfish with long glowing tentacles",
+    "imageFraming": 20,
     "position": { "x": 400, "y": 360 },
     "solutionPosition": { "x": 310, "y": 260 },
     "fields": [
@@ -71,6 +73,7 @@
     "description": "Concrete decorator that puts listeners to sleep.",
     "image": "./resource/Sleep.png",
     "imageAlt": "A soft blue jellyfish with wispy tentacles",
+    "imageFraming": 18,
     "position": { "x": 0, "y": 855 },
     "solutionPosition": { "x": 0, "y": 555 },
     "methods": [
@@ -91,6 +94,7 @@
     "description": "Concrete decorator that puts listeners in a trance.",
     "image": "./resource/Hypnosis.png",
     "imageAlt": "A violet jellyfish surrounded by a purple glow",
+    "imageFraming": 18,
     "position": { "x": 400, "y": 855 },
     "solutionPosition": { "x": 310, "y": 555 },
     "methods": [
@@ -111,6 +115,7 @@
     "description": "Concrete decorator that summons a storm.",
     "image": "./resource/Storm.png",
     "imageAlt": "A bright blue jellyfish surrounded by lightning",
+    "imageFraming": 18,
     "position": { "x": 800, "y": 855 },
     "solutionPosition": { "x": 620, "y": 555 },
     "methods": [

@@ -20,6 +20,8 @@ Keep `scenario.json` focused on metadata and local section references:
 
 - `intro.json` contains the story object: paragraphs, image, task, and optional category, imageAlt, caption, concept, and three steps.
 - `classes.json` contains the class/interface array. Keep fields, methods, and positions nested inside their owning class. Use `position` for the starting position in the editor and optional `solutionPosition` for the compact worked example. Set `"anchorY": "center"` in the solution positions of cards that should share a midpoint at the same y-coordinate. Cards with the same solution y-coordinate connect from their sides. Cards on different rows connect from their top or bottom. Each class or interface lists its expected outgoing arrows in `relationships`, with a `type` and a `target` class ID for each arrow. Use `"relationships": []` when there are no outgoing arrows.
+- Class artwork fills the card width and is cropped from the bottom by default. Set `imageFraming` to a vertical position from `0` (top) to `100` (bottom). Use `imageHeight` in pixels when the default 180 px crop cannot fit all faces or key details.
+- Use `shared/resource/portraits/<character>.png` for recurring character portraits, with an `imageFraming` of 22 for the shared portrait set.
 - `hints.json` contains an array of progressive hint strings.
 - Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in. The toolbar offers a relationship type only when a class declares an arrow of that type in `classes.json`.
 

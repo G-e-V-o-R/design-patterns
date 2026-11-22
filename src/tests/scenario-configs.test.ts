@@ -35,12 +35,30 @@ for (const config of configs)
 }
 console.log(`Validated ${configs.length} configured scenarios, local artwork, solutions, and targeted invalid-diagram feedback.`);
 
+const portraits = [
+  { file: 'narion.png', cards: ['observer:narion', 'mediator:narion', 'command:narion', 'proxy:party'] },
+  { file: 'dre-kaar.png', cards: ['observer:dre-kaar', 'mediator:dre-kaar', 'command:dre-kaar'] },
+  { file: 'faelina.png', cards: ['mediator:faelina', 'command:faelina'] },
+  { file: 'saerenn.png', cards: ['mediator:saerenn'] },
+  { file: 'latve-v2.png', cards: ['decorator:latve-voice', 'command:latve'] },
+];
+for (const { file, cards } of portraits)
+{
+  for (const key of cards)
+  {
+    const [scenarioId, cardId] = key.split(':');
+    const card = configs.find(config => config.id === scenarioId)?.classes.find(entry => entry.id === cardId);
+    assert.equal(card?.artwork?.src, resolve('src/scenarios/shared/resource/portraits', file), `${key} uses the shared portrait.`);
+  }
+}
+
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'scenario-sections-'));
 try
 {
   const directory = join(temporaryRoot, 'observer');
   cpSync(resolve('src/scenarios/observer/config'), join(directory, 'config'), { recursive: true });
   cpSync(resolve('src/scenarios/observer/resource'), join(directory, 'resource'), { recursive: true });
+  cpSync(resolve('src/scenarios/shared/resource'), join(temporaryRoot, 'shared', 'resource'), { recursive: true });
   assert.equal(readConfiguredScenarios(temporaryRoot)[0]?.id, 'observer');
   writeFileSync(join(directory, 'config', 'intro.json'), '{ broken JSON');
   assert.throws(() => readConfiguredScenarios(temporaryRoot), /intro.json/);

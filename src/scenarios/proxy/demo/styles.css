@@ -68,11 +68,13 @@
   --proxy-start: 16.6667%;
   --proxy-middle: 50%;
   --proxy-end: 83.3333%;
+  --proxy-scene-height: clamp(132px, 31vw, 291px);
   max-width: 770px;
   margin: 0 auto;
 }
 
 .proxy-demo .proxy-actors {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -82,7 +84,7 @@
   isolation: isolate;
   display: grid;
   align-content: end;
-  min-height: clamp(132px, 31vw, 291px);
+  min-height: var(--proxy-scene-height);
   margin-inline: clamp(2px, .65vw, 8px);
   overflow: hidden;
   border: 1px solid #796355;
@@ -130,16 +132,16 @@
   font-size: clamp(11px, 1.75vw, 13px);
 }
 
-.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="helped"], [data-phase="denied"]) .proxy-actor[data-actor="narion"],
-.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verify-letter"], [data-phase="verified"], [data-phase="forward"], [data-phase="relay"]) .proxy-actor[data-actor="guard"],
-.proxy-demo .proxy-scene:is([data-phase="forward"], [data-phase="answer"], [data-phase="relay"], [data-phase="helped"]) .proxy-actor[data-actor="elder"] {
+.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="relay"], [data-phase="helped"], [data-phase="denied"]) .proxy-actor[data-actor="narion"],
+.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="forward"], [data-phase="answer"], [data-phase="relay"]) .proxy-actor[data-actor="guard"],
+.proxy-demo .proxy-scene:is([data-phase="forward"], [data-phase="answer"]) .proxy-actor[data-actor="elder"] {
   border-color: var(--proxy-copper);
   box-shadow: 0 0 16px #e8a05a29;
 }
 
-.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="helped"], [data-phase="denied"]) [data-actor="narion"] img,
-.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verify-letter"], [data-phase="verified"], [data-phase="forward"], [data-phase="relay"]) [data-actor="guard"] img,
-.proxy-demo .proxy-scene:is([data-phase="forward"], [data-phase="answer"], [data-phase="relay"], [data-phase="helped"]) [data-actor="elder"] img {
+.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="relay"], [data-phase="helped"], [data-phase="denied"]) [data-actor="narion"] img,
+.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="forward"], [data-phase="answer"], [data-phase="relay"]) [data-actor="guard"] img,
+.proxy-demo .proxy-scene:is([data-phase="forward"], [data-phase="answer"]) [data-actor="elder"] img {
   filter: saturate(1.1) brightness(1.17);
   transform: scale(1.045);
 }
@@ -147,6 +149,64 @@
 .proxy-demo .proxy-scene:is([data-phase="refuse"], [data-phase="denied"]) .proxy-actor[data-actor="guard"] {
   border-color: var(--proxy-denied);
   box-shadow: 0 0 18px #ed7a5e45;
+}
+
+.proxy-demo .proxy-antidote {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  left: var(--proxy-to, var(--proxy-start));
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 8px 6px 3px;
+  border: 1px solid #8bdbb8;
+  border-radius: 8px;
+  background: #152a23;
+  box-shadow: 0 0 12px #8bdbb870;
+  color: #e1f9ec;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  transform: translateX(-50%);
+}
+
+.proxy-demo .proxy-vial {
+  position: relative;
+  width: 16px;
+  height: 18px;
+  margin-top: 5px;
+  border: 1px solid #dbfdf1;
+  border-radius: 5px 5px 6px 6px;
+  background: linear-gradient(100deg, #ffffff80, transparent 45%),
+    linear-gradient(to bottom, #294d46 32%, #64e3a2 35%, #208260);
+}
+
+.proxy-demo .proxy-vial::before {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 8px;
+  height: 5px;
+  border: 1px solid #efd69b;
+  border-radius: 2px;
+  background: #ae7951;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.proxy-demo .proxy-scene[data-phase="answer"] .proxy-antidote {
+  --proxy-from: var(--proxy-end);
+  --proxy-to: var(--proxy-middle);
+}
+
+.proxy-demo .proxy-scene[data-phase="relay"] .proxy-antidote {
+  --proxy-from: var(--proxy-middle);
+  --proxy-to: var(--proxy-start);
+}
+
+.proxy-demo .proxy-scene:is([data-phase="answer"], [data-phase="relay"]) .proxy-antidote {
+  animation: proxy-handoff 1400ms ease-in-out both;
 }
 
 .proxy-demo .proxy-route {
@@ -229,7 +289,7 @@
   --proxy-to: var(--proxy-middle);
 }
 
-.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verify-letter"], [data-phase="verified"], [data-phase="answer"]) .proxy-signal {
+.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verify-letter"], [data-phase="verified"]) .proxy-signal {
   --proxy-to: var(--proxy-middle);
 }
 
@@ -248,11 +308,7 @@
   --proxy-to: var(--proxy-end);
 }
 
-.proxy-demo .proxy-scene[data-phase="answer"] .proxy-signal {
-  --proxy-from: var(--proxy-end);
-}
-
-.proxy-demo .proxy-scene:is([data-phase="relay"], [data-phase="refuse"]) .proxy-signal {
+.proxy-demo .proxy-scene[data-phase="refuse"] .proxy-signal {
   --proxy-from: var(--proxy-middle);
 }
 
@@ -262,11 +318,11 @@
   box-shadow: 0 0 11px 3px #eb9b8479;
 }
 
-.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="forward"], [data-phase="answer"], [data-phase="relay"], [data-phase="refuse"]) .proxy-signal {
+.proxy-demo .proxy-scene:is([data-phase="request"], [data-phase="forward"], [data-phase="refuse"]) .proxy-signal {
   animation: proxy-travel 950ms cubic-bezier(.34, .05, .37, 1) both;
 }
 
-.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verify-letter"], [data-phase="verified"]) .proxy-signal {
+.proxy-demo .proxy-scene:is([data-phase="check-letter"], [data-phase="verified"]) .proxy-signal {
   animation: proxy-check 490ms ease-in-out 2;
 }
 
@@ -335,6 +391,101 @@
   font-style: italic;
 }
 
+.proxy-demo .proxy-comparison {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.proxy-demo .proxy-letter .proxy-comparison {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #a37a52;
+}
+
+.proxy-demo .proxy-close-up {
+  display: grid;
+  align-content: center;
+  min-height: var(--proxy-scene-height);
+  padding: 8px clamp(8px, 4vw, 32px);
+  border: 1px solid #a37a52;
+  border-radius: 10px;
+  background: linear-gradient(105deg, #f1dbb0, #dcb784);
+  color: #35241d;
+}
+
+.proxy-demo .proxy-proof-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  font-size: 13px;
+}
+
+.proxy-demo .proxy-proof-row {
+  display: grid;
+  gap: 4px;
+}
+
+.proxy-demo .proxy-proof-label {
+  color: #503527;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.proxy-demo .proxy-proof-mark {
+  display: grid;
+  min-height: 42px;
+  place-items: center;
+  padding: 4px;
+  border: 2px solid #a583626b;
+  border-radius: 6px;
+  background: #fff3d74d;
+}
+
+.proxy-demo .proxy-signature {
+  color: #692e2d;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-style: italic;
+}
+
+.proxy-demo .proxy-wax-seal {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 2px solid #7c282a;
+  border-radius: 48% 51% 44% 53%;
+  background: radial-gradient(circle at 40% 35%, #a83f3d, #702426 75%);
+  box-shadow: inset 0 0 0 2px #bd52475e;
+  color: #ffd4a8;
+  font-size: 17px;
+}
+
+.proxy-demo .proxy-wax-seal[data-seal="split-star"]::before {
+  content: "✦";
+}
+
+.proxy-demo .proxy-comparison[data-checking="true"] .proxy-proof-mark {
+  animation: proxy-compare-proof 900ms 100ms ease-in-out both;
+}
+
+.proxy-demo .proxy-comparison[data-checking="true"] [data-proof="seal"] .proxy-proof-mark {
+  animation-delay: 1000ms;
+}
+
+.proxy-demo .proxy-comparison[data-checking="false"] .proxy-proof-label {
+  color: #254a2b;
+}
+
+@keyframes proxy-compare-proof {
+  25%, 80% {
+    border-color: #985712;
+    background-color: #fff4d2;
+    box-shadow: inset 0 0 10px #e7a34580;
+  }
+}
+
 @keyframes proxy-travel {
   from {
     left: var(--proxy-from);
@@ -342,6 +493,16 @@
 
   to {
     left: var(--proxy-to, var(--proxy-start));
+  }
+}
+
+@keyframes proxy-handoff {
+  0%, 18% {
+    left: var(--proxy-from);
+  }
+
+  78%, 100% {
+    left: var(--proxy-to);
   }
 }
 
@@ -379,5 +540,13 @@
   .proxy-demo .proxy-scene[data-phase] :is(.proxy-signal, .proxy-block) {
     animation-duration: 0s;
     animation-iteration-count: 1;
+  }
+
+  .proxy-demo .proxy-scene[data-phase] .proxy-antidote {
+    animation: none;
+  }
+
+  .proxy-demo .proxy-comparison[data-checking="true"] .proxy-proof-mark {
+    animation: none;
   }
 }

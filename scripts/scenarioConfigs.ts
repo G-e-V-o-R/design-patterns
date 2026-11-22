@@ -23,7 +23,8 @@ export function readConfiguredScenarios(root: string)
       }
       const config = compileScenarioConfig(input, path, relativePath =>
       {
-        const asset = join(directory, relativePath);
+        const assetRoot = relativePath.startsWith('shared/') ? root : directory;
+        const asset = join(assetRoot, relativePath);
         if (!existsSync(asset) || !statSync(asset).isFile())
         {
           throw new Error(`Missing artwork: ${asset}`);

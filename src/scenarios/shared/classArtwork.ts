@@ -1,6 +1,6 @@
-import type { Artwork, ClassArtwork, ClassDefinition, PresentedClass } from './lessonTypes';
+import type { ClassArtwork, ClassDefinition, ClassImage, PresentedClass } from './lessonTypes';
 
-export function requireClassArtwork(artwork: Artwork | undefined, label: string): Artwork
+export function requireClassArtwork(artwork: ClassImage | undefined, label: string): ClassImage
 {
   if (!artwork?.src.trim() || !artwork.alt.trim())
   {
@@ -14,7 +14,7 @@ export function withClassArtwork<const Classes extends readonly ClassDefinition[
   artwork: ClassArtwork<NoInfer<Classes>>,
 ): PresentedClass[]
 {
-  const images: Partial<Record<string, Artwork>> = artwork;
+  const images: Partial<Record<string, ClassImage>> = artwork;
   return classes.map(card =>
   {
     if (card.variant === 'interface')

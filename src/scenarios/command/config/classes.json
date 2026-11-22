@@ -4,8 +4,9 @@
     "label": "Dre’Kaar",
     "kind": "class",
     "description": "The client. Creates each command with its receiver and passes it to the Commander Beetle.",
-    "image": "./resource/dre-kaar.webp",
+    "image": "shared/resource/portraits/dre-kaar.png",
     "imageAlt": "Portrait of Dre’Kaar",
+    "imageFraming": 22,
     "position": {
       "x": 0,
       "y": 0
@@ -37,6 +38,7 @@
     "description": "The invoker. Queues Command objects and calls their shared execute() method on delivery.",
     "image": "./resource/7.0.png",
     "imageAlt": "A large beetle with Dre’Kaar on its back",
+    "imageFraming": 25,
     "position": {
       "x": 340,
       "y": 0
@@ -106,8 +108,9 @@
     "label": "WakeEveryoneCommand",
     "kind": "class",
     "description": "An order for Latve to wake everyone.",
-    "image": "./resource/7.1.png",
-    "imageAlt": "Messenger beetle carrying an order for Latve",
+    "image": "./resource/flank-beetle.webp",
+    "imageAlt": "Blue-winged messenger beetle carrying an order for Latve",
+    "imageFraming": 50,
     "position": {
       "x": 340,
       "y": 360
@@ -147,8 +150,9 @@
     "label": "SetTrapsCommand",
     "kind": "class",
     "description": "An order for Faelina to set traps.",
-    "image": "./resource/7.1.png",
-    "imageAlt": "Messenger beetle carrying an order for Faelina",
+    "image": "./resource/traps-beetle.webp",
+    "imageAlt": "Green-winged messenger beetle carrying an order for Faelina",
+    "imageFraming": 50,
     "position": {
       "x": 680,
       "y": 360
@@ -188,8 +192,9 @@
     "label": "HoldFlankCommand",
     "kind": "class",
     "description": "An order for Narion to move from the left flank to the right lookout.",
-    "image": "./resource/7.1.png",
-    "imageAlt": "Messenger beetle carrying an order for Narion",
+    "image": "./resource/wake-beetle.webp",
+    "imageAlt": "Amber-winged messenger beetle carrying an order for Narion",
+    "imageFraming": 50,
     "position": {
       "x": 1020,
       "y": 360
@@ -229,8 +234,9 @@
     "label": "Latve",
     "kind": "class",
     "description": "The receiver. Wakes everyone.",
-    "image": "./resource/latve.webp",
+    "image": "shared/resource/portraits/latve-v2.png",
     "imageAlt": "Portrait of Latve",
+    "imageFraming": 8,
     "position": {
       "x": 340,
       "y": 680
@@ -255,8 +261,9 @@
     "label": "Faelina",
     "kind": "class",
     "description": "The receiver. Sets the traps.",
-    "image": "./resource/faelina.webp",
+    "image": "shared/resource/portraits/faelina.png",
     "imageAlt": "Portrait of Faelina",
+    "imageFraming": 22,
     "position": {
       "x": 680,
       "y": 680
@@ -281,8 +288,9 @@
     "label": "Narion",
     "kind": "class",
     "description": "The receiver. Guards the left flank until ordered to move to the right lookout.",
-    "image": "./resource/narion.webp",
+    "image": "shared/resource/portraits/narion.png",
     "imageAlt": "Portrait of Narion",
+    "imageFraming": 22,
     "position": {
       "x": 1020,
       "y": 680

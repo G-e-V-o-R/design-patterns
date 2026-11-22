@@ -38,6 +38,7 @@
     "description": "Abstract base class that stores the next handler and forwards unmatched requests.",
     "image": "./resource/BaseHandler.png",
     "imageAlt": "Pale spider resting in its web",
+    "imageFraming": 36,
     "position": {
       "x": 450,
       "y": 370
@@ -82,6 +83,7 @@
     "description": "The client sends requests through a single IHandler reference.",
     "image": "./resource/intro.png",
     "imageAlt": "Faelina preparing the silk-thread trap that passes signals into the chain",
+    "imageFraming": 16,
     "position": {
       "x": 0,
       "y": 370
@@ -118,6 +120,7 @@
     "description": "Recognizes orc blood trails and handles the matching request.",
     "image": "./resource/OrcHandler.png",
     "imageAlt": "Spider with a red marking on its back",
+    "imageFraming": 45,
     "position": {
       "x": 0,
       "y": 1040
@@ -151,6 +154,7 @@
     "description": "Recognizes goblin footsteps and handles the matching request.",
     "image": "./resource/GoblinHandler.png",
     "imageAlt": "Spider with a blue S-shaped marking on its back",
+    "imageFraming": 45,
     "position": {
       "x": 450,
       "y": 1040
@@ -184,6 +188,7 @@
     "description": "Recognizes the scent of trolls and handles the matching request.",
     "image": "./resource/TrollHandler.png",
     "imageAlt": "Spider with a pale circular marking on its back",
+    "imageFraming": 45,
     "position": {
       "x": 900,
       "y": 1040

@@ -94,6 +94,10 @@
   object-position: center 22%;
 }
 
+.state-demo .state-source[data-event="reassure"] img {
+  object-position: center 8%;
+}
+
 .state-demo .state-source:hover:not([aria-disabled="true"]):not(:disabled),
 .state-demo .state-scene-card[data-highlighted="true"] {
   border-color: var(--state-gold);

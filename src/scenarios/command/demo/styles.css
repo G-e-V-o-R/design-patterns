@@ -360,10 +360,10 @@
 
 .command-demo .command-narion-marker img {
   position: absolute;
-  width: 300%;
+  width: 250%;
   max-width: none;
-  left: -98%;
-  top: -31%;
+  left: -85%;
+  top: -45%;
 }
 
 .command-demo .command-flank-map[data-right-post="true"] .command-narion-marker {

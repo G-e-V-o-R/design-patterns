@@ -37,6 +37,15 @@ assert.equal(scenario.intro.category, undefined);
 assert.equal(scenario.members.length, 3);
 assert.equal(scenario.memberOwners.speed, 'walker');
 assert.equal(scenario.classes[1]?.artwork?.src, '/resolved/resource/walker.svg');
+assert.equal(scenario.classes[1]?.artwork?.framing, undefined);
+for (const framing of [0, 16, 100])
+{
+  const framed = fixture();
+  framed.classes[1]!.imageFraming = framing;
+  framed.classes[1]!.imageHeight = 220;
+  assert.equal(compile(framed).classes[1]?.artwork?.framing, framing);
+  assert.equal(compile(framed).classes[1]?.artwork?.height, 220);
+}
 assert.deepEqual(getConfiguredLessonIssues(scenario, solutionConfiguredLesson(scenario)), []);
 assert.ok(getConfiguredLessonIssues(scenario, emptyConfiguredLesson()).length > 0);
 assert.notDeepEqual(scenario.positions.route, scenario.positions.walker);
@@ -170,6 +179,21 @@ invalid(config =>
 {
   delete config.classes[1]!.image;
 }, 'classes[1].image');
+for (const framing of [-1, 101, Number.NaN])
+{
+  invalid(config =>
+  {
+    config.classes[1]!.imageFraming = framing;
+  }, 'classes[1].imageFraming');
+}
+invalid(config =>
+{
+  config.classes[0]!.imageFraming = 20;
+}, 'classes[0].imageFraming');
+invalid(config =>
+{
+  config.classes[1]!.imageHeight = 0;
+}, 'classes[1].imageHeight');
 invalid(config =>
 {
   config.intro.image = '../other/resource/intro.svg';

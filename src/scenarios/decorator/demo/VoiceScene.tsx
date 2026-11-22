@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import foxAsleep from '../resource/fox-asleep.png?url';
 import foxAwake from '../resource/fox-awake.png?url';
-import latve from '../resource/latve-voice.png?url';
+import latve from '../../shared/resource/portraits/latve-v2.png?url';
 import listenerAlert from '../resource/listener-alert.png?url';
 import listenerHypnotized from '../resource/listener-hypnotized.png?url';
 import towerCalm from '../resource/tower-calm.png?url';

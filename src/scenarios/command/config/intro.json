@@ -1,7 +1,7 @@
 {
   "paragraphs": [
     "Dre’Kaar gives the Commander Beetle three orders. Latve must wake everyone, Faelina must set the traps, and Narion must move from the left flank to the right lookout after Dre’Kaar spots an apparent orc advance. Each order is an object that carries its own receiver and knows what to ask that receiver to do.",
-    "Three child beetles register with the Commander Beetle, one for each order. When Dre’Kaar chooses an order, the Commander sends a copy of the corresponding beetle and keeps the registered beetle beside her. The Commander says execute() to the child beetle. The copy flies to its receiver and calls that receiver’s method to carry out the order.",
+    "Three child beetles register with the Commander Beetle, one for each order. When Dre’Kaar chooses an order, the Commander calls execute() on a copy of the beetle for that order. The registered beetle stays beside her. The copy flies to its receiver and calls that receiver’s method to carry out the order.",
     "Once Narion reaches the right lookout, the orcs withdraw on the right and Dre’Kaar sees the real attack on the left. The command saved Narion’s previous post when it ran. Undo sends him back to defend the left flank."
   ],
   "image": "./resource/7.0.png",

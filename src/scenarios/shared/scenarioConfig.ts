@@ -1,4 +1,4 @@
-import type { IntroContent, MemberDefinition, MemberVisibility, PresentedClass } from './lessonTypes.ts';
+import type { ClassImage, IntroContent, MemberDefinition, MemberVisibility, PresentedClass } from './lessonTypes.ts';
 import type { DiagramRelationship } from './connections.ts';
 import type { RelationshipDefinition } from './relationships.ts';
 
@@ -28,6 +28,8 @@ export type ScenarioConfig = {
     description?: string;
     image?: string;
     imageAlt?: string;
+    imageFraming?: number;
+    imageHeight?: number;
     position?: ClassPosition;
     solutionPosition?: SolutionPosition;
     fields?: ConfigMember[];
@@ -135,10 +137,10 @@ export function compileScenarioConfig(
   function artwork(value: unknown, alt: unknown, path: string, fallbackAlt: string)
   {
     const imagePath = string(value, `${path}.image`);
-    if (!/^(\.\/)?resource\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_ .-]+\.(png|jpe?g|webp|gif|svg|avif)$/i.test(imagePath)
+    if (!/^(?:\.\/|shared\/)?resource\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_ .-]+\.(png|jpe?g|webp|gif|svg|avif)$/i.test(imagePath)
       || imagePath.split('/').some(part => part === '..'))
     {
-      fail(`${path}.image`, 'Use a local image path such as ./resource/card.png.');
+      fail(`${path}.image`, 'Use an image path such as ./resource/card.png or shared/resource/portraits/narion.png.');
     }
     let src: string;
     try
@@ -154,6 +156,22 @@ export function compileScenarioConfig(
       return fail(`${path}.image`, `Cannot resolve "${imagePath}": ${error instanceof Error ? error.message : String(error)}`);
     }
     return { src, alt: optionalString(alt, `${path}.imageAlt`) ?? fallbackAlt };
+  }
+
+  function classArtwork(card: Record<string, unknown>, path: string, label: string): ClassImage
+  {
+    const image = artwork(card.image, card.imageAlt, path, label);
+    const framing = card.imageFraming;
+    const height = card.imageHeight;
+    if (framing !== undefined && (typeof framing !== 'number' || !Number.isFinite(framing) || framing < 0 || framing > 100))
+    {
+      return fail(`${path}.imageFraming`, 'Use a vertical crop position from 0 to 100.');
+    }
+    if (height !== undefined && (typeof height !== 'number' || !Number.isFinite(height) || height <= 0))
+    {
+      return fail(`${path}.imageHeight`, 'Use a positive height in pixels.');
+    }
+    return { ...image, framing, height };
   }
 
   const root = { ...record(input, 'scenario', ['id', 'title', 'pattern', 'number', 'intro', 'classes', 'relationshipTypes', 'hints']) };
@@ -261,7 +279,7 @@ export function compileScenarioConfig(
   classValues.forEach((value, index) =>
   {
     const path = `classes[${index}]`;
-    const card = record(value, path, ['id', 'label', 'kind', 'description', 'image', 'imageAlt', 'position', 'solutionPosition', 'fields', 'methods', 'relationships']);
+    const card = record(value, path, ['id', 'label', 'kind', 'description', 'image', 'imageAlt', 'imageFraming', 'imageHeight', 'position', 'solutionPosition', 'fields', 'methods', 'relationships']);
     const classId = identifier(card.id, `${path}.id`);
     if (classIds.has(classId))
     {
@@ -276,15 +294,21 @@ export function compileScenarioConfig(
     const definition = { id: classId, label, kind: card.kind, description: optionalString(card.description, `${path}.description`) ?? '' };
     if (card.kind === 'class')
     {
-      classes.push({ ...definition, variant: 'class', artwork: artwork(card.image, card.imageAlt, path, label) });
+      classes.push({ ...definition, variant: 'class', artwork: classArtwork(card, path, label) });
     }
     else
     {
-      if (card.imageAlt !== undefined && card.image === undefined)
+      if (card.image === undefined)
       {
-        fail(`${path}.imageAlt`, 'Provide image alongside imageAlt.');
+        for (const field of ['imageAlt', 'imageFraming', 'imageHeight'])
+        {
+          if (card[field] !== undefined)
+          {
+            fail(`${path}.${field}`, `Provide image alongside ${field}.`);
+          }
+        }
       }
-      classes.push({ ...definition, variant: 'interface', artwork: card.image === undefined ? undefined : artwork(card.image, card.imageAlt, path, label) });
+      classes.push({ ...definition, variant: 'interface', artwork: card.image === undefined ? undefined : classArtwork(card, path, label) });
     }
 
     const position = card.position === undefined

@@ -10,6 +10,7 @@
     "description": "Looks for danger and keeps a list of observers. When it finds danger, it publishes the discovery through the Observer interface.",
     "image": "./resource/fox-card.png",
     "imageAlt": "Fox — the Subject",
+    "imageFraming": 50,
     "position": {
       "x": 0,
       "y": 0
@@ -82,8 +83,9 @@
       "y": 415
     },
     "description": "Implements Observer. Gets the discovery and helps Narion plan a safer path.",
-    "image": "./resource/narion-card.png",
+    "image": "shared/resource/portraits/narion.png",
     "imageAlt": "Narion — a concrete Observer",
+    "imageFraming": 22,
     "position": {
       "x": 0,
       "y": 800
@@ -117,8 +119,9 @@
       "y": 415
     },
     "description": "Implements Observer. Gets the same discovery and helps Dre’Kaar protect the group.",
-    "image": "./resource/dre-kaar-card.png",
+    "image": "shared/resource/portraits/dre-kaar.png",
     "imageAlt": "Dre’Kaar — a concrete Observer",
+    "imageFraming": 22,
     "position": {
       "x": 390,
       "y": 800

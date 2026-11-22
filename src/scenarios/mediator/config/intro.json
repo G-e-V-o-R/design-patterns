@@ -1,7 +1,12 @@
 {
   "paragraphs": [
-    "The ambush closes around the companions. Everyone is shouting. Faelina warns, “Enemy behind you!” Narion calls, “Saerenn is bleeding—get her to safety!” Their cries collide. Narion turns toward the enemy, while Dre’Kaar rushes to Saerenn—then both hesitate, unsure whether to fight or get her to safety.",
-    "Elvir sends Raven aloft. A mental link joins Raven to every companion, so they can send a thought instead of shouting across the fight. “Saerenn is bleeding—get her to safety!” Narion thinks. Raven knows who can help and directs the request to them. Faelina can ask for shelter and Dre’Kaar for cover; Raven routes those requests to Saerenn and Narion. The companions stay focused on the fight while Raven keeps each request moving to the right person."
+    "The companions are trapped in an ambush. Everyone is shouting.",
+    "“There’s an enemy behind you!” Faelina warns.",
+    "“Saerenn is bleeding! Get her to safety!” Narion shouts.",
+    "They shout over each other. Narion turns toward the enemy while Dre’Kaar rushes to Saerenn. Then both hesitate, unsure whether to fight or get her to safety.",
+    "Elvir sends Raven into the air. A mental link connects Raven to each companion, so they can send their thoughts to Raven during the fight.",
+    "“Saerenn is bleeding! Get her to safety!” Narion thinks.",
+    "Raven knows who can help and sends the request to them. When Faelina asks for shelter, Raven passes the request to Saerenn. When Dre’Kaar asks for cover, Raven passes it to Narion. The companions can focus on the fight while Raven sends each request to the right person."
   ],
   "caption": "Many requests → one coordinator",
   "task": "Build a class diagram where companions ask through a Mediator interface. Let RavenMediator decide who responds.",

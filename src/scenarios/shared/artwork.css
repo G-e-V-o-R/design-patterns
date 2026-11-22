@@ -1,6 +1,6 @@
 .scenario-class-artwork
 {
-  height: 350px;
+  height: 180px;
   overflow: hidden;
   border-top: 1px solid #c3ceab35;
   border-radius: 0 0 6px 6px;
@@ -11,9 +11,8 @@
 {
   display: block;
   width: 100%;
-  height: auto;
-  margin-top: -15px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   object-position: center top;
   pointer-events: none;
   user-select: none;

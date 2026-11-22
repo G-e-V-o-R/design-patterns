@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import hypnosis from '../resource/Hypnosis.png?url';
-import latve from '../resource/latve-voice.png?url';
+import latve from '../../shared/resource/portraits/latve-v2.png?url';
 import sleep from '../resource/Sleep.png?url';
 import storm from '../resource/Storm.png?url';
 import { speakWithEffects, voiceEffects, type VoiceEffect } from './demoModel';

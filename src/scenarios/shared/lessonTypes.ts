@@ -1,4 +1,5 @@
 export type Artwork = { src: string; alt: string };
+export type ClassImage = Artwork & { framing?: number; height?: number };
 
 export type IntroContent = {
   number: string;
@@ -35,11 +36,11 @@ export type MemberDefinition = {
 };
 
 export type ClassAppearance =
-  | { variant: 'class'; artwork: Artwork }
-  | { variant: 'interface'; artwork?: Artwork };
+  | { variant: 'class'; artwork: ClassImage }
+  | { variant: 'interface'; artwork?: ClassImage };
 
 export type PresentedClass = Omit<ClassDefinition, 'variant'> & ClassAppearance;
 
 export type ClassArtwork<Classes extends readonly ClassDefinition[]> =
-  Record<Extract<Classes[number], { variant: 'class' }>['id'], Artwork>
-  & Partial<Record<Extract<Classes[number], { variant: 'interface' }>['id'], Artwork>>;
+  Record<Extract<Classes[number], { variant: 'class' }>['id'], ClassImage>
+  & Partial<Record<Extract<Classes[number], { variant: 'interface' }>['id'], ClassImage>>;

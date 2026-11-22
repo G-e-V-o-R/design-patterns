@@ -270,10 +270,6 @@
   object-position: center 20%;
 }
 
-.mediator-scenario .med-actor-dre-kaar img {
-  object-position: center 38%;
-}
-
 .mediator-scenario .med-actor-copy {
   padding: 7px clamp(5px, 1.2cqw, 12px) 9px;
 }

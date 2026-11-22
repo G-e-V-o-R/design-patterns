@@ -7,8 +7,8 @@
 
 .pattern-intro {
   display: grid;
-  grid-template-columns: minmax(230px,0.55fr) minmax(0,1.45fr);
-  align-items: center;
+  grid-template-columns: clamp(220px, 27.5%, 290px) minmax(0, 1fr);
+  align-items: start;
   margin-bottom: 28px;
   overflow: hidden;
   border: 1px solid #aec79d26;
@@ -19,7 +19,8 @@
 .pattern-intro-copy {
   grid-column: 2;
   grid-row: 1;
-  padding: 32px;
+  padding-block: 20px;
+  padding-inline: 16px 32px;
 }
 
 .pattern-kicker {
@@ -27,7 +28,7 @@
   letter-spacing: 1.8px;
   color: #d2b980;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .pattern-kicker span {
@@ -38,7 +39,7 @@
 .pattern-intro h1 {
   font-size: clamp(28px,3vw,43px);
   line-height: 1.2;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .pattern-intro h1 > span {
@@ -56,11 +57,11 @@
 .pattern-intro p:not(.pattern-kicker) {
   color: #bbc6b6;
   font-size: 16px;
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
 .pattern-story {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .pattern-story p {
@@ -68,7 +69,7 @@
 }
 
 .pattern-story p + p {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .pattern-goal {
@@ -83,9 +84,11 @@
 .pattern-intro figure {
   grid-column: 1;
   grid-row: 1;
+  justify-self: end;
   margin: 0;
   position: relative;
   aspect-ratio: 0.69;
+  max-height: clamp(300px, 35vw, 420px);
   overflow: hidden;
   background: #12231c;
 }
@@ -496,12 +499,9 @@
     padding: 15px;
   }
 
-  .pattern-intro {
-    grid-template-columns: minmax(220px,0.55fr) minmax(0,1.45fr);
-  }
-
   .pattern-intro-copy {
-    padding: 24px;
+    padding-block: 16px;
+    padding-inline-end: 24px;
   }
 
   .pattern-canvas {
@@ -534,7 +534,7 @@
   }
 
   .pattern-intro-copy {
-    padding: 24px 20px;
+    padding: 16px 20px;
   }
 
   .pattern-intro figure {
@@ -828,6 +828,7 @@
   .pattern-intro {
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
 
   .pattern-intro figure {

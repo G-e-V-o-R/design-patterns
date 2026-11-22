@@ -3,8 +3,8 @@ import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import type { LessonGraph } from '../../shared/configuredLessonModel';
 import { requireClassArtwork } from '../../shared/classArtwork';
 import { config } from '../config/config';
-import dreKaar from '../resource/Dre_Kaar.png?url';
-import latve from '../resource/Latve.png?url';
+import dreKaar from '../../shared/resource/portraits/dre-kaar.png?url';
+import latve from '../../shared/resource/portraits/latve-v2.png?url';
 import { createSimulation, type Reaction, type StateId, type StoryEvent, type Transition } from './demoModel';
 import { StateMachine } from './StateMachine';
 import './styles.css';
@@ -220,6 +220,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
               key={event.id}
               type="button"
               className="state-scene-card state-source"
+              data-event={event.id}
               data-highlighted={source?.id === event.id}
               disabled={disabled}
               aria-disabled={Boolean(delivery)}

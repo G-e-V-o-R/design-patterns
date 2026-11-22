@@ -3,7 +3,7 @@ import wakeAfter from '../resource/wake-after.webp?url';
 import trapsBefore from '../resource/traps-before.webp?url';
 import trapsAfter from '../resource/traps-after.webp?url';
 import campMap from '../resource/flank-map.webp?url';
-import narionPortrait from '../resource/narion.webp?url';
+import narionPortrait from '../../shared/resource/portraits/narion.png?url';
 import type { OrderId, OrderStatus } from './demoModel';
 
 const receiverScenes = {
