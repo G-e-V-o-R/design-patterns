@@ -1,9 +1,9 @@
-import { useEffect, useState, type DragEvent, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type DragEvent, type MouseEvent } from 'react';
 import { applyNodeChanges, type Connection, type Edge, type EdgeChange, type NodeChange } from '@xyflow/react';
 import { ClassDiagramCanvas } from './ClassDiagramCanvas';
 import { configuredNodeTypes, type ConfiguredClassNode } from './ConfiguredClassNode';
 import { facingConnectionHandles } from './connections';
-import { DiagramBuilderPanel, type CardCategory } from './DiagramBuilderPanel';
+import { DiagramBuilderPanel, DiagramHelp, type CardCategory } from './DiagramBuilderPanel';
 import { BoardToolbar, LessonAction, LessonStatus, LessonWorkspace, SolutionNotice } from './LessonLayout';
 import { RelationshipList } from './RelationshipList';
 import { parallelRelationshipEdgeTypes, parallelRelationshipOffsets } from './ParallelRelationshipEdge';
@@ -30,14 +30,35 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
   const [selectedEdges, setSelectedEdges] = useState<Set<number>>(() => new Set());
   const [draggedMember, setDraggedMember] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const cardsDialog = useRef<HTMLDialogElement>(null);
+  const cardsDialogId = `${config.id}-cards-title`;
   const dragType = `application/x-${config.id}-member`;
   const { graph, layout } = editor;
   const defaultPositions = layout.compact ? config.solutionPositions : config.positions;
   const invalidMembers = new Set(editor.issues.flatMap(issue => issue.memberIds));
   const invalidEdges = new Set(editor.issues.flatMap(issue => issue.edgeIndices));
-  const emptyDescription = config.relationships.length
-    ? 'Add class cards, assign their members, then connect them.'
-    : 'Add class cards and assign their members.';
+  const firstClass = config.classes[0];
+
+  useEffect(() =>
+  {
+    const dialog = cardsDialog.current;
+    if (!active)
+    {
+      dialog?.close();
+      return;
+    }
+
+    const mobile = window.matchMedia('(max-width: 720px)');
+    function closeOnDesktop(event: MediaQueryListEvent)
+    {
+      if (!event.matches)
+      {
+        dialog?.close();
+      }
+    }
+    mobile.addEventListener('change', closeOnDesktop);
+    return () => mobile.removeEventListener('change', closeOnDesktop);
+  }, [active]);
 
   useEffect(() =>
   {
@@ -241,27 +262,39 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
     endDrag();
   }
 
+  function addClassFromDrawer(id: string)
+  {
+    editor.addClass(id);
+    cardsDialog.current?.close();
+  }
+
+  function assignFromDrawer(memberId: string, owner: string)
+  {
+    editor.assign(memberId, owner);
+    cardsDialog.current?.close();
+  }
+
+  const cardPanelProps = {
+    classes: config.classes,
+    members: config.members,
+    placedClasses: graph.classes,
+    assignments: graph.members,
+    category,
+    onCategoryChange: setCategory,
+    draggedMemberId: draggedMember,
+    onStartDrag: startDrag,
+    onEndDrag: endDrag,
+  };
+
   return (
     <LessonWorkspace
       onDragEnd={endDrag}
       tray={
         <div className="configured-tray" onDragOver={allowReturn} onDrop={returnMember}>
           <DiagramBuilderPanel
-            classes={config.classes}
-            members={config.members}
-            placedClasses={graph.classes}
-            assignments={graph.members}
+            {...cardPanelProps}
             hideAssignedMembers
-            category={category}
-            onCategoryChange={setCategory}
-            draggedMemberId={draggedMember}
-            hints={config.hints}
-            hintIndex={editor.hint}
             onAddClass={editor.addClass}
-            onStartDrag={startDrag}
-            onEndDrag={endDrag}
-            onShowHint={editor.showHint}
-            onShowSolution={showSolution}
           />
         </div>
       }
@@ -273,7 +306,15 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         canUndo={editor.canUndo}
         onUndo={editor.undo}
         onReset={reset}
+        onOpenCards={() => cardsDialog.current?.showModal()}
       />
+      <dialog ref={cardsDialog} className="configured-cards-dialog" aria-labelledby={cardsDialogId}>
+        <header className="configured-cards-dialog-header">
+          <h2 id={cardsDialogId}>Add or assign cards</h2>
+          <button type="button" onClick={() => cardsDialog.current?.close()}>Close</button>
+        </header>
+        <DiagramBuilderPanel {...cardPanelProps} onAddClass={addClassFromDrawer} onAssign={assignFromDrawer} />
+      </dialog>
       {editor.worked && <SolutionNotice>Example solution · study how the members and relationships fit together.</SolutionNotice>}
       <ClassDiagramCanvas
         nodes={nodes}
@@ -285,8 +326,8 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         compact={layout.compact}
         markerNamespace={config.id}
         label={`${config.pattern} class diagram`}
-        emptyTitle="Build your class diagram"
-        emptyDescription={emptyDescription}
+        emptyTitle="Start your diagram"
+        emptyAction={firstClass && { label: `Add ${firstClass.label}`, onClick: () => editor.addClass(firstClass.id) }}
         onNodesChange={changeNodes}
         onEdgesChange={changeEdges}
         onNodesDelete={deleted => editor.removeClasses(deleted.map(node => node.id))}
@@ -319,7 +360,10 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         invalidEdgeIndices={invalidEdges}
         onRemove={index => editor.removeEdges([index])}
       />
-      <ConfiguredLessonStatus editor={editor} />
+      <div className="configured-diagram-feedback">
+        <DiagramHelp hints={config.hints} hintIndex={editor.hint} onShowHint={editor.showHint} onShowSolution={showSolution} />
+        <ConfiguredLessonStatus editor={editor} />
+      </div>
       {onRunDemo && <LessonAction label="Run demo" ready={editor.ready} onRun={onRunDemo} />}
     </LessonWorkspace>
   );

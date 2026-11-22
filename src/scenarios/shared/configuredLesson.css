@@ -31,3 +31,222 @@
   color: #bbc6b6;
   font-size: 13px;
 }
+
+.configured-lesson .pattern-intro {
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+.configured-lesson .pattern-intro figure {
+  width: 100%;
+  height: 100%;
+  min-height: 230px;
+  max-height: 290px;
+  aspect-ratio: auto;
+}
+
+.configured-lesson .pattern-intro-copy {
+  max-width: 83ch;
+}
+
+.configured-lesson .pattern-open-cards {
+  border-color: #d2b980;
+  background: #3b5033;
+  color: #f5e8c8;
+  font-weight: 700;
+}
+
+.configured-lesson .pattern-open-cards:hover {
+  background: #4b6142;
+}
+
+.configured-lesson .pattern-intro-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.configured-lesson .pattern-intro-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid #917b52;
+  border-radius: 999px;
+  background: #27352c;
+  color: #ecd2a0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.configured-lesson .pattern-intro-actions > button:hover {
+  border-color: #c5a46f;
+  background: #354437;
+  color: #ffebc2;
+}
+
+.configured-lesson .pattern-intro-actions > button[aria-expanded]::after {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  content: '';
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.configured-lesson .pattern-intro-actions > button[aria-expanded="true"]::after {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.configured-lesson .pattern-story-disclosure .pattern-story {
+  margin: 12px 0 0;
+}
+
+.configured-lesson .pattern-story-disclosure .pattern-steps {
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 12px 0 0;
+  padding: 12px 0 0;
+}
+
+.configured-lesson .configured-lesson-tabs button {
+  scroll-margin-top: 12px;
+}
+
+.configured-lesson .configured-tray .pattern-card-list {
+  margin-top: 12px;
+}
+
+.configured-lesson .pattern-open-cards,
+.configured-lesson .configured-cards-dialog {
+  display: none;
+}
+
+.configured-lesson .pattern-empty button {
+  pointer-events: auto;
+}
+
+.configured-lesson .configured-diagram-feedback .pattern-hints {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 15px;
+  margin: 0;
+  padding: 12px 20px;
+  border: 0;
+}
+
+.configured-lesson .configured-diagram-feedback .pattern-hints > div {
+  flex-basis: 100%;
+}
+
+.configured-lesson .configured-diagram-feedback .pattern-hints p {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .configured-lesson {
+    padding-top: 16px;
+  }
+
+  .configured-lesson .pattern-intro figure {
+    min-height: 0;
+    height: 130px;
+    border-radius: 0;
+  }
+
+  .configured-lesson .pattern-intro figcaption {
+    padding-top: 16px;
+  }
+
+  .configured-lesson .configured-tray {
+    display: none;
+  }
+
+  .configured-lesson .pattern-open-cards {
+    display: block;
+  }
+
+  .configured-lesson .pattern-board-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .configured-lesson .pattern-board-toolbar button {
+    min-height: 36px;
+  }
+
+  .configured-lesson .pattern-canvas {
+    height: clamp(350px, 60dvh, 615px);
+  }
+
+  .configured-lesson .configured-cards-dialog[open] {
+    position: fixed;
+    inset: auto 0 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    max-height: min(84dvh, 650px);
+    margin: 0;
+    padding: 0 0 env(safe-area-inset-bottom);
+    overflow: hidden;
+    border: 1px solid #aec79d59;
+    border-radius: 16px 16px 0 0;
+    background: #1b2b23;
+    color: inherit;
+  }
+
+  .configured-lesson .configured-cards-dialog::backdrop {
+    background: #0b160fba;
+  }
+
+  .configured-lesson .configured-cards-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #aec79d26;
+  }
+
+  .configured-lesson .configured-cards-dialog-header h2 {
+    margin: 0;
+    font-size: 17px;
+  }
+
+  .configured-lesson .configured-cards-dialog .pattern-tray {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 0;
+  }
+
+  .configured-lesson .configured-cards-dialog .pattern-card-list {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 10px;
+    overscroll-behavior: contain;
+  }
+
+  .configured-lesson .configured-cards-dialog .pattern-tray-card h3 {
+    font-size: 14px;
+  }
+
+  .configured-lesson .configured-cards-dialog .pattern-tray-card p {
+    font-size: 12px;
+  }
+
+  .configured-lesson .configured-cards-dialog select {
+    width: 100%;
+    min-height: 40px;
+    padding: 6px;
+    border: 1px solid #aec79d59;
+    border-radius: 6px;
+    background: #18271f;
+    color: #e7ecdf;
+  }
+}

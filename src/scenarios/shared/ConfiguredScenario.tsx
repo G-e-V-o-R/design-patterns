@@ -54,6 +54,13 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
     }
   }
 
+  function startBuilding()
+  {
+    openDiagram();
+    diagramTab.current?.focus({ preventScroll: true });
+    diagramTab.current?.scrollIntoView({ block: 'start' });
+  }
+
   function moveTabFocus(event: KeyboardEvent<HTMLDivElement>)
   {
     switch (event.key)
@@ -92,7 +99,7 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
 
   return (
     <section className="configured-lesson pattern-lesson" aria-labelledby={config.intro.headingId}>
-      <StoryIntro content={config.intro} />
+      <StoryIntro content={config.intro} onStart={startBuilding} />
       <div className="configured-lesson-navigation">
         <div className="configured-lesson-tabs" role="tablist" aria-label="Lesson workspace" onKeyDown={moveTabFocus}>
           <button

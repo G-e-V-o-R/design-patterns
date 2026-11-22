@@ -14,13 +14,14 @@ export function LessonWorkspace({ tray, children, onDragEnd }: {
   );
 }
 
-export function BoardToolbar({ placedMembers, totalMembers, relationships, canUndo, onUndo, onReset }: {
+export function BoardToolbar({ placedMembers, totalMembers, relationships, canUndo, onUndo, onReset, onOpenCards }: {
   placedMembers: number;
   totalMembers: number;
   relationships: number;
   canUndo: boolean;
   onUndo: () => void;
   onReset: () => void;
+  onOpenCards?: () => void;
 })
 {
   return (
@@ -30,6 +31,9 @@ export function BoardToolbar({ placedMembers, totalMembers, relationships, canUn
         <p>{placedMembers}/{totalMembers} member cards placed · {relationships} relationships</p>
       </div>
       <div>
+        {onOpenCards && (
+          <button className="pattern-open-cards" type="button" aria-haspopup="dialog" onClick={onOpenCards}>Add cards</button>
+        )}
         <button disabled={!canUndo} onClick={onUndo}>Undo</button>
         <button onClick={onReset}>Reset</button>
       </div>

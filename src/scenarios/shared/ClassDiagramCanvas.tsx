@@ -30,7 +30,8 @@ export type DiagramCanvasProps<NodeType extends Node> = RelationshipToolsProps &
   markerNamespace: string;
   label: string;
   emptyTitle: string;
-  emptyDescription: string;
+  emptyDescription?: string;
+  emptyAction?: { label: string; onClick: () => void };
   onNodesChange: (changes: NodeChange<NodeType>[]) => void;
   onEdgesChange?: (changes: EdgeChange<Edge>[]) => void;
   onNodesDelete: (nodes: NodeType[]) => void;
@@ -66,6 +67,7 @@ export function ClassDiagramCanvas<NodeType extends Node>({
   label,
   emptyTitle,
   emptyDescription,
+  emptyAction,
   onNodesChange,
   onEdgesChange,
   onNodesDelete,
@@ -157,7 +159,8 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         <div className="pattern-empty">
           <span aria-hidden="true">▤ → ▤</span>
           <h3>{emptyTitle}</h3>
-          <p>{emptyDescription}</p>
+          {emptyDescription && <p>{emptyDescription}</p>}
+          {emptyAction && <button type="button" onClick={emptyAction.onClick}>{emptyAction.label}</button>}
         </div>
       )}
     </div>
