@@ -13,12 +13,11 @@ export type ScenarioConfig = {
   number?: string;
   intro: {
     category?: string;
-    paragraphs: string[];
+    paragraphs: (string | { text: string; image: string; imageFraming?: number })[];
     image: string;
     imageAlt?: string;
     caption?: string;
     task: string;
-    concept?: string;
     steps?: string[];
   };
   classes: {
@@ -37,7 +36,6 @@ export type ScenarioConfig = {
     relationships?: { type: string; target: string }[];
   }[];
   relationshipTypes?: RelationshipDefinition[];
-  hints?: string[];
 };
 
 export type CompiledScenario = {
@@ -53,13 +51,14 @@ export type CompiledScenario = {
   positions: Record<string, ClassPosition>;
   solutionPositions: Record<string, SolutionPosition>;
   relationships: RelationshipDefinition[];
-  hints: string[];
 };
 
 const defaultRelationships: readonly RelationshipDefinition[] = [
   { id: 'implements', label: 'implements', appearance: 'implementation' },
   { id: 'uses', label: 'uses', appearance: 'solid' },
 ];
+
+export const defaultOrientationSteps = ['Add class cards', 'Assign fields & methods', 'Connect the diagram'] as const;
 
 export function compileScenarioConfig(
   input: unknown,
@@ -129,9 +128,9 @@ export function compileScenarioConfig(
     return value;
   }
 
-  function strings(value: unknown, path: string, optional = false): string[]
+  function strings(value: unknown, path: string): string[]
   {
-    return array(value, path, optional).map((item, index) => string(item, `${path}[${index}]`));
+    return array(value, path).map((item, index) => string(item, `${path}[${index}]`));
   }
 
   function artwork(value: unknown, alt: unknown, path: string, fallbackAlt: string)
@@ -158,15 +157,20 @@ export function compileScenarioConfig(
     return { src, alt: optionalString(alt, `${path}.imageAlt`) ?? fallbackAlt };
   }
 
-  function classArtwork(card: Record<string, unknown>, path: string, label: string): ClassImage
+  function imageFraming(framing: unknown, path: string): number | undefined
   {
-    const image = artwork(card.image, card.imageAlt, path, label);
-    const framing = card.imageFraming;
-    const height = card.imageHeight;
     if (framing !== undefined && (typeof framing !== 'number' || !Number.isFinite(framing) || framing < 0 || framing > 100))
     {
       return fail(`${path}.imageFraming`, 'Use a vertical crop position from 0 to 100.');
     }
+    return framing;
+  }
+
+  function classArtwork(card: Record<string, unknown>, path: string, label: string): ClassImage
+  {
+    const image = artwork(card.image, card.imageAlt, path, label);
+    const framing = imageFraming(card.imageFraming, path);
+    const height = card.imageHeight;
     if (height !== undefined && (typeof height !== 'number' || !Number.isFinite(height) || height <= 0))
     {
       return fail(`${path}.imageHeight`, 'Use a positive height in pixels.');
@@ -174,8 +178,8 @@ export function compileScenarioConfig(
     return { ...image, framing, height };
   }
 
-  const root = { ...record(input, 'scenario', ['id', 'title', 'pattern', 'number', 'intro', 'classes', 'relationshipTypes', 'hints']) };
-  for (const section of ['intro', 'classes', 'relationshipTypes', 'hints'])
+  const root = { ...record(input, 'scenario', ['id', 'title', 'pattern', 'number', 'intro', 'classes', 'relationshipTypes']) };
+  for (const section of ['intro', 'classes', 'relationshipTypes'])
   {
     const reference = root[section];
     if (typeof reference !== 'string')
@@ -219,7 +223,22 @@ export function compileScenarioConfig(
   }
   const intro = record(root.intro, 'intro', ['category', 'paragraphs', 'image', 'imageAlt', 'caption', 'task', 'concept', 'steps']);
   const category = optionalString(intro.category, 'intro.category');
-  const paragraphs = strings(intro.paragraphs, 'intro.paragraphs');
+  const paragraphs = array(intro.paragraphs, 'intro.paragraphs').map((value, index) =>
+  {
+    const path = `intro.paragraphs[${index}]`;
+    if (typeof value === 'string')
+    {
+      return { text: string(value, path) };
+    }
+    const paragraph = record(value, path, ['text', 'image', 'imageFraming']);
+    return {
+      text: string(paragraph.text, `${path}.text`),
+      portrait: {
+        src: artwork(paragraph.image, undefined, path, '').src,
+        framing: imageFraming(paragraph.imageFraming, path),
+      },
+    };
+  });
   if (paragraphs.length === 0)
   {
     fail('intro.paragraphs', 'Include at least one story paragraph.');
@@ -406,10 +425,12 @@ export function compileScenarioConfig(
       headingId: `${id}-heading`,
       artwork: artwork(intro.image, intro.imageAlt, 'intro', title),
       caption: optionalString(intro.caption, 'intro.caption') ?? title,
-      paragraphs,
+      paragraphs: paragraphs.map(paragraph => paragraph.text),
+      ...(paragraphs.some(paragraph => paragraph.portrait)
+        ? { paragraphPortraits: paragraphs.map(paragraph => paragraph.portrait) }
+        : {}),
       task: string(intro.task, 'intro.task'),
-      concept: optionalString(intro.concept, 'intro.concept') ?? `Build the classes and relationships that express ${pattern}.`,
-      steps: steps ?? ['Add class cards', 'Assign fields & methods', 'Connect & check'],
+      steps: steps ?? defaultOrientationSteps,
     },
     classes,
     members,
@@ -418,6 +439,5 @@ export function compileScenarioConfig(
     positions,
     solutionPositions,
     relationships: relationships.filter(relationship => usedRelationshipIds.has(relationship.id)),
-    hints: strings(root.hints, 'hints', true),
   };
 }

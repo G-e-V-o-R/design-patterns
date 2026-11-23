@@ -22,9 +22,9 @@ Observer demonstrates this flow: the fox's discovery introduces a publisher and 
 
 1. **Orient.** Use the idea in `docs/hobbit/Russian Scenarios.md` as the starting point. Give the scenario a title, pattern name, clear A2-level description of the situation and how the pattern works, and an explicit task.
 2. **Build.** Provide the classes or interfaces, members, and relationship choices needed to model the pattern. Explain the interactions and controls before expecting the learner to use them.
-3. **Check.** Validate the learner's model and provide specific, actionable feedback. Point to the class, member, or relationship that needs attention; do not rely on a generic “incorrect” result.
-4. **Support.** Offer progressive hints and a way to inspect or load a worked solution. Neither should prevent learners from continuing to experiment.
-5. **Try it.** Make the demonstration available when the model is valid (or when the solution is loaded). Show outcomes for meaningful cases, including a contrasting or no-op case where relevant.
+3. **Give feedback.** Validate as the learner edits. Highlight the misplaced member or incorrect relationship that needs attention.
+4. **Show an example.** Offer a separate worked example and preserve the learner's work.
+5. **Try it.** Make the demonstration available when the learner completes their diagram. Show outcomes for meaningful cases, including a contrasting or no-op case where relevant.
 6. **Reset and recover.** Let learners reset their own scenario and recover from edits without changing another scenario's state. Keep feedback and the demonstrated result in sync with edits.
 
 The order and visual treatment can vary, but learners must be able to move from the story to a structural model, understand mistakes, and observe the pattern in action.
@@ -41,7 +41,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 
 ## Interaction and accessibility
 
-- Use clear labels and concise instructions for cards, diagram controls, relationships, hints, validation, demo actions, and reset.
+- Use clear labels and concise instructions for cards, diagram controls, relationships, validation, demo actions, and reset.
 - Do not make drag-and-drop the only way to assign members or create relationships; provide equivalent controls.
 - Make validation and demo outcomes available as readable text, not color or animation alone. Announce changing results accessibly, and give informative text alternatives for meaningful artwork.
 - Support keyboard operation, visible focus, reduced-motion preferences, and narrow layouts. Avoid requiring animation to understand a result.
@@ -57,7 +57,7 @@ The order and visual treatment can vary, but learners must be able to move from 
 ## Adding a scenario
 
 1. Create `src/scenarios/<id>/config/scenario.json` and set a unique matching config ID.
-2. Adapt the scenario idea into clear story copy, diagram definitions, targeted hints, and local artwork in `scenario.json`.
+2. Adapt the scenario idea into clear story copy, diagram definitions, and local artwork referenced through `scenario.json`.
 3. Add an optional `Demo.tsx` and focused simulation helpers when the pattern needs a custom demonstration. Registration is automatic.
 4. Include custom demo tests in `npm test`; config validation already covers every scenario directory.
 5. Run `npm test`, `npm run typecheck`, and `npm run build`.
@@ -70,7 +70,7 @@ Use [REFERENCE_SCENARIO.md](./REFERENCE_SCENARIO.md) for the file-by-file recipe
 - A memorable story with a specific, testable learning goal.
 - A build sequence and clear descriptions for class, member, and relationship cards, with scenario artwork on the concrete class cards.
 - Targeted validation that identifies the affected diagram elements.
-- Progressive hints, a worked solution, reset, and undo.
+- Live progress, a separate worked example, reset, and undo.
 - A demonstration with contrasting danger/safe outcomes, subscription changes, accessible status, and a method-call trace.
 - Shared graph validation plus a separate demo model and behavior tests.
 

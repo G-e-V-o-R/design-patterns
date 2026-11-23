@@ -1,18 +1,27 @@
+import { localize, useLanguage, type Language } from '../../shared/language';
 import commanderArt from '../resource/7.0.png?url';
 import { childBeetleArt } from './childBeetleArt';
 import { ReceiverEffect } from './ReceiverEffect';
-import { orderDetails, type DemoState, type OrderId, type OrderStatus } from './demoModel';
+import { orderDetails, describeReceiverOutcome, type DemoState, type OrderId, type OrderStatus } from './demoModel';
 
 export const orderIds = ['wake', 'traps', 'flank'] as const;
 
-const statusLabels: Record<OrderStatus, string> = {
-  pending: 'Queued',
-  launching: 'Launching',
-  'in-flight': 'In flight',
-  handoff: 'Order received',
-  executed: 'Executed',
-  undone: 'Undone',
+const statusLabels: Record<OrderStatus, { en: string; ru: string }> = {
+  pending: { en: 'Queued', ru: 'В очереди' },
+  launching: { en: 'Launching', ru: 'Взлетает' },
+  'in-flight': { en: 'In flight', ru: 'В полёте' },
+  handoff: { en: 'Order received', ru: 'Приказ получен' },
+  executed: { en: 'Executed', ru: 'Выполнен' },
+  undone: { en: 'Undone', ru: 'Отменён' },
 };
+
+const receiverNames = { wake: 'Латве', traps: 'Фаэлина', flank: 'Нарион' } satisfies Record<OrderId, string>;
+const handoffNames = { wake: 'Латве', traps: 'Фаэлине', flank: 'Нариону' } satisfies Record<OrderId, string>;
+
+function handoffLabel(id: OrderId, language: Language)
+{
+  return localize(language, `Child beetle → ${orderDetails[id].receiver}`, `Жук-посыльный → ${handoffNames[id]}`);
+}
 
 type RouteCallbacks = {
   onLaunch: () => void;
@@ -22,7 +31,8 @@ type RouteCallbacks = {
 
 function CommandCard({ id, status, onLaunch, onDeliver, onExecute }: RouteCallbacks & { id: OrderId; status: OrderStatus })
 {
-  const { name, receiver, method } = orderDetails[id];
+  const language = useLanguage();
+  const { name, method } = orderDetails[id];
   const launching = status === 'launching';
   const handingOff = status === 'handoff';
 
@@ -54,21 +64,21 @@ function CommandCard({ id, status, onLaunch, onDeliver, onExecute }: RouteCallba
       <div className="command-card-copy">
         {launching && (
           <div className="command-dialogue" role="status">
-            <span>Mother Beetle → child</span>
+            <span>{localize(language, 'Mother Beetle → child', 'Жук-мать → жук-посыльный')}</span>
             <code>execute()</code>
           </div>
         )}
         {handingOff && (
           <div className="command-dialogue" role="status">
-            <span>Child beetle → {receiver}</span>
+            <span>{handoffLabel(id, language)}</span>
             <code>{method}</code>
           </div>
         )}
         {!launching && !handingOff && (
           <>
-            <span>Command</span>
+            <span>{localize(language, 'Command', 'Команда')}</span>
             <strong>{name}</strong>
-            <span className="command-order-status">{statusLabels[status]}</span>
+            <span className="command-order-status">{statusLabels[status][language]}</span>
           </>
         )}
       </div>
@@ -78,7 +88,8 @@ function CommandCard({ id, status, onLaunch, onDeliver, onExecute }: RouteCallba
 
 function FlightRoute({ id, order, onLaunch, onDeliver, onExecute }: RouteCallbacks & { id: OrderId; order: DemoState[number] | undefined })
 {
-  const { receiver, before } = orderDetails[id];
+  const language = useLanguage();
+  const { receiver } = orderDetails[id];
   const status = order?.status;
 
   return (
@@ -93,11 +104,11 @@ function FlightRoute({ id, order, onLaunch, onDeliver, onExecute }: RouteCallbac
       <div className="command-receiver">
         <ReceiverEffect id={id} status={status} />
         <div className="command-receiver-copy">
-          <span className="command-action">Receiver</span>
-          <strong>{receiver}</strong>
+          <span className="command-action">{localize(language, 'Receiver', 'Получатель')}</span>
+          <strong>{localize(language, receiver, receiverNames[id])}</strong>
           <div className="command-receiver-state" aria-live="polite">
-            {status === 'undone' && <code>undo() · Previous post restored</code>}
-            <span className={status === 'executed' ? 'command-outcome' : undefined}>{order?.outcome ?? before}</span>
+            {status === 'undone' && <code>{localize(language, 'undo() · Previous post restored', 'undo() · Возврат на прежний пост')}</code>}
+            <span className={status === 'executed' ? 'command-outcome' : undefined}>{describeReceiverOutcome(id, order?.outcome, language)}</span>
           </div>
         </div>
       </div>
@@ -118,15 +129,16 @@ type FlightSceneProps = {
 
 export function FlightScene({ orders, active, gathered, gathering, onGather, onLaunch, onDeliver, onExecute }: FlightSceneProps)
 {
+  const language = useLanguage();
   const flying = orders.filter(order => order.status === 'in-flight').length;
-  let commanderStatus = 'Waiting for registration';
+  let commanderStatus = localize(language, 'Waiting for registration', 'Ожидает регистрации жуков');
   if (gathering)
   {
-    commanderStatus = 'Gathering child beetles';
+    commanderStatus = localize(language, 'Gathering child beetles', 'Собирает жуков-посыльных');
   }
   else if (gathered === orderIds.length)
   {
-    commanderStatus = `${gathered} registered beetles`;
+    commanderStatus = localize(language, `${gathered} registered beetles`, `Зарегистрировано жуков: ${gathered}`);
   }
 
   return (
@@ -154,13 +166,13 @@ export function FlightScene({ orders, active, gathered, gathering, onGather, onL
           })}
         </div>
         <figcaption>
-          <strong>Commander Beetle</strong>
-          <span>Invoker · <code>Command[]</code></span>
+          <strong>{localize(language, 'Commander Beetle', 'Жук-командир')}</strong>
+          <span>{localize(language, 'Invoker', 'Инициатор')} · <code>Command[]</code></span>
           <span>{commanderStatus}</span>
-          {flying > 0 && <span>{flying === 1 ? '1 copy in flight' : `${flying} copies in flight`}</span>}
+          {flying > 0 && <span>{localize(language, flying === 1 ? '1 copy in flight' : `${flying} copies in flight`, `Копий в полёте: ${flying}`)}</span>}
         </figcaption>
       </figure>
-      <ul className="command-routes" aria-label="Order routes">
+      <ul className="command-routes" aria-label={localize(language, 'Order routes', 'Маршруты приказов')}>
         {orderIds.map(id => <FlightRoute key={id} id={id} order={orders.find(order => order.id === id)} onLaunch={() => onLaunch(id)}
           onDeliver={() => onDeliver(id)} onExecute={() => onExecute(id)} />)}
       </ul>

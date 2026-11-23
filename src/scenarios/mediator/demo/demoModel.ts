@@ -1,3 +1,4 @@
+import { localize, type Language } from '../../shared/language';
 import { config as demoConfig } from '../config/config';
 import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 
@@ -28,22 +29,47 @@ export function simulateLesson(
     return null;
   }
 
+  return describeCoordination(request, 'en');
+}
+
+export function describeCoordination(request: RequestKind, language: Language): CoordinationResult
+{
   const isCoverRequest = request === 'cover';
   const sender = isCoverRequest ? 'dre-kaar' : 'faelina';
   const recipient = isCoverRequest ? 'narion' : 'saerenn';
 
+  const requestMethod = isCoverRequest ? 'requestCover' : 'requestShelter';
+  const responseMethod = isCoverRequest ? 'provideCover' : 'provideShelter';
+  const senderClass = classLabel(sender);
+  const recipientClass = classLabel(recipient);
   return {
     request,
     sender,
     recipient,
     summary: isCoverRequest
-      ? 'Only Narion receives the cover request and provides covering fire.'
-      : 'Only Saerenn receives the shelter request and guides the group to safety.',
+      ? localize(language, 'Only Narion receives the cover request and provides covering fire.', 'Просьбу о прикрытии получает только Нарион. Он прикрывает отряд огнём.')
+      : localize(language, 'Only Saerenn receives the shelter request and guides the group to safety.', 'Просьбу об укрытии получает только Саэренн. Она ведёт отряд в безопасное место.'),
     trace: [
-      `${classLabel(sender)}.${isCoverRequest ? 'requestCover' : 'requestShelter'}() calls mediator.notify(this, "${request}").`,
-      `RavenMediator.notify(sender, "${request}") selects ${classLabel(recipient)} using its coordination rule.`,
-      `RavenMediator calls ${classLabel(recipient)}.${isCoverRequest ? 'provideCover' : 'provideShelter'}().`,
-      `${classLabel(recipient)} performs its own business logic. The other participants receive no request.`,
+      localize(
+        language,
+        `${senderClass}.${requestMethod}() calls mediator.notify(this, "${request}").`,
+        `Метод ${senderClass}.${requestMethod}() вызывает mediator.notify(this, "${request}").`,
+      ),
+      localize(
+        language,
+        `RavenMediator.notify(sender, "${request}") selects ${recipientClass} using its coordination rule.`,
+        `Метод RavenMediator.notify(sender, "${request}") выбирает ${recipientClass} по правилу маршрутизации.`,
+      ),
+      localize(
+        language,
+        `RavenMediator calls ${recipientClass}.${responseMethod}().`,
+        `Посредник RavenMediator вызывает ${recipientClass}.${responseMethod}().`,
+      ),
+      localize(
+        language,
+        `${recipientClass} performs its own business logic. The other participants receive no request.`,
+        `${recipientClass} выполняет свою часть задачи. Остальные участники не получают запроса.`,
+      ),
     ],
   };
 }

@@ -1,12 +1,13 @@
+import { localize, useLanguage, type Language } from './language';
 import { useEffect, useRef, useState, type DragEvent, type MouseEvent } from 'react';
 import { applyNodeChanges, type Connection, type Edge, type EdgeChange, type NodeChange } from '@xyflow/react';
 import { ClassDiagramCanvas } from './ClassDiagramCanvas';
 import { configuredNodeTypes, type ConfiguredClassNode } from './ConfiguredClassNode';
 import { facingConnectionHandles } from './connections';
-import { DiagramBuilderPanel, DiagramHelp, type CardCategory } from './DiagramBuilderPanel';
-import { BoardToolbar, LessonAction, LessonStatus, LessonWorkspace, SolutionNotice } from './LessonLayout';
+import { DiagramBuilderPanel, type CardCategory } from './DiagramBuilderPanel';
+import { BoardToolbar, LessonWorkspace } from './LessonLayout';
 import { RelationshipList } from './RelationshipList';
-import { parallelRelationshipEdgeTypes, parallelRelationshipOffsets } from './ParallelRelationshipEdge';
+import { parallelRelationshipEdgeTypes, spaceParallelRelationships } from './ParallelRelationshipEdge';
 import { createRelationshipEdge } from './relationships';
 import type { CompiledScenario } from './scenarioConfig';
 import type { ConfiguredLessonEditor } from './useConfiguredLesson';
@@ -15,13 +16,15 @@ type WorkspaceProps = {
   config: CompiledScenario;
   editor: ConfiguredLessonEditor;
   active: boolean;
+  onOpenExample: () => void;
   onRunDemo?: () => void;
 };
 
 type NodePresentation = Pick<ConfiguredClassNode, 'selected' | 'measured'>;
 
-export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }: WorkspaceProps)
+export function ConfiguredLessonWorkspace({ config, editor, active, onOpenExample, onRunDemo }: WorkspaceProps)
 {
+  const language = useLanguage();
   const [category, setCategory] = useState<CardCategory>('classes');
   const [relationship, setRelationship] = useState(config.relationships[0]?.id ?? '');
   const [drawing, setDrawing] = useState(false);
@@ -34,10 +37,16 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
   const cardsDialogId = `${config.id}-cards-title`;
   const dragType = `application/x-${config.id}-member`;
   const { graph, layout } = editor;
-  const defaultPositions = layout.compact ? config.solutionPositions : config.positions;
   const invalidMembers = new Set(editor.issues.flatMap(issue => issue.memberIds));
   const invalidEdges = new Set(editor.issues.flatMap(issue => issue.edgeIndices));
   const firstClass = config.classes[0];
+  const correctMembers = Object.keys(graph.members).filter(id => !invalidMembers.has(id)).length;
+  const progress = [
+    { label: localize(language, 'Classes', 'Классы'), correct: graph.classes.length, total: config.classes.length },
+    { label: localize(language, 'Members', 'Поля и методы'), correct: correctMembers, total: config.members.length },
+    { label: localize(language, 'Relationships', 'Связи'), correct: graph.edges.length - invalidEdges.size, total: config.expectedEdges.length },
+  ].filter(item => item.total > 0);
+  const status = editor.message || diagramStatus(language, config, editor, correctMembers, invalidEdges.size);
 
   useEffect(() =>
   {
@@ -127,13 +136,13 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
     .map(card => ({
       id: card.id,
       type: 'configuredClass',
-      position: layout.positions[card.id] ?? defaultPositions[card.id] ?? { x: 0, y: 0 },
-      origin: layout.compact && config.solutionPositions[card.id]?.anchorY === 'center' ? [0, 0.5] : undefined,
+      ariaLabel: card.label,
+      domAttributes: language === 'ru' ? { 'aria-roledescription': 'карточка класса' } : undefined,
+      position: layout.positions[card.id] ?? config.positions[card.id] ?? { x: 0, y: 0 },
       ...nodeState[card.id],
       className: connectionSource === card.id ? 'pattern-connection-source' : '',
       data: {
         ...card,
-        showArtwork: !layout.compact,
         dragType,
         members: config.members.filter(member => graph.members[member.id] === card.id),
         invalidMemberIds: invalidMembers,
@@ -161,22 +170,19 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
       },
     }));
 
-  const edges: Edge[] = graph.edges.map((edge, index) =>
+  const edges = spaceParallelRelationships(graph.edges.map((edge, index) =>
   {
     const selected = selectedEdges.has(index);
     const relationshipEdge = createRelationshipEdge(edge, index, config.relationships, config.id, selected, invalidEdges.has(index));
     return {
       ...relationshipEdge,
-      type: layout.compact ? 'straight' : relationshipEdge.type,
+      ...language === 'ru' && {
+        ariaLabel: `${classLabel(edge.source)} → ${relationshipEdge.label} → ${classLabel(edge.target)}`,
+        domAttributes: { 'aria-roledescription': 'связь' },
+      },
       reconnectable: selected,
     };
-  });
-  const parallelOffsets = parallelRelationshipOffsets(edges);
-  parallelOffsets.forEach((offset, index) =>
-  {
-    const edge = edges[index]!;
-    edges[index] = { ...edge, type: 'parallelRelationship', data: { offset } };
-  });
+  }));
 
   function changeNodes(changes: NodeChange<ConfiguredClassNode>[])
   {
@@ -254,14 +260,6 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
     endDrag();
   }
 
-  function showSolution()
-  {
-    editor.showSolution();
-    setNodeState({});
-    setDrawing(false);
-    endDrag();
-  }
-
   function addClassFromDrawer(id: string)
   {
     editor.addClass(id);
@@ -300,22 +298,22 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
       }
     >
       <BoardToolbar
-        placedMembers={Object.keys(graph.members).length}
-        totalMembers={config.members.length}
-        relationships={graph.edges.length}
+        progress={progress}
+        status={status}
         canUndo={editor.canUndo}
         onUndo={editor.undo}
         onReset={reset}
         onOpenCards={() => cardsDialog.current?.showModal()}
+        onOpenExample={onOpenExample}
+        onRunDemo={onRunDemo}
       />
       <dialog ref={cardsDialog} className="configured-cards-dialog" aria-labelledby={cardsDialogId}>
         <header className="configured-cards-dialog-header">
-          <h2 id={cardsDialogId}>Add or assign cards</h2>
-          <button type="button" onClick={() => cardsDialog.current?.close()}>Close</button>
+          <h2 id={cardsDialogId}>{localize(language, 'Add or assign cards', 'Добавление и распределение карточек')}</h2>
+          <button type="button" onClick={() => cardsDialog.current?.close()}>{localize(language, 'Close', 'Закрыть')}</button>
         </header>
         <DiagramBuilderPanel {...cardPanelProps} onAddClass={addClassFromDrawer} onAssign={assignFromDrawer} />
       </dialog>
-      {editor.worked && <SolutionNotice>Example solution · study how the members and relationships fit together.</SolutionNotice>}
       <ClassDiagramCanvas
         nodes={nodes}
         edges={edges}
@@ -323,11 +321,10 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         edgeTypes={parallelRelationshipEdgeTypes}
         classKey={`${editor.fitRevision}:${graph.classes.join(',')}`}
         active={active}
-        compact={layout.compact}
         markerNamespace={config.id}
-        label={`${config.pattern} class diagram`}
-        emptyTitle="Start your diagram"
-        emptyAction={firstClass && { label: `Add ${firstClass.label}`, onClick: () => editor.addClass(firstClass.id) }}
+        label={localize(language, `${config.pattern} class diagram`, `Диаграмма классов · ${config.pattern}`)}
+        emptyTitle={localize(language, 'Start your diagram', 'Начните построение диаграммы')}
+        emptyAction={firstClass && { label: localize(language, `Add ${firstClass.label}`, `Добавить ${firstClass.label}`), onClick: () => editor.addClass(firstClass.id) }}
         onNodesChange={changeNodes}
         onEdgesChange={changeEdges}
         onNodesDelete={deleted => editor.removeClasses(deleted.map(node => node.id))}
@@ -337,20 +334,22 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         onNodeClick={clickNode}
         onPaneClick={() => setConnectionSource(null)}
         relationships={config.relationships}
-        drawing={drawing}
-        relationship={relationship}
-        connectionSource={connectionSource}
-        classLabel={classLabel}
-        onMoveMode={() =>
-        {
-          setDrawing(false);
-          setConnectionSource(null);
-        }}
-        onSelectRelationship={type =>
-        {
-          setRelationship(type);
-          setDrawing(true);
-          setConnectionSource(null);
+        relationshipTools={{
+          drawing,
+          relationship,
+          connectionSource,
+          classLabel,
+          onMoveMode: () =>
+          {
+            setDrawing(false);
+            setConnectionSource(null);
+          },
+          onSelectRelationship: type =>
+          {
+            setRelationship(type);
+            setDrawing(true);
+            setConnectionSource(null);
+          },
         }}
       />
       <RelationshipList
@@ -360,29 +359,28 @@ export function ConfiguredLessonWorkspace({ config, editor, active, onRunDemo }:
         invalidEdgeIndices={invalidEdges}
         onRemove={index => editor.removeEdges([index])}
       />
-      <div className="configured-diagram-feedback">
-        <DiagramHelp hints={config.hints} hintIndex={editor.hint} onShowHint={editor.showHint} onShowSolution={showSolution} />
-        <ConfiguredLessonStatus editor={editor} />
-      </div>
-      {onRunDemo && <LessonAction label="Run demo" ready={editor.ready} onRun={onRunDemo} />}
     </LessonWorkspace>
   );
 }
 
-function ConfiguredLessonStatus({ editor }: { editor: ConfiguredLessonEditor })
+function diagramStatus(language: Language, config: CompiledScenario, editor: ConfiguredLessonEditor, correctMembers: number, invalidEdges: number)
 {
-  return (
-    <LessonStatus>
-      {editor.message && <p>{editor.message}</p>}
-      {editor.ready && <p>Your diagram is complete. All members and relationships are in the correct places.</p>}
-      {!editor.ready && (
-        <div>
-          <p>Complete the diagram:</p>
-          <ul>{editor.issues.slice(0, 4).map((issue, index) => <li key={index}>{issue.message}</li>)}</ul>
-          {editor.issues.length > 4 && <p>{editor.issues.length - 4} more items to complete.</p>}
-        </div>
-      )}
-    </LessonStatus>
-  );
+  if (editor.ready)
+  {
+    return localize(language, 'Your diagram is complete.', 'Ваша диаграмма готова.');
+  }
+  if (invalidEdges > 0 || correctMembers < Object.keys(editor.graph.members).length)
+  {
+    return localize(language, 'Review the highlighted members or relationships.', 'Проверьте выделенные поля, методы и связи.');
+  }
+  if (editor.graph.classes.length < config.classes.length)
+  {
+    return localize(language, 'Add class and interface cards to the canvas.', 'Добавьте на диаграмму карточки классов и интерфейсов.');
+  }
+  if (correctMembers < config.members.length)
+  {
+    return localize(language, 'Place the remaining fields and methods.', 'Распределите оставшиеся поля и методы.');
+  }
+  return localize(language, 'Draw the remaining relationships.', 'Нарисуйте оставшиеся связи.');
 }
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { localize, useLanguage } from '../../shared/language';
 import orcSpider from '../resource/OrcHandler.png?url';
 import goblinSpider from '../resource/GoblinHandler.png?url';
 import trollSpider from '../resource/TrollHandler.png?url';
@@ -6,13 +7,13 @@ import orc from '../resource/orc.png?url';
 import goblin from '../resource/goblin.png?url';
 import troll from '../resource/troll.png?url';
 import harmlessTraveller from '../resource/harmless-traveller.png?url';
-import { classLabel, type ChainResult, type ChainStep, type RequestKind } from './demoModel';
+import { classLabel, describeChainStep, describeChainOutcome, type ChainResult, type ChainStep, type RequestKind } from './demoModel';
 
 const targets = {
-  blood: { label: 'Orc', image: orc },
-  iron: { label: 'Troll', image: troll },
-  step: { label: 'Goblin', image: goblin },
-  safe: { label: 'Harmless traveller', image: harmlessTraveller },
+  blood: { label: 'Orc', labelRu: 'Орк', image: orc },
+  iron: { label: 'Troll', labelRu: 'Тролль', image: troll },
+  step: { label: 'Goblin', labelRu: 'Гоблин', image: goblin },
+  safe: { label: 'Harmless traveller', labelRu: 'Мирный путник', image: harmlessTraveller },
 };
 
 const targetOrder = ['blood', 'iron', 'step', 'safe'] as const;
@@ -88,11 +89,12 @@ function getFrames(result: ChainResult | null): Frame[]
 
 function TargetPortrait({ request }: { request: RequestKind })
 {
-  const { label, image } = targets[request];
+  const language = useLanguage();
+  const { label, labelRu, image } = targets[request];
   return (
     <>
       <img src={image} alt="" draggable={false} />
-      <span>{label}</span>
+      <span>{localize(language, label, labelRu)}</span>
     </>
   );
 }
@@ -123,6 +125,7 @@ function SpiderCard({ spider, frame }: { spider: Spider; frame: Frame | undefine
 
 export function ChainDemo({ ready, active, result, onRun }: ChainDemoProps)
 {
+  const language = useLanguage();
   const frames = useMemo(() => getFrames(result), [result]);
   const [progress, setProgress] = useState<{ result: ChainResult; index: number }>();
   const index = progress && progress.result === result ? progress.index : 0;
@@ -160,24 +163,26 @@ export function ChainDemo({ ready, active, result, onRun }: ChainDemoProps)
     };
   }, [active, frame, frames.length, index, result]);
 
-  let status = 'Choose a target to send it through the chain.';
+  let status = localize(language, 'Choose a target to send it through the chain.', 'Выберите цель, которая пройдёт по цепочке.');
   if (result && frame?.phase === 'done')
   {
-    status = result.summary;
+    status = describeChainOutcome(result, language);
   }
   else if (frame)
   {
-    status = frame.step?.message ?? 'The target is moving along the trail.';
+    status = result && frame.step
+      ? describeChainStep(result, frame.step, language)
+      : localize(language, 'The target is moving along the trail.', 'Цель движется по тропе.');
   }
 
   return (
     <section className="chain-demo" aria-labelledby="chain-demo-heading">
-      <h2 id="chain-demo-heading">Follow the silk thread</h2>
-      <p>Choose a target and watch the first matching spider strike.</p>
-      {!ready && <p>Complete the class diagram to unlock the demo.</p>}
+      <h2 id="chain-demo-heading">{localize(language, 'Follow the silk thread', 'По шёлковой нити')}</h2>
+      <p>{localize(language, 'Choose a target and watch the first matching spider strike.', 'Выберите цель и посмотрите, как её перехватит первый подходящий паук.')}</p>
+      {!ready && <p>{localize(language, 'Complete the class diagram to unlock the demo.', 'Завершите диаграмму классов, чтобы открыть демонстрацию.')}</p>}
 
       <div className="chain-scene">
-        <div className="chain-sources" role="group" aria-label="Targets">
+        <div className="chain-sources" role="group" aria-label={localize(language, 'Targets', 'Цели')}>
           {targetOrder.map(request => (
             <button
               key={request}
@@ -201,7 +206,7 @@ export function ChainDemo({ ready, active, result, onRun }: ChainDemoProps)
           ))}
         </div>
         <div className="chain-silk" aria-hidden="true" />
-        <ol className="chain-spiders" aria-label="Spider handlers in chain order">
+        <ol className="chain-spiders" aria-label={localize(language, 'Spider handlers in chain order', 'Пауки-обработчики в порядке цепочки')}>
           {spiders.map(spider => <SpiderCard key={spider.id} spider={spider} frame={frame} />)}
         </ol>
         {playing && result && frame && (
@@ -222,9 +227,9 @@ export function ChainDemo({ ready, active, result, onRun }: ChainDemoProps)
       <div className="chain-outcome" role="status">{status}</div>
       {result && !playing && (
         <details className="chain-trace">
-          <summary>See the handler calls</summary>
+          <summary>{localize(language, 'See the handler calls', 'Посмотреть вызовы обработчиков')}</summary>
           <ol>
-            {result.trace.map(step => <li key={step.handler}>{step.message}</li>)}
+            {result.trace.map(step => <li key={step.handler}>{describeChainStep(result, step, language)}</li>)}
           </ol>
         </details>
       )}

@@ -1,14 +1,33 @@
 import { Component, type ReactNode } from 'react';
-/** A failed lesson cannot take down the navigation or its neighboring lessons. */
-export class ScenarioBoundary extends Component<{ children: ReactNode; name: string }, { failed: boolean }> {
+import { LanguageContext, localize, type Language } from '../scenarios/shared/language';
+
+export class ScenarioBoundary extends Component<{ children: ReactNode; name: string }, { failed: boolean }>
+{
+  static contextType = LanguageContext;
+  declare context: Language;
   state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() {
-    if (this.state.failed) return <div className="scenario-error" role="alert">
-      <h2>{this.props.name} could not be displayed</h2>
-      <p>You can still open another scenario. Retrying starts this lesson again.</p>
-      <button onClick={() => this.setState({ failed: false })}>Retry this scenario</button>
-    </div>;
+
+  static getDerivedStateFromError()
+  {
+    return { failed: true };
+  }
+
+  render()
+  {
+    if (this.state.failed)
+    {
+      const { name } = this.props;
+      return (
+        <div className="scenario-error" role="alert">
+          <h2>{localize(this.context, `${name} could not be displayed`, `Не удалось открыть сценарий «${name}»`)}</h2>
+          <p>{localize(this.context, 'You can still open another scenario. Retrying starts this lesson again.',
+            'Вы можете открыть другой сценарий. Если повторить попытку, урок начнётся заново.')}</p>
+          <button onClick={() => this.setState({ failed: false })}>
+            {localize(this.context, 'Retry this scenario', 'Повторить попытку')}
+          </button>
+        </div>
+      );
+    }
     return this.props.children;
   }
 }

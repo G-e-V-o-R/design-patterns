@@ -1,0 +1,22 @@
+{
+  "paragraphs": [
+    "At dusk, the companions found a dead troll in the village square. Narion knelt beside it. There wasn’t a single wound. A fighter in a bear mask stood nearby.",
+    {
+      "text": "“I wore this one when the troll came for me,” he said, lifting a green serpent mask from his belt. “Its shadow coiled around him and stole his breath.”",
+      "image": "./resource/bear-mask.png",
+      "imageFraming": 20
+    },
+    "Another troll charged out of the ruined smithy. Still wearing the bear mask, the fighter met the charge head-on. The impact shook loose the roof tiles. Step by step, he drove the troll back into the smithy.",
+    "The troll vanished into the dark. The fighter chose an owl mask and waited in the doorway. When the troll moved again, he spotted an opening and struck.",
+    "What design pattern lets the same fighter choose a different way to fight simply by swapping masks?"
+  ],
+  "image": "./resource/mask-bearer-and-fallen-troll.png",
+  "imageAlt": "A bear-masked warrior stands beside a fallen troll in a ruined village.",
+  "caption": "The mask bearer in the village square",
+  "task": "Build a class diagram where MaskBearer can equip any CombatStrategy and delegate the same fight action to the equipped mask.",
+  "steps": [
+    "Add classes and assign members",
+    "Connect the diagram",
+    "Try each mask"
+  ]
+}

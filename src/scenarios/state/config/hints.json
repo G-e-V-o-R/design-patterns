@@ -1,5 +1,0 @@
-[
-  "Jararis holds the Snake and forwards each story event with handle(event). Snake keeps the current SnakeState and calls its nextState(event) to decide which state to store.",
-  "Put nextState(event) and react() on the SnakeState interface. Give each concrete state its own transition rules and reaction. Snake calls the current state’s react().",
-  "Draw Uses from Jararis to Snake and from Snake to SnakeState. Each of the three concrete states points to SnakeState with Implements."
-]

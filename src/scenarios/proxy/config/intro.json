@@ -1,15 +1,24 @@
 {
   "category": "STRUCTURAL PATTERN",
   "paragraphs": [
-    "In your last fight, a poisoned arrow hit one of your companions. The poison came from Tish-Karr captives. Only the Tish-Karr have the antidote, so you bring your wounded friend to their den.",
-    "Before you set out, Orven the wizard gave Narion a letter. Orven is an old friend of the Tish-Karr. In the letter, he asks them to help whoever brings it.",
-    "At the den, Narion tells the guard about the poisoned arrow and asks for the antidote. He is so worried about his friend that he forgets the letter in his coat. “The Elder doesn’t meet strangers without a word from someone we trust,” the guard says. Narion reaches into his pocket."
+    "The next morning, the party gets ready to move on. Latve still hasn’t gotten up. Narion goes over and finds Dre’Kaar in a cold sweat, struggling to keep their eyes open and barely able to speak.",
+    "The blade that wounded Saerenn during the ambush was poisoned. The smell coming from the wound is familiar to Narion. He recognizes Tish-Karr poison.",
+    "The Tish-Karr keep to themselves and have a particular hatred for orcs. Orcs take them captive and use their poison on weapons. Only the Tish-Karr have the antidote, so the party decides to go to their cave and ask for help.",
+    "Orven the wizard has known the Tish-Karr for years. When the party first set out, he handed Narion a letter as he bid them farewell. “Many creatures in these lands will be glad to help you once they know you’re my friends,” he said.",
+    "At the cave entrance, Narion calls out to the guard. “Orcs wounded our friend. Their blade was coated with Tish-Karr poison. We need an antidote. May I speak with the Elder?”",
+    {
+      "text": "“All requests for the Elder go through me,” the guard replies. “I don’t know you, and I don’t trust you. I won’t take your request to her.”",
+      "image": "./resource/tish-karr-guard.png",
+      "imageFraming": 5
+    },
+    "Narion remembers the letter Orven gave him. He takes it from his pocket and holds it out to the guard. “Here, read this. Orven can vouch for us. We mean you no harm.”",
+    "The guard compares the signature and wax seal with those on an old letter from Orven. “They match. So you’re friends of Orven’s. I’ll take your request to the Elder.”",
+    "The guard goes deeper into the cave and relays their request to the Elder. She gives him a vial of antidote, and he brings it back to Narion."
   ],
   "image": "./resource/tish-karr-den-entrance.png",
   "imageAlt": "An armored guard stands at the cave entrance, with Tish-Karr creatures behind him",
   "caption": "The guard speaks for the Elder at the entrance to the den.",
   "task": "What do you call someone who receives requests for another person and checks who is allowed to reach them? Build a class diagram that shows how the guard protects access to the Elder.",
-  "concept": "A protection proxy controls access to another object. Narion asks for help through the Audience interface. The guard checks that the letter is really from Orven before he passes the request to the Elder. The Elder decides whether to help.",
   "steps": [
     "Add the cards and assign their members",
     "Connect the party, guard, and Elder",

@@ -2,7 +2,7 @@ import { BaseEdge, Position, type Edge, type EdgeProps, type EdgeTypes } from '@
 
 type ParallelEdge = Edge<{ offset: number }, 'parallelRelationship'>;
 
-export function parallelRelationshipOffsets(edges: readonly Edge[])
+export function spaceParallelRelationships(edges: Edge[]): Edge[]
 {
   const routes = new Map<string, { index: number; direction: number }[]>();
   edges.forEach((edge, index) =>
@@ -16,7 +16,6 @@ export function parallelRelationshipOffsets(edges: readonly Edge[])
     routes.set(key, route);
   });
 
-  const offsets = new Map<number, number>();
   for (const route of routes.values())
   {
     if (route.length < 2)
@@ -26,10 +25,10 @@ export function parallelRelationshipOffsets(edges: readonly Edge[])
     const center = (route.length - 1) / 2;
     route.forEach(({ index, direction }, lane) =>
     {
-      offsets.set(index, (lane - center) * 86 * direction);
+      edges[index] = { ...edges[index]!, type: 'parallelRelationship', data: { offset: (lane - center) * 86 * direction } };
     });
   }
-  return offsets;
+  return edges;
 }
 
 function ParallelRelationshipEdge({

@@ -4,6 +4,7 @@ import {
   ConnectionMode,
   Controls,
   ReactFlow,
+  type AriaLabelConfig,
   type Connection,
   type Edge,
   type EdgeChange,
@@ -17,9 +18,10 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { orientConnection } from './connections';
+import { useLanguage } from './language';
 import { RelationshipMarkers, RelationshipTools, type RelationshipToolsProps } from './RelationshipTools';
 
-export type DiagramCanvasProps<NodeType extends Node> = RelationshipToolsProps & {
+type DiagramCanvasProps<NodeType extends Node> = {
   nodes: NodeType[];
   edges: Edge[];
   nodeTypes: NodeTypes;
@@ -28,32 +30,41 @@ export type DiagramCanvasProps<NodeType extends Node> = RelationshipToolsProps &
   active?: boolean;
   compact?: boolean;
   markerNamespace: string;
+  relationships: RelationshipToolsProps['relationships'];
+  relationshipTools?: Omit<RelationshipToolsProps, 'relationships'>;
   label: string;
-  emptyTitle: string;
+  emptyTitle?: string;
   emptyDescription?: string;
   emptyAction?: { label: string; onClick: () => void };
-  onNodesChange: (changes: NodeChange<NodeType>[]) => void;
+  onNodesChange?: (changes: NodeChange<NodeType>[]) => void;
   onEdgesChange?: (changes: EdgeChange<Edge>[]) => void;
-  onNodesDelete: (nodes: NodeType[]) => void;
-  onEdgesDelete: (edges: Edge[]) => void;
-  onConnect: (connection: Connection) => void;
+  onNodesDelete?: (nodes: NodeType[]) => void;
+  onEdgesDelete?: (edges: Edge[]) => void;
+  onConnect?: (connection: Connection) => void;
   onReconnect?: OnReconnect<Edge>;
-  onNodeClick: (event: MouseEvent, node: NodeType) => void;
-  onPaneClick: () => void;
+  onNodeClick?: (event: MouseEvent, node: NodeType) => void;
+  onPaneClick?: () => void;
   onDragOver?: (event: DragEvent<HTMLDivElement>) => void;
   onDrop?: (event: DragEvent<HTMLDivElement>) => void;
 };
 
-export type ScenarioDiagramProps<NodeType extends Node> = Omit<
-  DiagramCanvasProps<NodeType>,
-  'nodeTypes' | 'markerNamespace' | 'label' | 'emptyTitle' | 'emptyDescription' | 'relationships' | 'classLabel'
->;
-
 const compactFit = {
-  padding: { x: '20px', top: '26px', bottom: '125px' },
+  padding: { x: '20px', y: '26px' },
   minZoom: 0.16,
   maxZoom: 0.9,
 } satisfies FitViewOptions;
+
+const russianDiagramLabels = {
+  'node.a11yDescription.default': 'Нажмите Enter или пробел, чтобы выбрать карточку, Delete, чтобы удалить, или Esc, чтобы отменить выбор.',
+  'node.a11yDescription.keyboardDisabled': 'Нажмите Enter или пробел, чтобы выбрать карточку. Используйте клавиши со стрелками для перемещения, Delete для удаления и Esc для отмены выбора.',
+  'node.a11yDescription.ariaLiveMessage': ({ x, y }) => `Карточка перемещена. Новая позиция: x = ${x}, y = ${y}.`,
+  'edge.a11yDescription.default': 'Нажмите Enter или пробел, чтобы выбрать связь, Delete, чтобы удалить, или Esc, чтобы отменить выбор.',
+  'controls.ariaLabel': 'Управление диаграммой',
+  'controls.zoomIn.ariaLabel': 'Увеличить масштаб',
+  'controls.zoomOut.ariaLabel': 'Уменьшить масштаб',
+  'controls.fitView.ariaLabel': 'Показать всю диаграмму',
+} satisfies Partial<AriaLabelConfig>;
+const englishDiagramLabels: Partial<AriaLabelConfig> = {};
 
 export function ClassDiagramCanvas<NodeType extends Node>({
   nodes,
@@ -64,6 +75,8 @@ export function ClassDiagramCanvas<NodeType extends Node>({
   active = true,
   compact = false,
   markerNamespace,
+  relationships,
+  relationshipTools,
   label,
   emptyTitle,
   emptyDescription,
@@ -78,17 +91,18 @@ export function ClassDiagramCanvas<NodeType extends Node>({
   onPaneClick,
   onDragOver,
   onDrop,
-  ...relationshipTools
 }: DiagramCanvasProps<NodeType>)
 {
+  const language = useLanguage();
   const [flow, setFlow] = useState<ReactFlowInstance<NodeType> | null>(null);
+  const editable = Boolean(relationshipTools);
 
   const dragStartNode = useRef<string | null>(null);
   const clickStartNode = useRef<string | null>(null);
 
   function handleConnect(connection: Connection)
   {
-    onConnect(orientConnection(connection, dragStartNode.current ?? clickStartNode.current));
+    onConnect?.(orientConnection(connection, dragStartNode.current ?? clickStartNode.current));
     dragStartNode.current = null;
     clickStartNode.current = null;
   }
@@ -110,8 +124,10 @@ export function ClassDiagramCanvas<NodeType extends Node>({
 
   return (
     <div className="pattern-canvas" aria-label={label} onDragOver={onDragOver} onDrop={onDrop}>
-      <RelationshipMarkers relationships={relationshipTools.relationships} namespace={markerNamespace} />
+      <RelationshipMarkers relationships={relationships} namespace={markerNamespace} />
       <ReactFlow
+        id={markerNamespace}
+        ariaLabelConfig={language === 'ru' ? russianDiagramLabels : englishDiagramLabels}
         connectionMode={ConnectionMode.Loose}
         nodes={nodes}
         edges={edges}
@@ -122,7 +138,7 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         onEdgesChange={onEdgesChange}
         onNodesDelete={onNodesDelete}
         onEdgesDelete={onEdgesDelete}
-        onConnect={handleConnect}
+        onConnect={editable ? handleConnect : undefined}
         onReconnect={onReconnect}
         edgesReconnectable={false}
         elevateEdgesOnSelect
@@ -144,8 +160,12 @@ export function ClassDiagramCanvas<NodeType extends Node>({
         }}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
-        nodesDraggable={!relationshipTools.drawing}
-        deleteKeyCode={['Backspace', 'Delete']}
+        nodesDraggable={editable && !relationshipTools?.drawing}
+        nodesConnectable={editable}
+        nodesFocusable={editable}
+        edgesFocusable={editable}
+        elementsSelectable={editable}
+        deleteKeyCode={editable ? ['Backspace', 'Delete'] : null}
         minZoom={compact ? compactFit.minZoom : 0.25}
         maxZoom={1.5}
         defaultViewport={{ x: 30, y: 30, zoom: 0.65 }}
@@ -153,9 +173,9 @@ export function ClassDiagramCanvas<NodeType extends Node>({
       >
         <Background gap={22} color="#314338" />
         <Controls position="bottom-right" showInteractive={false} fitViewOptions={compact ? compactFit : undefined} />
-        <RelationshipTools {...relationshipTools} />
+        {relationshipTools && <RelationshipTools relationships={relationships} {...relationshipTools} />}
       </ReactFlow>
-      {nodes.length === 0 && (
+      {nodes.length === 0 && emptyTitle && (
         <div className="pattern-empty">
           <span aria-hidden="true">▤ → ▤</span>
           <h3>{emptyTitle}</h3>

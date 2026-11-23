@@ -1,3 +1,4 @@
+import { localize, useLanguage } from '../../shared/language';
 import wakeBefore from '../resource/wake-before.webp?url';
 import wakeAfter from '../resource/wake-after.webp?url';
 import trapsBefore from '../resource/traps-before.webp?url';
@@ -13,16 +14,17 @@ const receiverScenes = {
 
 function FlankMap({ status }: { status: OrderStatus | undefined })
 {
+  const language = useLanguage();
   const rightPost = status === 'executed';
   const feintRevealed = rightPost || status === 'undone';
 
   return (
     <div className="command-flank-map" data-right-post={rightPost} data-feint-revealed={feintRevealed} aria-hidden="true">
       <img className="command-camp-art" src={campMap} alt="" draggable={false} />
-      <span className="command-flank-threat command-flank-threat-right">Orc advance</span>
-      <span className="command-flank-threat command-flank-threat-left">Real attack</span>
-      <span className="command-flank-label command-flank-label-left">Left flank</span>
-      <span className="command-flank-label command-flank-label-right">Right flank</span>
+      <span className="command-flank-threat command-flank-threat-right">{localize(language, 'Orc advance', 'Наступление орков')}</span>
+      <span className="command-flank-threat command-flank-threat-left">{localize(language, 'Real attack', 'Основная атака')}</span>
+      <span className="command-flank-label command-flank-label-left">{localize(language, 'Left flank', 'Левый фланг')}</span>
+      <span className="command-flank-label command-flank-label-right">{localize(language, 'Right flank', 'Правый фланг')}</span>
       <span className="command-narion-marker">
         <img src={narionPortrait} alt="" draggable={false} />
       </span>

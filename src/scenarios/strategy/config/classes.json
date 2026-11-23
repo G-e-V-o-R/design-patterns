@@ -1,0 +1,118 @@
+[
+  {
+    "id": "mask-bearer",
+    "label": "MaskBearer",
+    "kind": "class",
+    "description": "The fighter who chooses a mask at runtime and delegates combat to it.",
+    "image": "./resource/mask-bearer-and-fallen-troll.png",
+    "imageAlt": "A warrior wearing a bear mask and carrying other masks at his belt.",
+    "imageFraming": 23,
+    "position": { "x": 0, "y": 0 },
+    "solutionPosition": { "x": 0, "y": 150, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "equipped-strategy",
+        "label": "strategy: CombatStrategy",
+        "description": "Hold the equipped mask through the common CombatStrategy interface."
+      }
+    ],
+    "methods": [
+      {
+        "id": "equip",
+        "label": "equip(strategy: CombatStrategy)",
+        "description": "Replace the equipped strategy with the chosen mask."
+      },
+      {
+        "id": "bearer-fight",
+        "label": "fight() · delegate",
+        "description": "Call fight() on the equipped strategy."
+      }
+    ],
+    "relationships": [
+      { "type": "uses", "target": "combat-strategy" }
+    ]
+  },
+  {
+    "id": "combat-strategy",
+    "label": "CombatStrategy",
+    "kind": "interface",
+    "description": "Defines the combat operation that every mask provides.",
+    "position": { "x": 390, "y": 0 },
+    "solutionPosition": { "x": 350, "y": 150, "anchorY": "center" },
+    "fields": [],
+    "methods": [
+      {
+        "id": "fight-contract",
+        "label": "fight() · contract",
+        "description": "Give every mask the same combat operation."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "bear-mask",
+    "label": "BearMask",
+    "kind": "class",
+    "description": "Meets a troll’s charge with brute strength.",
+    "image": "./resource/bear-mask.png",
+    "imageAlt": "A carved bear mask with round ears and a broad muzzle.",
+    "imageFraming": 28,
+    "position": { "x": 0, "y": 650 },
+    "solutionPosition": { "x": 0, "y": 410 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "bear-fight",
+        "label": "fight() · overpower",
+        "description": "Hold ground against the charge and drive the troll back."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "combat-strategy" }
+    ]
+  },
+  {
+    "id": "serpent-mask",
+    "label": "SerpentMask",
+    "kind": "class",
+    "description": "Summons a serpent-shaped shadow to bind the troll.",
+    "image": "./resource/serpent-mask.png",
+    "imageAlt": "A green serpent mask with scales and an open mouth.",
+    "imageFraming": 42,
+    "position": { "x": 390, "y": 650 },
+    "solutionPosition": { "x": 350, "y": 410 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "serpent-fight",
+        "label": "fight() · bind",
+        "description": "Summon a shadow that coils around the troll and holds it fast."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "combat-strategy" }
+    ]
+  },
+  {
+    "id": "owl-mask",
+    "label": "OwlMask",
+    "kind": "class",
+    "description": "Watches for an opening, even in the dark.",
+    "image": "./resource/owl-mask.png",
+    "imageAlt": "A carved owl mask with a long beak and wide eyeholes.",
+    "imageFraming": 40,
+    "position": { "x": 780, "y": 650 },
+    "solutionPosition": { "x": 700, "y": 410 },
+    "fields": [],
+    "methods": [
+      {
+        "id": "owl-fight",
+        "label": "fight() · watch and strike",
+        "description": "Track the troll’s movements and strike when its guard drops."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "combat-strategy" }
+    ]
+  }
+]

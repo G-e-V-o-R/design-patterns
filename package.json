@@ -7,7 +7,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:templates && npm run test:chain && npm run test:state && npm run test:decorator && npm run test:template && npm run test:command && npm run test:proxy && npm run test:configs",
+    "test": "npm run test:boundaries && npm run test:observer && npm run test:mediator && npm run test:templates && npm run test:chain && npm run test:state && npm run test:decorator && npm run test:template && npm run test:command && npm run test:proxy && npm run test:strategy && npm run test:configs",
     "test:boundaries": "tsx src/tests/scenario-boundaries.test.mjs",
     "test:observer": "tsx src/scenarios/observer/demo/demoModel.test.ts",
     "test:mediator": "tsx src/scenarios/mediator/demo/demoModel.test.ts",
@@ -18,6 +18,7 @@
     "test:template": "tsx src/scenarios/template/demo/demoModel.test.ts",
     "test:command": "tsx src/scenarios/command/demo/demoModel.test.ts",
     "test:proxy": "tsx src/scenarios/proxy/demo/demoModel.test.ts",
+    "test:strategy": "tsx src/scenarios/strategy/demo/demoModel.test.ts",
     "test:configs": "tsx src/tests/configured-lesson.test.ts && tsx src/tests/scenario-configs.test.ts"
   },
   "devDependencies": {

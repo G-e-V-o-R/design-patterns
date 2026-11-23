@@ -1,0 +1,8 @@
+{
+  "id": "strategy",
+  "number": "10",
+  "title": "Faces of the Beast",
+  "pattern": "Strategy",
+  "intro": "./intro.json",
+  "classes": "./classes.json"
+}

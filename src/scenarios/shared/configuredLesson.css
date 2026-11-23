@@ -129,23 +129,87 @@
   pointer-events: auto;
 }
 
-.configured-lesson .configured-diagram-feedback .pattern-hints {
-  display: flex;
-  align-items: center;
+.configured-lesson .pattern-board-toolbar {
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 0 15px;
+  row-gap: 14px;
+}
+
+.configured-lesson .configured-board-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 0;
-  padding: 12px 20px;
-  border: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.configured-lesson .configured-diagram-feedback .pattern-hints > div {
-  flex-basis: 100%;
+.configured-lesson .configured-board-progress li {
+  padding: 4px 8px;
+  border: 1px solid #aec79d38;
+  border-radius: 6px;
+  background: #21332a;
+  color: #c4d0bf;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.configured-lesson .configured-diagram-feedback .pattern-hints p {
-  margin: 8px 0 0;
+.configured-lesson .configured-board-progress li.is-complete {
+  border-color: #a3be757a;
+  background: #304332;
+}
+
+.configured-lesson .configured-board-progress strong {
+  margin-left: 2px;
+  color: #eef2e6;
+  font-variant-numeric: tabular-nums;
+}
+
+.configured-lesson .pattern-board-toolbar p {
+  color: #c4d0bf;
   font-size: 13px;
+}
+
+.configured-lesson .pattern-board-toolbar .configured-board-status {
+  margin-top: 8px;
+}
+
+.configured-lesson .configured-board-actions {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.configured-lesson .configured-board-actions button {
+  font-size: 12px;
+}
+
+.configured-lesson .configured-board-actions .configured-example-action {
+  border-color: #b998625e;
+  background: transparent;
+  color: #ecd9aa;
+}
+
+.configured-lesson .configured-board-actions .configured-example-action:hover {
+  background: #423a27;
+}
+
+.configured-lesson .configured-board-actions .configured-demo-action {
+  border-color: #e4c387;
+  background: #dfc38e;
+  color: #15261c;
+  font-weight: 700;
+}
+
+.configured-lesson .configured-board-actions .configured-demo-action:hover {
+  background: #f1d8a7;
+}
+
+.configured-lesson .configured-worked-example .pattern-canvas {
+  height: clamp(350px, 65dvh, 650px);
+}
+
+.configured-lesson .configured-worked-example .react-flow__handle {
+  opacity: 0;
 }
 
 @media (max-width: 720px) {
@@ -172,12 +236,11 @@
   }
 
   .configured-lesson .pattern-board-toolbar {
-    flex-wrap: wrap;
-    gap: 10px;
+    row-gap: 10px;
   }
 
   .configured-lesson .pattern-board-toolbar button {
-    min-height: 36px;
+    min-height: 44px;
   }
 
   .configured-lesson .pattern-canvas {

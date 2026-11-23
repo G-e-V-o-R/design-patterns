@@ -1,5 +1,0 @@
-[
-  "Put cookSoup() on SoupRecipe. It calls cookMeat() first, then addSeasoning(), and finally addVegetables().",
-  "All three recipes prepare the broth and vegetables the same way. Declare addSeasoning() on SoupRecipe and put each override on the class for the cook who chooses that seasoning.",
-  "Draw one Extends arrow from each of FaelinaRecipe, LatveRecipe, and DreKaarRecipe to SoupRecipe."
-]

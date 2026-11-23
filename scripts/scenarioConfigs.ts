@@ -1,8 +1,10 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileScenarioConfig } from '../src/scenarios/shared/scenarioConfig.ts';
+import { localizeScenario } from '../src/scenarios/shared/scenarioLocalization.ts';
+import type { Language } from '../src/scenarios/shared/language.ts';
 
-export function readConfiguredScenarios(root: string)
+export function readConfiguredScenarios(root: string, language: Language = 'en')
 {
   return readdirSync(root, { withFileTypes: true })
     .filter(entry => entry.isDirectory() && entry.name !== 'shared')
@@ -46,6 +48,17 @@ export function readConfiguredScenarios(root: string)
       {
         throw new Error(`${path}: id must match directory "${entry.name}".`);
       }
-      return config;
+      const translationPath = join(directory, 'config', 'ru.json');
+      let translation: unknown;
+      try
+      {
+        translation = JSON.parse(readFileSync(translationPath, 'utf8'));
+      }
+      catch (error)
+      {
+        throw new Error(`${translationPath}: ${String(error)}`);
+      }
+      const russian = localizeScenario(config, translation, translationPath);
+      return language === 'ru' ? russian : config;
     });
 }

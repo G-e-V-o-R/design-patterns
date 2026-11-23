@@ -6,8 +6,10 @@ import { readConfiguredScenarios } from '../../scripts/scenarioConfigs';
 import { emptyConfiguredLesson, getConfiguredLessonIssues, solutionConfiguredLesson } from '../scenarios/shared/configuredLessonModel';
 
 const configs = readConfiguredScenarios(resolve('src/scenarios'));
-assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'command', 'decorator', 'mediator', 'observer', 'proxy', 'state', 'template'],
+const russianConfigs = readConfiguredScenarios(resolve('src/scenarios'), 'ru');
+assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'command', 'decorator', 'mediator', 'observer', 'proxy', 'state', 'strategy', 'template'],
   'Discover every lesson from its config directory.');
+assert.deepEqual(russianConfigs.map(config => config.id), configs.map(config => config.id));
 for (const config of configs)
 {
   assert.deepEqual(
@@ -17,6 +19,15 @@ for (const config of configs)
   );
   const solution = solutionConfiguredLesson(config);
   assert.deepEqual(getConfiguredLessonIssues(config, solution), [], `${config.id}: its configured solution must be valid.`);
+  const russian = russianConfigs.find(translation => translation.id === config.id)!;
+  assert.deepEqual(russian.intro.paragraphPortraits, config.intro.paragraphPortraits,
+    `${config.id}: translated dialogue must retain its speaker portraits.`);
+  for (const text of [russian.title, russian.pattern, russian.intro.task, ...russian.intro.paragraphs])
+  {
+    assert.match(text, /\p{Script=Cyrillic}/u, `${config.id}: Russian lesson text must be translated.`);
+  }
+  assert.deepEqual(solutionConfiguredLesson(russian), solution, `${config.id}: both languages must use the same graph.`);
+  assert.deepEqual(getConfiguredLessonIssues(russian, solution, 'ru'), []);
   assert.ok(getConfiguredLessonIssues(config, emptyConfiguredLesson()).length > 0, `${config.id}: empty diagrams must be incomplete.`);
   for (const member of config.members)
   {
@@ -60,6 +71,13 @@ try
   cpSync(resolve('src/scenarios/observer/resource'), join(directory, 'resource'), { recursive: true });
   cpSync(resolve('src/scenarios/shared/resource'), join(temporaryRoot, 'shared', 'resource'), { recursive: true });
   assert.equal(readConfiguredScenarios(temporaryRoot)[0]?.id, 'observer');
+  const translationPath = join(directory, 'config', 'ru.json');
+  const translation = readFileSync(translationPath, 'utf8');
+  const invalid = JSON.parse(translation);
+  invalid.classes.unknown = { description: 'Неизвестный класс' };
+  writeFileSync(translationPath, JSON.stringify(invalid));
+  assert.throws(() => readConfiguredScenarios(temporaryRoot), /ru\.json: classes\.unknown/);
+  writeFileSync(translationPath, translation);
   writeFileSync(join(directory, 'config', 'intro.json'), '{ broken JSON');
   assert.throws(() => readConfiguredScenarios(temporaryRoot), /intro.json/);
   rmSync(join(directory, 'config', 'intro.json'));

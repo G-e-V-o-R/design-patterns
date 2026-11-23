@@ -1,3 +1,4 @@
+import { localize, useLanguage } from '../../shared/language';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import hypnosis from '../resource/Hypnosis.png?url';
@@ -8,23 +9,38 @@ import { speakWithEffects, voiceEffects, type VoiceEffect } from './demoModel';
 import VoiceScene, { jellyfishArrivalMs, voiceWaveMs } from './VoiceScene';
 import './styles.css';
 
-const effects: Record<VoiceEffect, { label: string; decorator: string; outcome: string; image: string }> = {
+type EffectDetails = {
+  label: string;
+  labelRu: string;
+  decorator: string;
+  outcome: string;
+  outcomeRu: string;
+  image: string;
+};
+
+const effects: Record<VoiceEffect, EffectDetails> = {
   sleep: {
     label: 'Sleep',
+    labelRu: 'Сон',
     decorator: 'SleepDecorator',
     outcome: 'The listeners drift to sleep.',
+    outcomeRu: 'Слушатели засыпают.',
     image: sleep,
   },
   hypnosis: {
     label: 'Hypnosis',
+    labelRu: 'Гипноз',
     decorator: 'HypnosisDecorator',
     outcome: 'The listeners fall into a trance.',
+    outcomeRu: 'Слушатели впадают в транс.',
     image: hypnosis,
   },
   storm: {
     label: 'Storm',
+    labelRu: 'Буря',
     decorator: 'StormDecorator',
     outcome: 'A storm gathers around the tower.',
+    outcomeRu: 'Вокруг башни поднимается буря.',
     image: storm,
   },
 };
@@ -76,6 +92,7 @@ function useSpeakStep(playbackId: number | undefined, effectCount: number, addin
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
+  const language = useLanguage();
   const [run, setRun] = useState<DemoRun | null>(null);
   const nextPlaybackId = useRef(0);
   if (run && run.graph !== graph)
@@ -107,16 +124,16 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   return (
     <section className="decorator-demo" aria-labelledby="decorator-demo-title">
-      <h2 id="decorator-demo-title">Layer Latve’s voice</h2>
-      <p>Each jellyfish wraps the current voice. It calls the voice inside it before adding its own effect.</p>
+      <h2 id="decorator-demo-title">{localize(language, 'Layer Latve’s voice', 'Добавьте эффекты к голосу Латве')}</h2>
+      <p>{localize(language, 'Each jellyfish wraps the current voice. It calls the voice inside it before adding its own effect.', 'Каждая медуза оборачивает текущий голос. Сначала она вызывает голос внутри себя, а затем добавляет свой эффект.')}</p>
 
       <div className="decorator-workbench">
         <div className="decorator-palette">
-          <h3 id="decorator-jellyfish-title">Choose a jellyfish</h3>
+          <h3 id="decorator-jellyfish-title">{localize(language, 'Choose a jellyfish', 'Выберите медузу')}</h3>
           <div className="decorator-controls" role="group" aria-labelledby="decorator-jellyfish-title">
             {voiceEffects.map(effect =>
             {
-              const { label, image } = effects[effect];
+              const { label, labelRu, image } = effects[effect];
               const added = selectedEffects.includes(effect);
               return (
                 <button
@@ -126,7 +143,9 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
                   type="button"
                   disabled={disabled}
                   aria-disabled={added}
-                  aria-label={added ? `${label} added` : `Add ${label}`}
+                  aria-label={added
+                    ? localize(language, `${label} added`, `Добавлен эффект «${labelRu}»`)
+                    : localize(language, `Add ${label}`, `Добавить эффект «${labelRu}»`)}
                   onClick={() =>
                   {
                     if (!added)
@@ -137,28 +156,28 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
                 >
                   <img src={image} alt="" draggable={false} />
                   <span className="decorator-effect-caption">
-                    <strong>{label}</strong>
-                    <span>{added ? 'Added' : '+ Add'}</span>
+                    <strong>{localize(language, label, labelRu)}</strong>
+                    <span>{(added ? localize(language, 'Added', 'Добавлено') : localize(language, '+ Add', '+ Добавить'))}</span>
                   </span>
                 </button>
               );
             })}
           </div>
           <button className="decorator-plain" type="button" disabled={disabled} onClick={() => speak([])}>
-            Plain voice
+            {localize(language, 'Plain voice', 'Голос без эффектов')}
           </button>
         </div>
 
         <div className="decorator-action">
           <div className="decorator-voice-heading">
-            <h3>Latve’s voice in action</h3>
+            <h3>{localize(language, 'Latve’s voice in action', 'Голос Латве в действии')}</h3>
             <button
               className="decorator-plain"
               type="button"
               disabled={disabled || !utterance}
               onClick={() => speak(selectedEffects)}
             >
-              Speak again
+              {localize(language, 'Speak again', 'Произнести ещё раз')}
             </button>
           </div>
           <VoiceScene
@@ -171,7 +190,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
         </div>
 
         <div className="decorator-scene">
-          <h3>Voice composition</h3>
+          <h3>{localize(language, 'Voice composition', 'Из чего складывается голос')}</h3>
           <div className="decorator-stack">
             <VoiceComposition playbackId={playbackId} selectedEffects={selectedEffects} step={speakStep} />
           </div>
@@ -240,19 +259,20 @@ function VoiceComposition({ playbackId, selectedEffects, step }: VoiceCompositio
 
 function VoiceOutcome({ utterance }: Pick<DemoRun, 'utterance'>)
 {
+  const language = useLanguage();
   return (
     <>
-      <p><strong>Latve says</strong> <q>{utterance.words}</q></p>
+      <p><strong>{localize(language, 'Latve says', 'Латве говорит')}</strong> <q>{localize(language, utterance.words, 'Всё начинается с голоса.')}</q></p>
       {utterance.effects.length === 0 ? (
-        <p>Her words carry no magical effect.</p>
+        <p>{localize(language, 'Her words carry no magical effect.', 'В её словах нет магического эффекта.')}</p>
       ) : (
         <>
-          <p>Effects in order</p>
+          <p>{localize(language, 'Effects in order', 'Порядок эффектов')}</p>
           <ol role="list">
             {utterance.effects.map(effect => (
               <li key={effect} data-effect={effect}>
-                <strong>{effects[effect].label}</strong>
-                <span>{effects[effect].outcome}</span>
+                <strong>{localize(language, effects[effect].label, effects[effect].labelRu)}</strong>
+                <span>{localize(language, effects[effect].outcome, effects[effect].outcomeRu)}</span>
               </li>
             ))}
           </ol>
@@ -264,6 +284,7 @@ function VoiceOutcome({ utterance }: Pick<DemoRun, 'utterance'>)
 
 function CallTrace({ selectedEffects }: { selectedEffects: readonly VoiceEffect[] })
 {
+  const language = useLanguage();
   const voice = selectedEffects.reduce(
     (wrapped, effect) => `new ${effects[effect].decorator}(${wrapped})`,
     'new LatveVoice()',
@@ -273,12 +294,12 @@ function CallTrace({ selectedEffects }: { selectedEffects: readonly VoiceEffect[
 
   return (
     <details className="decorator-trace">
-      <summary>See the speak() call</summary>
+      <summary>{localize(language, 'See the speak() call', 'Посмотреть вызов speak()')}</summary>
       <p><code>({voice}).speak()</code></p>
       {selectedEffects.length > 0 && (
         <>
-          <p><strong>Calls inward</strong> <code>{callOrder.join(' → ')}</code></p>
-          <p><strong>Effects added on return</strong> {selectedEffects.map(effect => effects[effect].label).join(' → ')}</p>
+          <p><strong>{localize(language, 'Calls inward', 'Вызовы от внешней обёртки к голосу')}</strong> <code>{callOrder.join(' → ')}</code></p>
+          <p><strong>{localize(language, 'Effects added on return', 'Эффекты при возврате из вызовов')}</strong> {selectedEffects.map(effect => localize(language, effects[effect].label, effects[effect].labelRu)).join(' → ')}</p>
         </>
       )}
     </details>

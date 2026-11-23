@@ -1,6 +1,8 @@
 import { createElement, type ComponentType } from 'react';
 import { ConfiguredScenario, type ConfiguredDemoProps } from './shared/ConfiguredScenario';
 import { compileScenarioConfig } from './shared/scenarioConfig';
+import { useLanguage } from './shared/language';
+import { localizeScenario } from './shared/scenarioLocalization';
 import type { ScenarioDefinition, ScenarioProps } from './types';
 
 export function createConfiguredScenarios(
@@ -36,14 +38,16 @@ export function createConfiguredScenarios(
       throw new Error(`${path}: duplicate scenario id "${config.id}".`);
     }
     ids.add(config.id);
-    return config;
+    const russianPath = `./${directory}/config/ru.json`;
+    const russian = localizeScenario(config, sections[russianPath], russianPath);
+    return { config, russian };
   });
   const reservedNumbers = new Set([
     ...existing.map(scenario => Number(scenario.number)),
-    ...compiled.filter(config => config.number !== undefined).map(config => Number(config.number)),
+    ...compiled.flatMap(({ config }) => config.number === undefined ? [] : [Number(config.number)]),
   ]);
   let nextNumber = 1;
-  const configured = compiled.map(config =>
+  const configured = compiled.map(({ config, russian }) =>
   {
     while (reservedNumbers.has(nextNumber))
     {
@@ -52,15 +56,25 @@ export function createConfiguredScenarios(
     const number = config.number ?? String(nextNumber).padStart(2, '0');
     reservedNumbers.add(Number(number));
     const numberedConfig = { ...config, number, intro: { ...config.intro, number } };
+    const numberedRussian = { ...russian, number, intro: { ...russian.intro, number } };
     function Scenario(props: ScenarioProps)
     {
+      const language = useLanguage();
       return createElement(ConfiguredScenario, {
         ...props,
-        config: numberedConfig,
+        config: language === 'ru' ? numberedRussian : numberedConfig,
+        graphConfig: numberedConfig,
         Demo: demos[`./${config.id}/demo/Demo.tsx`],
       });
     }
-    return { id: config.id, title: config.title, pattern: config.pattern, number, Component: Scenario };
+    return {
+      id: config.id,
+      title: config.title,
+      pattern: config.pattern,
+      russian: { title: russian.title, pattern: russian.pattern },
+      number,
+      Component: Scenario,
+    };
   });
   return [...existing, ...configured].sort((left, right) =>
     left.number.localeCompare(right.number, undefined, { numeric: true }) || left.id.localeCompare(right.id));

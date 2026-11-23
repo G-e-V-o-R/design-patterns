@@ -23,7 +23,6 @@ function fixture(): ScenarioConfig
         relationships: [{ type: 'implements', target: 'route' }],
       },
     ],
-    hints: ['Start with the shared contract.'],
   };
 }
 
@@ -235,7 +234,6 @@ const inline = fixture();
 const sectionFiles: Record<string, unknown> = {
   './content/intro.json': inline.intro,
   './classes.json': inline.classes,
-  './hints.json': inline.hints,
   './relationships.json': [],
 };
 const manifest = {
@@ -244,7 +242,6 @@ const manifest = {
   pattern: inline.pattern,
   intro: './content/intro.json',
   classes: './classes.json',
-  hints: './hints.json',
   relationshipTypes: './relationships.json',
 };
 const loadSections = (input: unknown, files = sectionFiles) => compileScenarioConfig(
@@ -259,5 +256,5 @@ for (const reference of ['../intro.json', '/intro.json', './other/../intro.json'
 }
 assert.throws(() => loadSections(manifest, {}), /scenario.json: intro: Cannot load.*intro.json/);
 assert.throws(() => loadSections(manifest, { ...sectionFiles, './content/intro.json': [] }), /content\/intro.json: intro: Expected an object/);
-assert.throws(() => loadSections(manifest, { ...sectionFiles, './hints.json': './nested.json' }), /hints.json: hints: Expected an array/);
+assert.throws(() => loadSections(manifest, { ...sectionFiles, './classes.json': './nested.json' }), /classes.json: classes: Expected an array/);
 assert.throws(() => compile(manifest), /without a JSON section resolver/);

@@ -1,22 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
+import { localize, useLanguage } from '../../shared/language';
 import narion from '../../shared/resource/portraits/narion.png';
 import guard from '../resource/tish-karr-guard.png';
 import elder from '../resource/tish-karr-inside-the-den.png';
-import { antidoteRequest, getMessageDuration, oldLetter, simulateRequest, wizardLetter, type Phase } from './demoModel';
+import { antidoteRequest, antidoteRequestRu, getMessageDuration, oldLetter, simulateRequest, wizardLetter, type Phase } from './demoModel';
 import './styles.css';
 
 const minimumVerificationDuration = 2400;
 const minimumHandoffDuration = 1550;
 
 const actors = [
-  { id: 'narion', name: 'Narion', role: 'Client', image: narion },
-  { id: 'guard', name: 'Guard', role: 'Proxy', image: guard },
-  { id: 'elder', name: 'Elder', role: 'Real subject', image: elder },
+  { id: 'narion', name: 'Narion', nameRu: 'Нарион', role: 'Client', roleRu: 'Клиент', image: narion },
+  { id: 'guard', name: 'Guard', nameRu: 'Страж', role: 'Proxy', roleRu: 'Заместитель', image: guard },
+  { id: 'elder', name: 'Elder', nameRu: 'Старейшина', role: 'Real subject', roleRu: 'Реальный объект', image: elder },
 ] as const;
+
+const returnLabelsRu: Readonly<Record<string, string>> = {
+  'return refusal': 'вернуть отказ',
+  'return reply': 'вернуть ответ',
+};
 
 function RequestScene({ phase, hasLetter }: { phase: Phase | 'idle'; hasLetter: boolean })
 {
+  const language = useLanguage();
   const checking = phase === 'verify-letter';
   const showCloseUp = checking || phase === 'verified';
   const showAntidote = phase === 'answer' || phase === 'relay';
@@ -48,15 +55,15 @@ function RequestScene({ phase, hasLetter }: { phase: Phase | 'idle'; hasLetter: 
             <div key={actor.id} className="proxy-actor" data-actor={actor.id}>
               <img src={actor.image} alt="" draggable={false} />
               <div className="proxy-actor-label">
-                <strong>{actor.name}</strong>
-                <span>{actor.role}</span>
+                <strong>{localize(language, actor.name, actor.nameRu)}</strong>
+                <span>{localize(language, actor.role, actor.roleRu)}</span>
               </div>
             </div>
           ))}
           {showAntidote && (
             <div key={phase} className="proxy-antidote" aria-hidden="true">
               <span className="proxy-vial" />
-              Antidote
+              {localize(language, 'Antidote', 'Противоядие')}
             </div>
           )}
         </div>
@@ -73,25 +80,32 @@ function RequestScene({ phase, hasLetter }: { phase: Phase | 'idle'; hasLetter: 
 
 function LetterComparison({ checking }: { checking: boolean })
 {
+  const language = useLanguage();
+  const signatureLabel = checking
+    ? localize(language, 'Signature', 'Подпись')
+    : localize(language, 'Signature matches ✓', 'Подпись совпадает ✓');
+  const sealLabel = checking
+    ? localize(language, 'Wax seal', 'Сургучная печать')
+    : localize(language, 'Wax seal matches ✓', 'Печать совпадает ✓');
   return (
     <div className="proxy-comparison" data-checking={checking}>
       <div className="proxy-proof-columns">
-        <strong>Presented letter</strong>
-        <strong>Orven’s old letter</strong>
+        <strong>{localize(language, 'Presented letter', 'Предъявленное письмо')}</strong>
+        <strong>{localize(language, 'Orven’s old letter', 'Старое письмо Орвена')}</strong>
       </div>
       <div className="proxy-proof-row">
-        <div className="proxy-proof-label">{checking ? 'Signature' : 'Signature matches ✓'}</div>
+        <div className="proxy-proof-label">{signatureLabel}</div>
         <div className="proxy-proof-columns">
-          <span className="proxy-proof-mark proxy-signature">{wizardLetter.signature}</span>
-          <span className="proxy-proof-mark proxy-signature">{oldLetter.signature}</span>
+          <span className="proxy-proof-mark proxy-signature">{localize(language, wizardLetter.signature, 'Орвен')}</span>
+          <span className="proxy-proof-mark proxy-signature">{localize(language, oldLetter.signature, 'Орвен')}</span>
         </div>
       </div>
       <div className="proxy-proof-row" data-proof="seal">
-        <div className="proxy-proof-label">{checking ? 'Wax seal' : 'Wax seal matches ✓'}</div>
+        <div className="proxy-proof-label">{sealLabel}</div>
         <div className="proxy-proof-columns">
           {[wizardLetter.seal, oldLetter.seal].map((seal, index) => (
             <span key={index} className="proxy-proof-mark">
-              <span className="proxy-wax-seal" data-seal={seal} role="img" aria-label={`${seal} wax seal`} />
+              <span className="proxy-wax-seal" data-seal={seal} role="img" aria-label={localize(language, `${seal} wax seal`, 'Сургучная печать с рассечённой звездой')} />
             </span>
           ))}
         </div>
@@ -102,6 +116,7 @@ function LetterComparison({ checking }: { checking: boolean })
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
+  const language = useLanguage();
   const [run, setRun] = useState<{
     graph: ConfiguredDemoProps['graph'];
     hasLetter: boolean;
@@ -120,6 +135,10 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
   const playing = Boolean(run && run.index < run.route.length - 1);
   const enabled = ready && active;
   const letterUnlocked = Boolean(run?.letterUnlocked || stage?.phase === 'denied');
+  const message = stage
+    ? localize(language, stage.message, stage.messageRu)
+    : localize(language, 'The guard waits at the entrance.', 'Страж ждёт у входа.');
+  const call = stage ? localize(language, stage.call, returnLabelsRu[stage.call] ?? stage.call) : 'Audience.requestHelp(request)';
 
   useEffect(() =>
   {
@@ -187,30 +206,30 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
   return (
     <section className="proxy-demo" aria-labelledby="proxy-demo-title">
       <header className="proxy-introduction">
-        <h2 id="proxy-demo-title">Ask the guard for the antidote</h2>
-        <p>{antidoteRequest}</p>
+        <h2 id="proxy-demo-title">{localize(language, 'Ask the guard for the antidote', 'Попросите у стража противоядие')}</h2>
+        <p>{localize(language, antidoteRequest, antidoteRequestRu)}</p>
       </header>
-      <div className="proxy-controls" role="group" aria-label="Request controls">
+      <div className="proxy-controls" role="group" aria-label={localize(language, 'Request controls', 'Управление запросом')}>
         <button type="button" disabled={!enabled} aria-disabled={playing} onClick={() => startRequest(false)}>
-          Ask without the letter
+          {localize(language, 'Ask without the letter', 'Попросить без письма')}
         </button>
         <button type="button" disabled={!enabled || !letterUnlocked} aria-disabled={playing} onClick={() => startRequest(true)}>
-          Ask with the letter
+          {localize(language, 'Ask with the letter', 'Предъявить письмо')}
         </button>
         <button type="button" className="proxy-reset" aria-disabled={!run} disabled={!enabled} onClick={() => setRun(null)}>
-          Reset
+          {localize(language, 'Reset', 'Сбросить')}
         </button>
       </div>
       <RequestScene phase={phase ?? 'idle'} hasLetter={run?.hasLetter ?? false} />
       <div className="proxy-feedback" data-result={phase}>
-        <p role="status" aria-atomic="true">{stage?.message ?? 'The guard waits at the entrance.'}</p>
-        <code>{stage?.call ?? 'Audience.requestHelp(request)'}</code>
+        <p role="status" aria-atomic="true">{message}</p>
+        <code>{call}</code>
       </div>
       {playing && run?.hasLetter && (
         <figure className="proxy-letter">
-          <figcaption>Orven’s letter</figcaption>
-          <blockquote>{wizardLetter.message}</blockquote>
-          <p>{wizardLetter.signature} <span aria-hidden="true">✦</span></p>
+          <figcaption>{localize(language, 'Orven’s letter', 'Письмо Орвена')}</figcaption>
+          <blockquote>{localize(language, wizardLetter.message, wizardLetter.messageRu)}</blockquote>
+          <p>{localize(language, wizardLetter.signature, 'Орвен')} <span aria-hidden="true">✦</span></p>
         </figure>
       )}
     </section>

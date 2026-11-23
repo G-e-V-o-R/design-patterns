@@ -10,8 +10,8 @@ export type IntroContent = {
   artwork: Artwork;
   caption: string;
   paragraphs: readonly string[];
+  paragraphPortraits?: readonly ({ src: string; framing?: number } | undefined)[];
   task: string;
-  concept: string;
   steps?: readonly string[];
 };
 

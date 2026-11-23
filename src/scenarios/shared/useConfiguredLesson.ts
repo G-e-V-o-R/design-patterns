@@ -1,9 +1,9 @@
 import { useReducer } from 'react';
 import { createDiagramRelationship, type DiagramConnection, type DiagramRelationship } from './connections';
+import { useLanguage } from './language';
 import {
   emptyConfiguredLesson,
   getConfiguredLessonIssues,
-  solutionConfiguredLesson,
   type LessonGraph,
 } from './configuredLessonModel';
 import type { CompiledScenario } from './scenarioConfig';
@@ -12,28 +12,33 @@ type CardPositions = Record<string, { x: number; y: number }>;
 
 type LessonLayout = {
   id: number;
-  compact: boolean;
   positions: CardPositions;
 };
 
 type LessonSnapshot = {
   graph: LessonGraph;
   layout: LessonLayout;
-  worked: boolean;
 };
+
+const editorMessages = {
+  missingClass: { en: 'Add both classes to the diagram first.', ru: 'Сначала добавьте на диаграмму оба класса.' },
+  sameClass: { en: 'Choose two different classes.', ru: 'Выберите два разных класса.' },
+  missingType: { en: 'Choose a relationship type first.', ru: 'Сначала выберите тип связи.' },
+  duplicate: { en: 'That relationship already exists.', ru: 'Такая связь уже существует.' },
+};
+
+type EditorMessage = keyof typeof editorMessages;
 
 type EditorState = LessonSnapshot & {
   history: LessonSnapshot[];
-  message: string;
-  hint: number;
+  message: EditorMessage | null;
   fitRevision: number;
 };
 
 type EditorAction =
-  | { type: 'edit'; update: (graph: LessonGraph) => LessonGraph; message?: string; layout?: 'solution' | 'reset' }
+  | { type: 'edit'; update: (graph: LessonGraph) => LessonGraph; resetLayout?: boolean }
   | { type: 'move'; positions: CardPositions; layoutId: number }
-  | { type: 'message'; message: string }
-  | { type: 'hint'; count: number }
+  | { type: 'message'; message: EditorMessage }
   | { type: 'undo' };
 
 function reduceEditor(state: EditorState, action: EditorAction): EditorState
@@ -53,10 +58,6 @@ function reduceEditor(state: EditorState, action: EditorAction): EditorState
   {
     return { ...state, message: action.message };
   }
-  if (action.type === 'hint')
-  {
-    return { ...state, hint: Math.min(state.hint + 1, action.count - 1) };
-  }
   if (action.type === 'undo')
   {
     const previous = state.history.at(-1);
@@ -71,7 +72,7 @@ function reduceEditor(state: EditorState, action: EditorAction): EditorState
       layout: sameLayout ? state.layout : previous.layout,
       fitRevision: state.fitRevision + (sameLayout ? 0 : 1),
       history: state.history.slice(0, -1),
-      message: 'Last edit undone.',
+      message: null,
     };
   }
 
@@ -80,38 +81,36 @@ function reduceEditor(state: EditorState, action: EditorAction): EditorState
   {
     return state;
   }
-  const fitRevision = state.fitRevision + (action.layout ? 1 : 0);
-  const layout = action.layout
-    ? { id: fitRevision, compact: action.layout === 'solution', positions: {} }
+  const fitRevision = state.fitRevision + (action.resetLayout ? 1 : 0);
+  const layout = action.resetLayout
+    ? { id: fitRevision, positions: {} }
     : state.layout;
-  const snapshot = { graph: state.graph, layout: state.layout, worked: state.worked };
+  const snapshot = { graph: state.graph, layout: state.layout };
   return {
     ...state,
     graph,
     layout,
     fitRevision,
     history: [...state.history.slice(-29), snapshot],
-    message: action.message ?? '',
-    worked: action.layout === 'solution',
+    message: null,
   };
 }
 
 export function useConfiguredLesson(config: CompiledScenario)
 {
+  const language = useLanguage();
   const [state, dispatch] = useReducer(reduceEditor, undefined, (): EditorState => ({
     graph: emptyConfiguredLesson(),
-    layout: { id: 0, compact: false, positions: {} },
+    layout: { id: 0, positions: {} },
     history: [],
-    message: '',
-    hint: -1,
-    worked: false,
+    message: null,
     fitRevision: 0,
   }));
-  const issues = getConfiguredLessonIssues(config, state.graph);
+  const issues = getConfiguredLessonIssues(config, state.graph, language);
 
-  function edit(update: (graph: LessonGraph) => LessonGraph, message = '')
+  function edit(update: (graph: LessonGraph) => LessonGraph)
   {
-    dispatch({ type: 'edit', update, message });
+    dispatch({ type: 'edit', update });
   }
 
   function addClass(id: string)
@@ -168,29 +167,29 @@ export function useConfiguredLesson(config: CompiledScenario)
   {
     if (!state.graph.classes.includes(connection.source) || !state.graph.classes.includes(connection.target))
     {
-      dispatch({ type: 'message', message: 'Add both classes to the diagram first.' });
+      dispatch({ type: 'message', message: 'missingClass' });
       return;
     }
     if (connection.source === connection.target)
     {
-      dispatch({ type: 'message', message: 'Choose two different classes.' });
+      dispatch({ type: 'message', message: 'sameClass' });
       return;
     }
     if (!config.relationships.some(relationship => relationship.id === type))
     {
-      dispatch({ type: 'message', message: 'Choose a relationship type first.' });
+      dispatch({ type: 'message', message: 'missingType' });
       return;
     }
     const relationship = createDiagramRelationship(connection, type);
     if (state.graph.edges.some(edge => edge !== previous && edge.source === relationship.source
       && edge.target === relationship.target && edge.type === type))
     {
-      dispatch({ type: 'message', message: 'That relationship already exists.' });
+      dispatch({ type: 'message', message: 'duplicate' });
       return;
     }
     if (!previous)
     {
-      edit(graph => ({ ...graph, edges: [...graph.edges, relationship] }), 'Relationship added.');
+      edit(graph => ({ ...graph, edges: [...graph.edges, relationship] }));
       return;
     }
 
@@ -207,7 +206,7 @@ export function useConfiguredLesson(config: CompiledScenario)
         return graph;
       }
       return { ...graph, edges: graph.edges.map(edge => edge === previous ? relationship : edge) };
-    }, 'Relationship reconnected.');
+    });
   }
 
   function connect(connection: DiagramConnection, type: string)
@@ -238,13 +237,9 @@ export function useConfiguredLesson(config: CompiledScenario)
     });
   }
 
-  function showSolution()
-  {
-    dispatch({ type: 'edit', update: () => solutionConfiguredLesson(config), layout: 'solution', message: 'Example solution loaded.' });
-  }
-
   return {
     ...state,
+    message: state.message ? editorMessages[state.message][language] : '',
     issues,
     ready: issues.length === 0,
     canUndo: state.history.length > 0,
@@ -255,10 +250,8 @@ export function useConfiguredLesson(config: CompiledScenario)
     reconnect,
     removeEdges,
     moveClasses: (positions: CardPositions) => dispatch({ type: 'move', positions, layoutId: state.layout.id }),
-    showSolution,
-    showHint: () => dispatch({ type: 'hint', count: config.hints.length }),
     undo: () => dispatch({ type: 'undo' }),
-    reset: () => dispatch({ type: 'edit', update: emptyConfiguredLesson, layout: 'reset' }),
+    reset: () => dispatch({ type: 'edit', update: emptyConfiguredLesson, resetLayout: true }),
   };
 }
 

@@ -3,20 +3,21 @@ import dreKaarPortrait from '../resource/Dre_Kaar.png?url';
 import faelinaPortrait from '../resource/Faelina.png?url';
 import latvePortrait from '../resource/Latve.png?url';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
+import { localize, useLanguage } from '../../shared/language';
 import { cookSoup, type CookId } from './demoModel';
 import { CookingScene } from './CookingScene';
 import './styles.css';
 
 const cooks = [
-  { id: 'faelina', name: 'Faelina', ingredient: 'Crushed garlic', portrait: faelinaPortrait },
-  { id: 'latve', name: 'Latve', ingredient: 'Fresh herbs', portrait: latvePortrait },
-  { id: 'dreKaar', name: 'Dre’Kaar', ingredient: 'Smoked pepper', portrait: dreKaarPortrait },
-] as const satisfies readonly { id: CookId; name: string; ingredient: string; portrait: string }[];
+  { id: 'faelina', name: 'Faelina', nameRu: 'Фаэлина', ingredient: 'Crushed garlic', ingredientRu: 'Толчёный чеснок', portrait: faelinaPortrait },
+  { id: 'latve', name: 'Latve', nameRu: 'Латве', ingredient: 'Fresh herbs', ingredientRu: 'Свежая зелень', portrait: latvePortrait },
+  { id: 'dreKaar', name: 'Dre’Kaar', nameRu: 'Дре’Каар', ingredient: 'Smoked pepper', ingredientRu: 'Копчёный перец', portrait: dreKaarPortrait },
+] as const satisfies readonly { id: CookId; name: string; nameRu: string; ingredient: string; ingredientRu: string; portrait: string }[];
 
 const stageDisplay = {
-  'cookMeat()': { label: 'Add meat and simmer', duration: 2100 },
-  'addSeasoning()': { label: 'Season the soup', duration: 1600 },
-  'addVegetables()': { label: 'Finish with vegetables', duration: 1700 },
+  'cookMeat()': { label: 'Add meat and simmer', labelRu: 'Сварить мясной бульон', duration: 2100 },
+  'addSeasoning()': { label: 'Season the soup', labelRu: 'Добавить приправу', duration: 1600 },
+  'addVegetables()': { label: 'Finish with vegetables', labelRu: 'Добавить овощи', duration: 1700 },
 };
 
 const defaultSteps = cookSoup('faelina');
@@ -37,6 +38,7 @@ function RecipeCard({ cook, selected, disabled, onStart }: {
   onStart: () => void;
 })
 {
+  const language = useLanguage();
   return (
     <button
       className="template-recipe"
@@ -48,8 +50,8 @@ function RecipeCard({ cook, selected, disabled, onStart }: {
     >
       <img src={cook.portrait} alt="" draggable={false} />
       <span className="template-recipe-caption">
-        <strong>{cook.name}</strong>
-        <span>{cook.ingredient}</span>
+        <strong>{localize(language, cook.name, cook.nameRu)}</strong>
+        <span>{localize(language, cook.ingredient, cook.ingredientRu)}</span>
       </span>
     </button>
   );
@@ -57,28 +59,36 @@ function RecipeCard({ cook, selected, disabled, onStart }: {
 
 function CookingSequence({ run, stepIndex }: { run: CookingRun | null; stepIndex: number })
 {
+  const language = useLanguage();
   const steps = run?.steps ?? defaultSteps;
   const step = steps[stepIndex];
   const finished = run && !step;
-  let status = 'Choose a cook to start the recipe.';
-  if (run)
+  let status = localize(language, 'Choose a cook to start the recipe.', 'Выберите, кто будет готовить суп.');
+  if (run && step)
   {
-    status = step?.detail ?? `${run.cook.name}’s soup is ready to serve.`;
+    status = localize(language, step.detail, step.detailRu);
+  }
+  else if (run)
+  {
+    status = localize(language, `${run.cook.name}’s soup is ready to serve.`, `Суп готов. ${run.cook.nameRu} может подавать его к столу.`);
   }
 
   return (
     <section className="template-sequence" aria-labelledby="template-sequence-title">
       <div className="template-sequence-header">
         <h3 id="template-sequence-title"><code>SoupRecipe.cookSoup()</code></h3>
-        {finished && <span className="template-served">Soup ready</span>}
+        {finished && <span className="template-served">{localize(language, 'Soup ready', 'Суп готов')}</span>}
       </div>
       <ol className="template-stages" role="list">
         {steps.map(({ method }, index) =>
         {
-          const { label, duration } = stageDisplay[method];
+          const { label, labelRu, duration } = stageDisplay[method];
           const current = Boolean(run && stepIndex === index);
           const completed = Boolean(run && stepIndex > index);
           const override = method === 'addSeasoning()';
+          const stageLabel = override && run
+            ? localize(language, run.cook.ingredient, run.cook.ingredientRu)
+            : localize(language, label, labelRu);
           return (
             <li
               key={method}
@@ -88,10 +98,12 @@ function CookingSequence({ run, stepIndex }: { run: CookingRun | null; stepIndex
             >
               <span className="template-stage-marker" aria-hidden="true">{completed ? '✓' : index + 1}</span>
               <div className="template-stage-text">
-                <span className="template-stage-kind">{override ? 'Overridden step' : 'Fixed step'}</span>
-                <strong>{override && run ? run.cook.ingredient : label}</strong>
+                <span className="template-stage-kind">{override
+                  ? localize(language, 'Overridden step', 'Переопределённый шаг')
+                  : localize(language, 'Fixed step', 'Общий шаг')}</span>
+                <strong>{stageLabel}</strong>
                 <code>{method}</code>
-                {completed && <span className="template-sr-only">Completed</span>}
+                {completed && <span className="template-sr-only">{localize(language, 'Completed', 'Выполнено')}</span>}
               </div>
               {current && (
                 <span
@@ -109,10 +121,10 @@ function CookingSequence({ run, stepIndex }: { run: CookingRun | null; stepIndex
       </p>
       {finished && run && (
         <details className="template-trace">
-          <summary>View recipe trace</summary>
+          <summary>{localize(language, 'View recipe trace', 'Посмотреть ход приготовления')}</summary>
           <ol>
-            {run.steps.map(({ method, detail }) => (
-              <li key={method}><code>{method}</code> {detail}</li>
+            {run.steps.map(({ method, detail, detailRu }) => (
+              <li key={method}><code>{method}</code> {localize(language, detail, detailRu)}</li>
             ))}
           </ol>
         </details>
@@ -123,6 +135,7 @@ function CookingSequence({ run, stepIndex }: { run: CookingRun | null; stepIndex
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
+  const language = useLanguage();
   const nextRunId = useRef(0);
   const [run, setRun] = useState<CookingRun | null>(null);
   const [progress, setProgress] = useState<{ run: CookingRun; index: number } | null>(null);
@@ -184,8 +197,8 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
       data-cook={currentRun?.cook.id}
       data-playing={Boolean(step)}
     >
-      <h2 id="template-demo-title">Campfire soup</h2>
-      <div className="template-cooks" role="group" aria-label="Choose a cook">
+      <h2 id="template-demo-title">{localize(language, 'Campfire soup', 'Суп на костре')}</h2>
+      <div className="template-cooks" role="group" aria-label={localize(language, 'Choose a cook', 'Выбор повара')}>
         {cooks.map(cook => (
           <RecipeCard
             key={cook.id}

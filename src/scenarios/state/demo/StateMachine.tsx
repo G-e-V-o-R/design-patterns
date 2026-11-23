@@ -1,20 +1,31 @@
 import { stateOrder, stateTransitions, type StateId, type Transition } from './demoModel';
+import { localize, useLanguage, type Language } from '../../shared/language';
 
-const stateNames: Record<StateId, string> = {
-  calm: 'Calm',
-  wary: 'Wary',
-  furious: 'Furious',
-};
+const stateNames = {
+  calm: { en: 'Calm', ru: 'Спокойствие' },
+  wary: { en: 'Wary', ru: 'Настороженность' },
+  furious: { en: 'Furious', ru: 'Ярость' },
+} satisfies Record<StateId, Record<Language, string>>;
+
+export function getStateName(id: StateId, language: Language): string
+{
+  return stateNames[id][language];
+}
 
 function TransitionArrow({ rule, taken }: { rule: Transition; taken: boolean })
 {
+  const language = useLanguage();
   const { from, to, event } = rule;
   const origin = stateOrder.indexOf(from);
   const destination = stateOrder.indexOf(to);
   const stays = origin === destination;
-  const eventLabel = event === 'approach' ? 'Approach' : 'Reassure';
+  const eventLabel = event === 'approach'
+    ? localize(language, 'Approach', 'Приближение')
+    : localize(language, 'Reassure', 'Успокоение');
   const arrow = origin < destination ? '→' : '←';
-  const description = `${eventLabel}: ${stateNames[from]} to ${stateNames[to]}`;
+  const description = localize(language,
+    `${eventLabel}: ${stateNames[from].en} to ${stateNames[to].en}`,
+    `${eventLabel}: «${stateNames[from].ru}» → «${stateNames[to].ru}»`);
 
   return (
     <div
@@ -22,7 +33,7 @@ function TransitionArrow({ rule, taken }: { rule: Transition; taken: boolean })
       data-taken={taken}
       data-loop={stays}
       role="img"
-      aria-label={taken ? `${description}, last transition` : description}
+      aria-label={taken ? localize(language, `${description}, last transition`, `${description}, последний переход`) : description}
       style={{
         gridColumn: stays ? 2 * origin + 1 : 2 * Math.max(origin, destination),
         gridRow: stays ? 3 : event === 'approach' ? 1 : 2,
@@ -36,9 +47,10 @@ function TransitionArrow({ rule, taken }: { rule: Transition; taken: boolean })
 
 export function StateMachine({ current, transition }: { current: StateId; transition: Transition | null })
 {
+  const language = useLanguage();
   return (
     <section className="state-machine" aria-labelledby="state-machine-title">
-      <h3 id="state-machine-title">Snake’s state machine</h3>
+      <h3 id="state-machine-title">{localize(language, 'Snake’s state machine', 'Автомат состояний змеи')}</h3>
       <div className="state-machine-grid">
         {stateOrder.map((id, index) => (
           <div
@@ -48,8 +60,8 @@ export function StateMachine({ current, transition }: { current: StateId; transi
             aria-current={current === id ? 'true' : undefined}
             style={{ gridColumn: 2 * index + 1 }}
           >
-            <strong>{stateNames[id]}</strong>
-            {id === current && <small>Current</small>}
+            <strong>{getStateName(id, language)}</strong>
+            {id === current && <small>{localize(language, 'Current', 'Текущее')}</small>}
           </div>
         ))}
         {stateTransitions.map(rule => (

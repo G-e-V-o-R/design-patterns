@@ -1,9 +1,8 @@
 {
   "id": "proxy",
-  "number": "09",
+  "number": "05",
   "title": "A voice at the entrance",
   "pattern": "Proxy",
   "intro": "./intro.json",
-  "classes": "./classes.json",
-  "hints": "./hints.json"
+  "classes": "./classes.json"
 }

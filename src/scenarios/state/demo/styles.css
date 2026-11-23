@@ -244,6 +244,11 @@
   font-size: 10px;
 }
 
+.state-demo:lang(ru) .state-machine-node,
+.state-demo:lang(ru) .state-machine-edge {
+  overflow-wrap: anywhere;
+}
+
 .state-demo .state-machine-edge {
   display: grid;
   justify-items: center;

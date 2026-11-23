@@ -1,11 +1,22 @@
+import type { Language } from '../../shared/language';
 import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 import { config } from '../config/config';
 
-const latve = { wakeEveryone: () => 'Latve wakes everyone.' };
-const faelina = { setTraps: () => 'Faelina sets the traps.' };
+const receiverOutcomes = {
+  wake: { en: 'Latve wakes everyone.', ru: 'Латве будит всех.' },
+  traps: { en: 'Faelina sets the traps.', ru: 'Фаэлина расставляет ловушки.' },
+  flank: {
+    en: 'Narion reaches the right lookout. The right advance was a feint. The orcs are attacking on the left.',
+    ru: 'Нарион добирается до дозорного поста справа. Наступление справа оказалось ложным. Орки атакуют слева.',
+  },
+  returned: { en: 'Narion guards the left flank.', ru: 'Нарион охраняет левый фланг.' },
+};
+
+const latve = { wakeEveryone: () => receiverOutcomes.wake.en };
+const faelina = { setTraps: () => receiverOutcomes.traps.en };
 const narion = {
-  post: 'Narion guards the left flank.',
-  holdFlank: () => 'Narion reaches the right lookout. The right advance was a feint. The orcs are attacking on the left.',
+  post: receiverOutcomes.returned.en,
+  holdFlank: () => receiverOutcomes.flank.en,
   returnTo: (previousPost: string) => previousPost,
 };
 
@@ -56,13 +67,45 @@ class HoldFlankCommand implements Command {
 }
 
 export const orderDetails = {
-  wake: { name: 'WakeEveryoneCommand', receiver: 'Latve', method: 'wakeEveryone()', before: 'Everyone is asleep.' },
-  traps: { name: 'SetTrapsCommand', receiver: 'Faelina', method: 'setTraps()', before: 'The traps are unset.' },
-  flank: { name: 'HoldFlankCommand', receiver: 'Narion', method: 'holdFlank()', before: 'Narion guards the left flank. Dre’Kaar spots orcs approaching on the right.' },
+  wake: {
+    name: 'WakeEveryoneCommand',
+    receiver: 'Latve',
+    method: 'wakeEveryone()',
+    before: 'Everyone is asleep.',
+    beforeRu: 'Все спят.',
+  },
+  traps: {
+    name: 'SetTrapsCommand',
+    receiver: 'Faelina',
+    method: 'setTraps()',
+    before: 'The traps are unset.',
+    beforeRu: 'Ловушки не расставлены.',
+  },
+  flank: {
+    name: 'HoldFlankCommand',
+    receiver: 'Narion',
+    method: 'holdFlank()',
+    before: 'Narion guards the left flank. Dre’Kaar spots orcs approaching on the right.',
+    beforeRu: 'Нарион охраняет левый фланг. Дре’Каар замечает, что справа приближаются орки.',
+  },
 } as const;
 
 export type OrderId = keyof typeof orderDetails;
 export type OrderStatus = 'pending' | 'launching' | 'in-flight' | 'handoff' | 'executed' | 'undone';
+
+export function describeReceiverOutcome(id: OrderId, outcome: string | undefined, language: Language)
+{
+  const { before, beforeRu } = orderDetails[id];
+  if (language === 'en')
+  {
+    return outcome ?? before;
+  }
+  if (outcome === receiverOutcomes[id].en)
+  {
+    return receiverOutcomes[id].ru;
+  }
+  return outcome === receiverOutcomes.returned.en ? receiverOutcomes.returned.ru : outcome ?? beforeRu;
+}
 
 type Order = {
   id: OrderId;

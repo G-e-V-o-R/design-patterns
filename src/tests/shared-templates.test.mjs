@@ -80,22 +80,16 @@ const tray = renderToStaticMarkup(createElement(DiagramBuilderPanel, {
   category: 'methods',
   onCategoryChange: () => {},
   draggedMemberId: null,
-  hints: ['First hint', 'Second hint'],
-  hintIndex: 0,
   onAddClass: () => {},
   onStartDrag: () => {},
-  onShowHint: () => {},
-  onShowSolution: () => {},
 }));
-assert.match(tray, /1\/1 classes/);
-assert.match(tray, /Show hint 2 \/ 2/);
-assert.match(tray, /First hint/);
+assert.match(tray, /Your cards/);
 assert.doesNotMatch(tray, /<select|Assign to/);
 assert.match(tray, /draggable="true"/);
 console.log('Shared templates: configured members, artwork, relationships, selection, and marker isolation passed.');
 
 const { RelationshipList } = await import('../scenarios/shared/RelationshipList.tsx');
-const { LessonStatus, LessonAction } = await import('../scenarios/shared/LessonLayout.tsx');
+const { BoardToolbar } = await import('../scenarios/shared/LessonLayout.tsx');
 const { StoryIntro } = await import('../scenarios/shared/StoryIntro.tsx');
 const relations = renderToStaticMarkup(createElement(RelationshipList, {
   edges: [edge],
@@ -108,19 +102,29 @@ assert.match(relations, /aria-label="Remove arrow 1: Worker → fulfills contrac
 assert.equal(renderToStaticMarkup(createElement(RelationshipList, {
   edges: [], relationships, classLabel: id => id, onRemove: () => {},
 })), '');
-const status = renderToStaticMarkup(createElement(LessonStatus, null, 'Connect your classes'));
-assert.match(status, /role="status"/);
-assert.match(status, /Connect your classes/);
-const action = renderToStaticMarkup(createElement(LessonAction, {
-  label: 'Run custom demo', description: 'Custom explanation', ready: false, onRun: () => {},
+const toolbarProps = {
+  progress: [{ label: 'Classes', correct: 1, total: 2 }, { label: 'Members', correct: 2, total: 2 }],
+  status: 'Add class and interface cards to the canvas.',
+  canUndo: true, onUndo: () => {}, onReset: () => {}, onOpenCards: () => {}, onOpenExample: () => {},
+};
+const toolbar = renderToStaticMarkup(createElement(BoardToolbar, toolbarProps));
+assert.match(toolbar, /Classes <strong>1\/2<\/strong>/);
+assert.match(toolbar, /role="status"/);
+assert.match(toolbar, /View worked example/);
+assert.doesNotMatch(toolbar, /Run demo|Show hint|Check diagram/);
+assert.match(renderToStaticMarkup(createElement(BoardToolbar, {
+  ...toolbarProps, status: 'Your diagram is complete.', onRunDemo: () => {},
+})), /Run demo/);
+const exampleRelations = renderToStaticMarkup(createElement(RelationshipList, {
+  edges: [edge], relationships, classLabel: id => id,
 }));
-assert.match(action, /disabled=""/);
-assert.match(action, /Run custom demo/);
+assert.match(exampleRelations, /fulfills contract/);
+assert.doesNotMatch(exampleRelations, /<button/);
 const intro = renderToStaticMarkup(createElement(StoryIntro, {
   content: {
     number: '99', title: 'Custom story', pattern: 'Custom pattern', headingId: 'custom-heading',
     artwork: { src: '/custom-intro.png', alt: 'Custom illustration' }, caption: 'Custom caption',
-    paragraphs: ['First paragraph', 'Second paragraph'], task: 'Custom task', concept: 'Custom concept',
+    paragraphs: ['First paragraph', 'Second paragraph'], task: 'Custom task',
     steps: ['First custom step', 'Second custom step'],
   },
 }));
@@ -137,6 +141,12 @@ const explicitVariant = renderToStaticMarkup(createElement(ReactFlowProvider, nu
   }),
 ));
 assert.match(explicitVariant, /is-interface/);
+const exampleCard = renderToStaticMarkup(createElement(ReactFlowProvider, null,
+  createElement(ClassDiagramCard, {
+    label: 'Port', kind: 'Contract', variant: 'interface', members: [], handles: [],
+  }),
+));
+assert.doesNotMatch(exampleCard, /<button|Assign methods/);
 console.log('Shared templates: custom intro, explicit interface variant, relationship list, status, and gated action passed.');
 
 const invalidMemberMarkup = renderToStaticMarkup(createElement(ReactFlowProvider, null,
@@ -210,8 +220,7 @@ const trayProps = {
     { id: 'work', kind: 'method', label: 'perform()' },
   ],
   placedClasses: [], assignments: {}, onCategoryChange: () => {}, draggedMemberId: null,
-  hints: [], hintIndex: -1, onAddClass: () => {}, onStartDrag: () => {},
-  onShowHint: () => {}, onShowSolution: () => {},
+  onAddClass: () => {}, onStartDrag: () => {},
 };
 for (const category of ['classes', 'fields', 'methods'])
 {

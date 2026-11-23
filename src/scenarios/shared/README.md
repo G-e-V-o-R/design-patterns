@@ -24,11 +24,10 @@ export const introContent = {
   caption: 'One short caption',
   paragraphs: ['The problem.', 'How the pattern helps.'],
   task: 'Build the diagram.',
-  concept: 'The main idea in plain language.',
 } satisfies IntroContent;
 ```
 
-Render `<StoryIntro content={introContent} />` and `<ConceptCallout>{introContent.concept}</ConceptCallout>`. The image-left desktop layout, mobile stacking, title, task, and step strip are shared.
+Render `<StoryIntro content={introContent} />`. The image-left desktop layout, mobile stacking, title, task, and step strip are shared.
 
 ## Classes, fields, and methods
 
@@ -41,7 +40,7 @@ const members = [
 ];
 ```
 
-The scenario adapter supplies removal/assignment callbacks and its drag MIME type. Handle configuration is optional. Use optional assigned-member drag callbacks when the scenario allows moving members between cards. Cards share a 260px width; place rows far enough apart to fit artwork and members. `DiagramBuilderPanel` renders the same class/member arrays, supplied category definitions, hints, and callbacks. Member assignment uses drag and drop only; `hideAssignedMembers` supports trays showing only unassigned cards. Pass `invalidMemberIds` to `ClassDiagramCard` to highlight misplaced members using the configured graph validator.
+The scenario adapter supplies removal/assignment callbacks and its drag MIME type. Handle configuration is optional. Use optional assigned-member drag callbacks when the scenario allows moving members between cards. Cards share a 260px width. Place rows far enough apart to fit artwork and members. `DiagramBuilderPanel` renders the same class and member arrays and supports assigning members with drag and drop or a class selector. Pass `invalidMemberIds` to `ClassDiagramCard` to highlight misplaced members using the configured graph validator.
 
 ## Arrows and canvas
 
@@ -54,7 +53,7 @@ The shared edge renderer preserves selected ports and normalizes old `side-start
 
 ## Workspace
 
-`LessonWorkspace` accepts a tray and board children. `BoardToolbar` accepts counts and undo/reset callbacks; `SolutionNotice` shows scenario-provided solution guidance. Compose the scenario's validation status and demonstration inside the board. `lesson.css` is the single source for intro, workspace, tray, canvas, card, and toolbar dimensions and responsive styles.
+`LessonWorkspace` accepts a tray and board children. The board header shows placement counts and completion status alongside editor actions. The worked example uses a separate read-only canvas. `lesson.css` supplies shared styles for the intro, workspace, tray, canvas, cards, and toolbar.
 
 For the reusable adapters, see `ConfiguredLessonWorkspace.tsx` and `ConfiguredClassNode.tsx`; lesson-specific data comes from each `scenario.json`. Shared files must never import scenario models, scenario resources, or app-shell files.
 
@@ -82,4 +81,4 @@ For a custom demonstration, add `Demo.tsx` with a default export accepting `Conf
 
 `ConfiguredLessonWorkspace` passes targeted feedback from the shared validator to class cards, edges, and relationship rows. Keep shared validation and rendering free of pattern-specific branches. See `REFERENCE_SCENARIO.md` for authoring and verification requirements.
 
-Config sections (`intro`, `classes`, `hints`, and optional `relationshipTypes`) may be inline values or local JSON paths. The compiler accepts a fourth argument to resolve referenced sections, shared by browser registration, build validation, and demo config loaders. See [the section format](../REFERENCE_SCENARIO.md).
+Config sections (`intro`, `classes`, and optional `relationshipTypes`) may be inline values or local JSON paths. The compiler accepts a fourth argument to resolve referenced sections, shared by browser registration, build validation, and demo config loaders. See [the section format](../REFERENCE_SCENARIO.md).

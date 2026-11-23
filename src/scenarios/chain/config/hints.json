@@ -1,5 +1,0 @@
-[
-  "Put Handle(request) and SetNext(handler: IHandler) on IHandler. EnemyHandler implements IHandler, stores the next handler, and supplies public SetNext and protected forward.",
-  "OrcHandler, GoblinHandler, and TrollHandler extend EnemyHandler. Each implements its own Handle(request) and calls forward on a mismatch. SilkThread uses IHandler and calls Handle on its single handler reference.",
-  "Use the Passes to arrows between concrete handlers: OrcHandler → GoblinHandler → TrollHandler. TrollHandler has no next handler."
-]

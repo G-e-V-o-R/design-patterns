@@ -1,13 +1,23 @@
 {
   "paragraphs": [
-    "The group stops to rest at the roots of an old tree. Dre’Kaar looks at the snake on Jararis’s shoulder. “She hisses when I come near,” he says. “But she stays quiet with Latve.”",
-    "“She feels that I don’t trust you,” says Jararis. “We share our feelings. When I’m calm, she is calm too. When I’m full of rage, she may strike.”",
-    "Dre’Kaar looks at the snake again. “So the same snake can react in different ways as your mood changes?”"
+    "As night draws near, the companions stop to rest at the roots of an old tree and light a campfire. They settle around the fire and start talking. Dre’Kaar catches a glint of scales on Jararis’s shoulder and nods toward the snake.",
+    {
+      "text": "“She hisses when I come near,” he says. “But she stays quiet with Latve.”",
+      "image": "shared/resource/portraits/dre-kaar.png"
+    },
+    {
+      "text": "“She feels that I don’t trust you,” says Jararis. “We share our feelings. When I’m calm, she is calm too. When I’m full of rage, she may strike.”",
+      "image": "./resource/4.0.png",
+      "imageFraming": 0
+    },
+    {
+      "text": "Dre’Kaar looks at the snake again. “So the same snake can react in different ways as your mood changes?”",
+      "image": "shared/resource/portraits/dre-kaar.png"
+    }
   ],
   "image": "./resource/4.png",
   "imageAlt": "Dre’Kaar speaks with Jararis by the campfire as the snake hisses from Jararis’s shoulder",
   "task": "Build a class diagram that lets Jararis pass story events to the snake. Give each state rules for choosing what state comes next and how the snake reacts.",
-  "concept": "The State pattern lets an object change its behavior as its state changes. The snake asks its current state what comes next after an event, so the same event can lead to different states. Calling react() gives the response of the state the snake is in now.",
   "steps": [
     "Add classes and assign members",
     "Connect the snake and its states",

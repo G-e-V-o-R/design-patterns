@@ -1,16 +1,24 @@
 {
   "paragraphs": [
-    "The companions are trapped in an ambush. Everyone is shouting.",
-    "“There’s an enemy behind you!” Faelina warns.",
-    "“Saerenn is bleeding! Get her to safety!” Narion shouts.",
-    "They shout over each other. Narion turns toward the enemy while Dre’Kaar rushes to Saerenn. Then both hesitate, unsure whether to fight or get her to safety.",
-    "Elvir sends Raven into the air. A mental link connects Raven to each companion, so they can send their thoughts to Raven during the fight.",
-    "“Saerenn is bleeding! Get her to safety!” Narion thinks.",
-    "Raven knows who can help and sends the request to them. When Faelina asks for shelter, Raven passes the request to Saerenn. When Dre’Kaar asks for cover, Raven passes it to Narion. The companions can focus on the fight while Raven sends each request to the right person."
+    "“Danger ahead!” The fox’s warning reaches Dre’Kaar and Narion through their bracelets. Narion looks for a safer route while Dre’Kaar and the others get ready to defend themselves. Before Narion can lead them away, branches snap on both sides of the trail and enemies rush out from behind the trees.",
+    {
+      "text": "“There’s an enemy behind you!” Faelina warns.",
+      "image": "shared/resource/portraits/faelina.png"
+    },
+    {
+      "text": "“We need shelter! Does anyone know where to go?” Narion shouts.",
+      "image": "shared/resource/portraits/narion.png"
+    },
+    "Their voices drown one another out. In the confusion, nobody can tell who’s speaking to whom or what they’re asking for.",
+    "Elvir casts a spell. Raven rises into the sky and forms a mental link with each companion. Now they can ask Raven for help in their minds without shouting over the noise.",
+    {
+      "text": "“Raven, we need cover,” Dre’Kaar thinks.",
+      "image": "shared/resource/portraits/dre-kaar.png"
+    },
+    "Raven sends each request to the companion who can act on it. He asks Narion to provide cover. When Faelina asks for shelter, he passes the request to Saerenn, who knows where to lead the group."
   ],
   "caption": "Many requests → one coordinator",
   "task": "Build a class diagram where companions ask through a Mediator interface. Let RavenMediator decide who responds.",
-  "concept": "Keep coordination in the mediator. Participants can cooperate without holding references to each other. Changing the raven’s routing rule does not require changing the requesters.",
   "image": "./resource/intro.png",
   "imageAlt": "The raven coordinating the companions",
   "steps": [

@@ -18,7 +18,7 @@ Scenarios must not import sibling scenarios, the shell contract, or application 
 
 ## State and new scenarios
 
-Each scenario component owns its own state. Visited scenarios remain mounted in hidden panels, preserving diagrams, history, hints, and demo state when switching. The shell passes `active` so hidden scenarios do not run visibility-dependent behavior. Reset affects only its own scenario. Page reload starts fresh.
+Each scenario component owns its own state. Visited scenarios remain mounted in hidden panels, preserving diagrams, history, and demo state when switching. The shell passes `active` so hidden scenarios do not run visibility-dependent behavior. Reset affects only its own scenario. Page reload starts fresh.
 
 To add a scenario:
 

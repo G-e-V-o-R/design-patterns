@@ -1,3 +1,4 @@
+import type { Language } from '../../shared/language';
 import { config as chainConfig } from '../config/config';
 import { getConfiguredLessonIssues, type LessonGraph } from '../../shared/configuredLessonModel';
 
@@ -59,3 +60,36 @@ export function simulateLesson(graph: LessonGraph, request: RequestKind): ChainR
   return { request, handler: null, summary: 'No spider handles this request. The traveller passes safely.', trace };
 }
 
+export function describeChainStep(result: ChainResult, step: ChainStep, language: Language)
+{
+  if (language === 'en')
+  {
+    return step.message;
+  }
+
+  const handler = classLabel(step.handler);
+  const nextStep = result.trace[result.trace.indexOf(step) + 1];
+  const nextHandler = nextStep && classLabel(nextStep.handler);
+  switch (step.action)
+  {
+    case 'forward':
+      return `SilkThread передаёт запрос обработчику ${nextHandler}.`;
+    case 'handle':
+      return `${handler} распознаёт сигнал и обрабатывает запрос. Цепочка на этом останавливается.`;
+    case 'pass':
+      return `${handler} не распознаёт сигнал и передаёт запрос обработчику ${nextHandler}.`;
+    case 'unhandled':
+      return `${handler} не распознаёт сигнал. Следующего обработчика нет.`;
+  }
+}
+
+export function describeChainOutcome(result: ChainResult, language: Language)
+{
+  if (language === 'en')
+  {
+    return result.summary;
+  }
+  return result.handler
+    ? `${classLabel(result.handler)} обрабатывает запрос. Остальные пауки не получают его.`
+    : 'Ни один паук не обрабатывает запрос. Путник проходит невредимым.';
+}

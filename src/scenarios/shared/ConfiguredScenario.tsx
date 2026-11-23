@@ -1,8 +1,10 @@
-import { useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
-import type { LessonGraph } from './configuredLessonModel';
+import { localize, useLanguage } from './language';
+import { useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
+import { solutionConfiguredLesson, type LessonGraph } from './configuredLessonModel';
 import type { CompiledScenario } from './scenarioConfig';
 import { ConfiguredLessonWorkspace } from './ConfiguredLessonWorkspace';
-import { ConceptCallout, StoryIntro } from './StoryIntro';
+import { ConfiguredWorkedExample } from './ConfiguredWorkedExample';
+import { StoryIntro } from './StoryIntro';
 import { useConfiguredLesson } from './useConfiguredLesson';
 import './lesson.css';
 import './configuredLesson.css';
@@ -15,32 +17,38 @@ export type ConfiguredDemoProps = {
 
 export type ConfiguredScenarioProps = {
   config: CompiledScenario;
+  graphConfig?: CompiledScenario;
   active?: boolean;
   Demo?: ComponentType<ConfiguredDemoProps>;
 };
 
-export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredScenarioProps)
+export function ConfiguredScenario({ config, graphConfig = config, active = true, Demo }: ConfiguredScenarioProps)
 {
+  const language = useLanguage();
   const editor = useConfiguredLesson(config);
-  const [view, setView] = useState<'diagram' | 'demo' | 'diagram-after-demo'>('diagram');
+  const [view, setView] = useState<'diagram' | 'example' | 'demo' | 'demo-preview'>('diagram');
+  const [hasOpenedDemo, setHasOpenedDemo] = useState(false);
+  const exampleGraph = useMemo(() => solutionConfiguredLesson(graphConfig), [graphConfig]);
   const diagramTab = useRef<HTMLButtonElement>(null);
   const demoTab = useRef<HTMLButtonElement>(null);
-  const demoReady = Boolean(Demo && editor.ready);
-  const showingDemo = demoReady && view === 'demo';
+  const showingExample = view === 'example';
+  const previewingDemo = import.meta.env.DEV && view === 'demo-preview';
+  const showingDemo = view === 'demo' || previewingDemo;
+  const demoGraphReady = editor.ready || previewingDemo;
+  const demoReady = Boolean(Demo && demoGraphReady && !showingExample);
+  const showDemoStatus = !showingExample && !demoReady;
   const diagramId = `${config.id}-diagram-panel`;
   const demoId = `${config.id}-demo-panel`;
   const demoStatusId = `${config.id}-demo-status`;
-  const demoStatus = Demo ? 'Complete the class diagram to unlock the demo.' : 'Demo unavailable for this lesson.';
-
-  if (!demoReady && view !== 'diagram')
-  {
-    setView('diagram');
-  }
+  const demoStatus = Demo
+    ? localize(language, 'Finish your diagram to run its demo.', 'Завершите диаграмму, чтобы запустить демонстрацию.')
+    : localize(language, 'Demo unavailable for this lesson.', 'Для этого урока демонстрация недоступна.');
 
   function openDemo()
   {
-    if (demoReady)
+    if (demoReady && !showingDemo)
     {
+      setHasOpenedDemo(true);
       setView('demo');
       demoTab.current?.focus();
     }
@@ -48,10 +56,13 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
 
   function openDiagram()
   {
-    if (showingDemo)
-    {
-      setView('diagram-after-demo');
-    }
+    setView('diagram');
+  }
+
+  function returnToDiagram()
+  {
+    openDiagram();
+    diagramTab.current?.focus();
   }
 
   function startBuilding()
@@ -88,20 +99,11 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
     }
   }
 
-  const workspace = (
-    <ConfiguredLessonWorkspace
-      config={config}
-      editor={editor}
-      active={active && !showingDemo}
-      onRunDemo={demoReady ? openDemo : undefined}
-    />
-  );
-
   return (
     <section className="configured-lesson pattern-lesson" aria-labelledby={config.intro.headingId}>
       <StoryIntro content={config.intro} onStart={startBuilding} />
       <div className="configured-lesson-navigation">
-        <div className="configured-lesson-tabs" role="tablist" aria-label="Lesson workspace" onKeyDown={moveTabFocus}>
+        <div className="configured-lesson-tabs" role="tablist" aria-label={localize(language, 'Lesson workspace', 'Рабочая область урока')} onKeyDown={moveTabFocus}>
           <button
             ref={diagramTab}
             type="button"
@@ -112,7 +114,7 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
             tabIndex={showingDemo ? -1 : 0}
             onClick={openDiagram}
           >
-            Class diagram
+            {localize(language, 'Class diagram', 'Диаграмма классов')}
           </button>
           <button
             ref={demoTab}
@@ -122,24 +124,55 @@ export function ConfiguredScenario({ config, active = true, Demo }: ConfiguredSc
             aria-controls={demoId}
             aria-selected={showingDemo}
             aria-disabled={!demoReady}
-            aria-describedby={demoReady ? undefined : demoStatusId}
+            aria-describedby={showDemoStatus ? demoStatusId : undefined}
             tabIndex={showingDemo ? 0 : -1}
             onClick={openDemo}
           >
-            Demo
+            {localize(language, 'Demo', 'Демонстрация')}
           </button>
         </div>
-        {!demoReady && <p id={demoStatusId}>{demoStatus}</p>}
-      </div>
-      <div id={diagramId} role="tabpanel" aria-labelledby={`${diagramId}-tab`} hidden={showingDemo}>
-        {workspace}
-      </div>
-      <div id={demoId} role="tabpanel" aria-labelledby={`${demoId}-tab`} hidden={!showingDemo}>
-        {Demo && demoReady && view !== 'diagram' && (
-          <Demo graph={editor.graph} ready={editor.ready} active={active && showingDemo} />
+        {showDemoStatus && <p id={demoStatusId}>{demoStatus}</p>}
+        {import.meta.env.DEV && Demo && view === 'diagram' && !editor.ready && (
+          <button
+            type="button"
+            onClick={() =>
+            {
+              setView('demo-preview');
+              demoTab.current?.focus();
+            }}
+          >
+            {localize(language, 'Run demo (dev)', 'Запустить демо (режим разработки)')}
+          </button>
         )}
       </div>
-      {config.intro.concept && <ConceptCallout>{config.intro.concept}</ConceptCallout>}
+      <div id={diagramId} role="tabpanel" aria-labelledby={`${diagramId}-tab`} hidden={showingDemo}>
+        <div hidden={showingExample}>
+          <ConfiguredLessonWorkspace
+            config={config}
+            editor={editor}
+            active={active && view === 'diagram'}
+            onOpenExample={() => setView('example')}
+            onRunDemo={Demo && editor.ready ? openDemo : undefined}
+          />
+        </div>
+        {showingExample && (
+          <ConfiguredWorkedExample
+            config={config}
+            graph={exampleGraph}
+            active={active}
+            onReturn={returnToDiagram}
+          />
+        )}
+      </div>
+      <div id={demoId} role="tabpanel" aria-labelledby={`${demoId}-tab`} hidden={!showingDemo}>
+        {Demo && (hasOpenedDemo || previewingDemo) && demoGraphReady && (
+          <Demo
+            graph={previewingDemo ? exampleGraph : editor.graph}
+            ready={demoGraphReady}
+            active={active && showingDemo}
+          />
+        )}
+      </div>
     </section>
   );
 }

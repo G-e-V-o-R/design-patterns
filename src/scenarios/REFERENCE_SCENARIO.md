@@ -13,17 +13,17 @@ Keep `scenario.json` focused on metadata and local section references:
   "title": "Example lesson",
   "pattern": "Example pattern",
   "intro": "./intro.json",
-  "classes": "./classes.json",
-  "hints": "./hints.json"
+  "classes": "./classes.json"
 }
 ```
 
-- `intro.json` contains the story object: paragraphs, image, task, and optional category, imageAlt, caption, concept, and three steps.
+- `intro.json` contains the story object: paragraphs, image, task, and optional category, imageAlt, caption, and three steps.
+- Use a string for narration and `{ "text": "…", "image": "shared/resource/portraits/narion.png" }` for dialogue with a speaker portrait. Optional `imageFraming` controls the vertical crop from 0 to 100. Keep the translated paragraphs as strings in the same order in `ru.json`.
 - `classes.json` contains the class/interface array. Keep fields, methods, and positions nested inside their owning class. Use `position` for the starting position in the editor and optional `solutionPosition` for the compact worked example. Set `"anchorY": "center"` in the solution positions of cards that should share a midpoint at the same y-coordinate. Cards with the same solution y-coordinate connect from their sides. Cards on different rows connect from their top or bottom. Each class or interface lists its expected outgoing arrows in `relationships`, with a `type` and a `target` class ID for each arrow. Use `"relationships": []` when there are no outgoing arrows.
 - Class artwork fills the card width and is cropped from the bottom by default. Set `imageFraming` to a vertical position from `0` (top) to `100` (bottom). Use `imageHeight` in pixels when the default 180 px crop cannot fit all faces or key details.
 - Use `shared/resource/portraits/<character>.png` for recurring character portraits, with an `imageFraming` of 22 for the shared portrait set.
-- `hints.json` contains an array of progressive hint strings.
 - Optional `relationshipTypes` can reference `./relationships.json`, an array of custom relationship definitions. `implements` and `uses` are built in. The toolbar offers a relationship type only when a class declares an arrow of that type in `classes.json`.
+- Add `config/ru.json` following the [Observer translation](./observer/config/ru.json). Translate the title, pattern, intro, descriptions, artwork alt text, and custom relationship labels. Use the original IDs as keys in `classes`, `members`, and `relationships`. Keep code identifiers and signatures in English and translate any explanatory suffixes.
 
 Each section can also remain inline. References must start with `./`, end with `.json`, and stay inside the scenario directory; nested folders are supported. Section files contain the section value directly, without a wrapper key. Includes are not recursive. Artwork paths remain relative to the scenario directory, even when a content file lives in a subfolder.
 
@@ -42,9 +42,8 @@ An optional scenario-local `Demo.tsx` default export receives `ConfiguredDemoPro
 ```text
 src/scenarios/<id>/
   scenario.json          metadata and section references
-  intro.json             story, task, artwork, concept, steps
+  intro.json             story, task, artwork, steps
   classes.json           cards, members, arrows, positions
-  hints.json             progressive hints
   relationships.json     optional custom relationship types
   config.ts              optional typed loader for demo code
   resource/              local artwork
@@ -59,7 +58,7 @@ A demo may have focused presentation helpers such as Observer's `NotificationDem
 ## Agent workflow
 
 1. Read a matching existing manifest and its content files.
-2. Define metadata in `scenario.json` and story, diagram, and hints in their referenced files. Keep stable, unique IDs and put each member inside its owning class.
+2. Define metadata in `scenario.json` and keep the story and diagram in their referenced files. Keep stable, unique IDs and put each member inside its owning class.
 3. If simulation is useful, add a default-exported `Demo.tsx` receiving `graph`, `ready`, and `active` from `ConfiguredDemoProps`.
 4. Keep simulation rules and tests local; use the shared configured graph validator instead of reimplementing lesson validation. Derive card labels and artwork metadata from the config when the demo needs them. For direct TypeScript use, follow `observer/config.ts`: statically import section JSON and pass a lookup as the fourth argument to `compileScenarioConfig`.
 5. Run the checks and browser flows below.
@@ -68,6 +67,7 @@ A demo may have focused presentation helpers such as Observer's `NotificationDem
 
 - The shared runtime mounts the demo only for a valid diagram; invalidation unmounts it and clears stale results.
 - Clear displayed results when the graph changes. Preserve demo state when only switching scenarios.
+- Use `useLanguage` from `shared/language.ts` to render demo text in English and Russian. Keep locale-independent simulation state so changing the language also updates prior results without restarting the demo.
 - Gate timers, animation, and layout/resize effects with `active`. Respect reduced motion and expose outcomes as readable status text.
 - Keep simulation independent of React and do not mutate the graph. Invalid graphs must not produce successful simulation results.
 - Test every meaningful outcome, including safe/unmatched cases, subscription changes, first-match stopping, or other pattern-specific behavior.
@@ -88,7 +88,7 @@ The Observer and Mediator intros share one composition. Future scenarios must pr
 - Give the whole panel a 1px subtle green border (`#aec79d26`), 12px rounded corners, clipped contents, and dark green text-panel background (`#1b2823`). Pad the copy by 32px on wide screens.
 - Keep the copy hierarchy and sizing consistent: uppercase 10px scenario/pattern kicker (`#d2b980`, 1.8px letter spacing); prominent title at `clamp(28px, 3vw, 43px)` and 1.2 line height; small outlined 12px pattern-name pill; story paragraphs at 16px/1.75 in muted green (`#bbc6b6`) with 12px between paragraphs; and a clearly emphasized “Your task” instruction with warm gold emphasis (`#e1c38d`).
 - The image fills a tall portrait region (approximately `aspect-ratio: 0.69`) with `object-fit: contain` over dark green (`#12231c`). Fade the 11px caption into the bottom of the image; do not crop important artwork.
-- Follow the intro with a compact, three-step horizontal strip using a top border and generous spacing, then the lesson workspace. Place the main-idea/concept callout after the interactive lesson content.
+- Follow the intro with a compact, three-step horizontal strip using a top border and generous spacing, then the lesson workspace.
 - At tablet widths (up to 1050px), retain both columns, use a minimum 220px image column, and reduce copy padding to 24px. At widths up to 720px, stack the copy above the illustration, use 24px 20px copy padding, keep the illustration visible at roughly 82% width, reduce the title to 30px and body copy to 14px, and space the steps evenly. Ensure the content does not overflow. Never hide the intro artwork on mobile.
 - Scope intro selectors to the scenario root and intro classes. Match the reference spacing, typography, colors, borders, and responsive breakpoints rather than inventing a new per-pattern card style.
 
@@ -101,13 +101,13 @@ From the learner's point of view, every scenario should feel like another lesson
 ### Workshop navigation and lesson order
 
 - Use the shared app shell for the workshop header, scenario navigation, skip link, and footer. Do not build scenario-specific navigation or duplicate shell elements inside a scenario.
-- Keep each scenario's content in this order: intro panel; three numbered orientation steps; diagram-building workspace; main-idea/concept callout.
+- Place the intro panel and three numbered orientation steps before the diagram-building workspace.
 - Keep the scenario selector and workspace behavior consistent when switching patterns. Each scenario owns its own state; switching scenarios must not unexpectedly clear another scenario's in-memory progress or run effects for a hidden scenario.
 
 ### Workspace layout and controls
 
 - Preserve the same desktop workspace arrangement: builder/tray on the left and diagram board on the right. On narrow screens, stack these regions in a predictable order without hiding lesson functionality.
-- Keep the builder's card-category controls, card list, hint, and solution controls together in the tray. Use consistent labels and interaction patterns for adding classes and assigning fields/methods. Pattern-specific card counts and class names may differ.
+- Keep the builder's card-category controls and card list together in the tray. Use consistent labels and interaction patterns for adding classes and assigning fields and methods. Pattern-specific card counts and class names may differ.
 - Keep the board heading and progress summary at the top of the board. Place `Undo` and `Reset` together in the same location in every scenario; disable `Undo` when there is no undo history.
 - Keep diagram controls attached to the diagram board. Relationship creation, movement, deletion, and other editing operations should use the same discoverable interaction conventions across scenarios.
 - Treat relationship arrows as a core part of the learner experience, not as incidental diagram decoration:
@@ -117,8 +117,8 @@ From the learner's point of view, every scenario should feel like another lesson
   - Make each relationship type visually distinguishable and consistent between its toolbar preview and canvas edge. Follow the established convention: solid line with a closed arrowhead for ordinary relationships; dashed line with an open/hollow arrowhead for `implements`. Put the relationship label on the edge so meaning does not depend on color or arrow shape alone.
   - Keep arrow selection/deletion discoverable: clicking an edge selects it, selected state is visible, and the relationship list gives each edge a labelled remove action. Keyboard deletion must work as well as pointer deletion.
   - Validate expected direction, type, endpoints, and multiplicity. Give targeted feedback for missing, reversed, duplicate, self-referencing, unknown, and extra arrows; keep invalid arrows visible and identifiable so the learner can correct them. Test these cases in the model tests.
-- Keep validation/status feedback immediately after the diagram and before the interactive demo. Keep the demo in the board/workspace flow, after the learner has built and validated the diagram; do not make users search for a scenario-specific location.
-- Keep hints progressive and discoverable, and keep `Show solution` in the builder tray. Loading the solution must be clearly identified as an example/solution state, not as the learner having independently completed the task.
+- Highlight misplaced members and incorrect relationships as they appear on the board. Report completion in the board header and make the demo available when the learner's diagram is valid.
+- Offer a separately labeled, read-only worked example. Preserve the learner's diagram and undo history when they switch between views.
 - Use consistent control labels, disabled/loading/ready states, confirmation behavior for destructive actions, status-message placement, focus behavior, and keyboard support. Do not rename or relocate common controls without a clear usability reason applied consistently to the reference scenarios too.
 
 ### Consistency with room for pattern differences
@@ -164,7 +164,7 @@ Then check in a browser:
 
 - initial state;
 - incomplete and incorrect diagrams;
-- every hint and the solution;
+- the read-only worked example and the return to the learner's diagram;
 - every demo case, including the contrasting case;
 - reset and undo;
 - keyboard use and narrow layout;

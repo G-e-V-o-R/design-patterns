@@ -1,6 +1,6 @@
 # Mediator: Thoughts through the raven
 
-`scenario.json` owns the story, diagram classes and members, directed relationships, hints, positions, and local artwork. The shared configured lesson supplies editing, validation, history, and the worked solution.
+`scenario.json` owns the story, diagram classes and members, directed relationships, positions, and local artwork. The shared configured lesson supplies editing, validation, history, and the worked example.
 
 `Demo.tsx` is discovered automatically and owns the demo result. `RoutingDemo.tsx` renders cover and shelter routes, their method traces, and the six direct connections shown for comparison. Visibility-dependent measurements and animation respect `active`; changing the graph clears stale results.
 

@@ -1,3 +1,4 @@
+import { localize, useLanguage } from './language';
 import type { DragEvent } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { connectionHandles } from './connections';
@@ -17,11 +18,11 @@ export type ClassDiagramCardProps = ClassAppearance & {
   invalidMemberIds?: ReadonlySet<string>;
   showArtwork?: boolean;
   handles?: readonly DiagramHandle[];
-  dragType: string;
-  isDropTarget: boolean;
-  onRemove: () => void;
-  onAssign: (id: string) => void;
-  onDragHover: (hovered: boolean) => void;
+  dragType?: string;
+  isDropTarget?: boolean;
+  onRemove?: () => void;
+  onAssign?: (id: string) => void;
+  onDragHover?: (hovered: boolean) => void;
   draggedMemberId?: string | null;
   onStartMemberDrag?: (event: DragEvent, id: string) => void;
   onEndMemberDrag?: () => void;
@@ -36,8 +37,14 @@ const defaultHandles: readonly DiagramHandle[] = connectionHandles.map(side => (
 const handlePositions = { top: Position.Top, bottom: Position.Bottom, left: Position.Left, right: Position.Right };
 const visibilitySymbols = { public: '+', protected: '#', private: '−' } satisfies Record<MemberVisibility, string>;
 
+const visibilityLabels = {
+  en: { public: 'public', protected: 'protected', private: 'private' },
+  ru: { public: 'открытый доступ', protected: 'защищённый доступ', private: 'закрытый доступ' },
+};
+
 export function ClassDiagramCard(props: ClassDiagramCardProps)
 {
+  const language = useLanguage();
   if (props.variant === 'class')
   {
     requireClassArtwork(props.artwork, props.label);
@@ -45,14 +52,14 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
 
   function handleDragOver(event: DragEvent<HTMLDivElement>)
   {
-    if (!event.dataTransfer.types.includes(props.dragType))
+    if (!props.dragType || !event.dataTransfer.types.includes(props.dragType))
     {
       return;
     }
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = 'move';
-    props.onDragHover(true);
+    props.onDragHover?.(true);
   }
 
   function handleDragLeave(event: DragEvent<HTMLDivElement>)
@@ -61,22 +68,22 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
     {
       return;
     }
-    props.onDragHover(false);
+    props.onDragHover?.(false);
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>)
   {
-    if (!event.dataTransfer.types.includes(props.dragType))
+    if (!props.dragType || !event.dataTransfer.types.includes(props.dragType))
     {
       return;
     }
     event.preventDefault();
     event.stopPropagation();
-    props.onDragHover(false);
+    props.onDragHover?.(false);
     const memberId = event.dataTransfer.getData(props.dragType);
     if (memberId)
     {
-      props.onAssign(memberId);
+      props.onAssign?.(memberId);
     }
     props.onEndMemberDrag?.();
   }
@@ -95,9 +102,11 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
         <Handle key={handle.id ?? handle.side} id={handle.id} type={handle.type} position={handlePositions[handle.side]} />
       ))}
       <header className="pattern-class-title">
-        <small>{props.kind}</small>
+        <small>{language === 'ru' ? (props.variant === 'class' ? 'класс' : 'интерфейс') : props.kind}</small>
         <strong>{props.label}</strong>
-        <button className="nodrag" aria-label={`Remove ${props.label} from diagram`} onClick={props.onRemove}>×</button>
+        {props.onRemove && (
+          <button type="button" className="nodrag" aria-label={localize(language, `Remove ${props.label} from diagram`, `Удалить ${props.label} с диаграммы`)} onClick={props.onRemove}>×</button>
+        )}
       </header>
       {(['field', 'method'] as const).map(kind => (
         <MemberSection key={kind} sectionKind={kind} {...props} />
@@ -118,28 +127,30 @@ export function ClassDiagramCard(props: ClassDiagramCardProps)
 
 function MemberSection({ sectionKind, ...props }: ClassDiagramCardProps & { sectionKind: 'field' | 'method' })
 {
+  const language = useLanguage();
   const members = props.members.filter(member => member.kind === sectionKind);
-  if (sectionKind === 'field' && props.variant === 'interface' && members.length === 0)
+  if (members.length === 0 && (!props.onAssign || (sectionKind === 'field' && props.variant === 'interface')))
   {
     return null;
   }
 
-  const heading = sectionKind === 'field' ? 'Fields' : 'Methods';
+  const heading = sectionKind === 'field' ? localize(language, 'Fields', 'Поля') : localize(language, 'Methods', 'Методы');
   const defaultVisibility = sectionKind === 'field' ? 'private' : 'public';
   return (
     <div className="pattern-class-members">
       <small className="pattern-member-heading">{heading}</small>
-      {members.length === 0 && <p>Assign {sectionKind}s from your cards</p>}
+      {members.length === 0 && <p>{localize(language, `Assign ${sectionKind}s from your cards`,
+        sectionKind === 'field' ? 'Перетащите карточки полей сюда' : 'Перетащите карточки методов сюда')}</p>}
       {members.map(member => (
         <div
           key={member.id}
           className={`pattern-assigned-method nodrag nopan${props.draggedMemberId === member.id ? ' is-dragging' : ''}${props.invalidMemberIds?.has(member.id) ? ' is-invalid' : ''}`}
-          title={props.invalidMemberIds?.has(member.id) ? 'Assigned to the wrong class' : undefined}
+          title={props.invalidMemberIds?.has(member.id) ? localize(language, 'Assigned to the wrong class', 'Назначено другому классу') : undefined}
           draggable={Boolean(props.onStartMemberDrag)}
           onDragStart={event => props.onStartMemberDrag?.(event, member.id)}
           onDragEnd={props.onEndMemberDrag}
         >
-          <span title={member.visibility}>{visibilitySymbols[member.visibility ?? defaultVisibility]}</span>
+          <span title={member.visibility && visibilityLabels[language][member.visibility]}>{visibilitySymbols[member.visibility ?? defaultVisibility]}</span>
           <code>{member.label}</code>
         </div>
       ))}

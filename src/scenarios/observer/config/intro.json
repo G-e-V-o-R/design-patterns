@@ -1,12 +1,18 @@
 {
   "paragraphs": [
-    "Before they enter the forest, Narion shows the group some magic bracelets. “My fox will go ahead and check the path,” he says. “It sends a message when it sees danger. When the path is safe, it keeps looking and sends nothing.”",
-    "“Put on a bracelet to subscribe as an observer,” Narion adds. “Take it off to unsubscribe. The fox will keep checking the path, and everyone who still wears a bracelet will get its messages.”",
+    "Before they enter the forest, Narion shows the group some magic bracelets.",
+    {
+      "text": "“My fox will go ahead and check the path,” he says. “It sends a message when it sees danger. When the path is safe, it keeps looking and sends nothing.”",
+      "image": "shared/resource/portraits/narion.png"
+    },
+    {
+      "text": "“Put on a bracelet to subscribe as an observer,” Narion adds. “Take it off to unsubscribe. The fox will keep checking the path, and everyone who still wears a bracelet will get its messages.”",
+      "image": "shared/resource/portraits/narion.png"
+    },
     "Narion and Dre’Kaar put on their bracelets. Soon, the fox sees danger and sends both of them the same message. Narion plans a safer path. Dre’Kaar gets ready to protect the group. Each person chooses what to do. Later, Narion takes off his bracelet. The next time the fox sees danger, only Dre’Kaar gets its message."
   ],
   "image": "./resource/intro.png",
   "imageAlt": "The fox scouting with Narion in the forest",
   "caption": "One Subject publishes to many Observers",
-  "task": "Build a class diagram where the fox notifies its subscribers through the Observer interface.",
-  "concept": "Subject keeps a list of observers and publishes notifications through notify(). The Observer interface defines update(); each concrete observer implements it and decides what to do with the discovery."
+  "task": "Build a class diagram where the fox notifies its subscribers through the Observer interface."
 }

@@ -6,5 +6,6 @@ export type ScenarioDefinition = {
   number: string;
   title: string;
   pattern: string;
+  russian?: { title: string; pattern: string };
   Component: ComponentType<ScenarioProps>;
 };

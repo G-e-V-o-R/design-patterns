@@ -1,24 +1,32 @@
+type StepDetail = { detail: string; detailRu: string };
+
 abstract class SoupRecipe
 {
   cookSoup()
   {
     return [
-      { method: 'cookMeat()', detail: this.cookMeat() },
-      { method: 'addSeasoning()', detail: this.addSeasoning() },
-      { method: 'addVegetables()', detail: this.addVegetables() },
+      { method: 'cookMeat()', ...this.cookMeat() },
+      { method: 'addSeasoning()', ...this.addSeasoning() },
+      { method: 'addVegetables()', ...this.addVegetables() },
     ] as const;
   }
 
   private cookMeat()
   {
-    return 'The meat goes into cold water and simmers to make the broth.';
+    return {
+      detail: 'The meat goes into cold water and simmers to make the broth.',
+      detailRu: 'Мясо кладут в холодную воду и варят на слабом огне, чтобы получился бульон.',
+    };
   }
 
-  protected abstract addSeasoning(): string;
+  protected abstract addSeasoning(): StepDetail;
 
   private addVegetables()
   {
-    return 'The vegetables are sautéed until golden and stirred into the soup.';
+    return {
+      detail: 'The vegetables are sautéed until golden and stirred into the soup.',
+      detailRu: 'Овощи обжаривают до золотистого цвета и добавляют в суп.',
+    };
   }
 }
 
@@ -26,7 +34,10 @@ class FaelinaRecipe extends SoupRecipe
 {
   protected override addSeasoning()
   {
-    return 'Faelina crushes a clove of garlic and adds it to the broth.';
+    return {
+      detail: 'Faelina crushes a clove of garlic and adds it to the broth.',
+      detailRu: 'Фаэлина раздавливает зубчик чеснока и добавляет его в бульон.',
+    };
   }
 }
 
@@ -34,7 +45,10 @@ class LatveRecipe extends SoupRecipe
 {
   protected override addSeasoning()
   {
-    return 'Latve adds fresh herbs to the broth.';
+    return {
+      detail: 'Latve adds fresh herbs to the broth.',
+      detailRu: 'Латве добавляет в бульон свежую зелень.',
+    };
   }
 }
 
@@ -42,7 +56,10 @@ class DreKaarRecipe extends SoupRecipe
 {
   protected override addSeasoning()
   {
-    return 'Dre’Kaar adds a pinch of smoked pepper to the broth.';
+    return {
+      detail: 'Dre’Kaar adds a pinch of smoked pepper to the broth.',
+      detailRu: 'Дре’Каар добавляет в бульон щепотку копчёного перца.',
+    };
   }
 }
 

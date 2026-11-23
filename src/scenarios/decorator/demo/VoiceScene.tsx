@@ -1,3 +1,4 @@
+import { localize, useLanguage } from '../../shared/language';
 import type { CSSProperties } from 'react';
 import foxAsleep from '../resource/fox-asleep.png?url';
 import foxAwake from '../resource/fox-awake.png?url';
@@ -21,6 +22,7 @@ type Props = {
 
 export default function VoiceScene({ playbackId, selectedEffects, addedEffect, voiceStep, effects }: Props)
 {
+  const language = useLanguage();
   const sleepIndex = selectedEffects.indexOf('sleep');
   const hypnosisIndex = selectedEffects.indexOf('hypnosis');
   const stormIndex = selectedEffects.indexOf('storm');
@@ -49,7 +51,7 @@ export default function VoiceScene({ playbackId, selectedEffects, addedEffect, v
       />
       <div className="decorator-portrait decorator-portrait-latve">
         <span className="decorator-portrait-art"><img src={latve} alt="" draggable={false} /></span>
-        <span className="decorator-portrait-label">Latve</span>
+        <span className="decorator-portrait-label">{localize(language, 'Latve', 'Латве')}</span>
       </div>
       <div className="decorator-jellyfish-stack">
         {selectedEffects.map(effect => (
@@ -65,7 +67,7 @@ export default function VoiceScene({ playbackId, selectedEffects, addedEffect, v
       </div>
       <TargetPortrait
         target="fox"
-        label="Fox"
+        label={localize(language, 'Fox', 'Лиса')}
         before={foxAwake}
         after={foxAsleep}
         effectApplied={sleepIndex >= 0 && sleepIndex < voiceStep}
@@ -73,7 +75,7 @@ export default function VoiceScene({ playbackId, selectedEffects, addedEffect, v
       />
       <TargetPortrait
         target="listener"
-        label="Listener"
+        label={localize(language, 'Listener', 'Слушатель')}
         before={listenerAlert}
         after={listenerHypnotized}
         effectApplied={hypnosisIndex >= 0 && hypnosisIndex < voiceStep}

@@ -1,12 +1,13 @@
+import { localize, useLanguage, type Language } from '../../shared/language';
 import { useEffect, useState } from 'react';
 import foxPortrait from '../resource/fox-card.png?url';
 import narionPortrait from '../../shared/resource/portraits/narion.png?url';
 import dreKaarPortrait from '../../shared/resource/portraits/dre-kaar.png?url';
-import type { DiscoveryResult, ObserverId, Subscriptions } from './demoModel';
+import { describeDiscovery, type DiscoveryResult, type ObserverId, type Subscriptions } from './demoModel';
 
 const subscribers = [
-  { id: 'narion', name: 'Narion', portrait: narionPortrait },
-  { id: 'dre-kaar', name: 'Dre’Kaar', portrait: dreKaarPortrait },
+  { id: 'narion', name: 'Narion', nameRu: 'Нарион', braceletRu: 'Браслет Нариона', portrait: narionPortrait },
+  { id: 'dre-kaar', name: 'Dre’Kaar', nameRu: 'Дре’Каар', braceletRu: 'Браслет Дре’Каара', portrait: dreKaarPortrait },
 ] as const;
 
 type Subscriber = typeof subscribers[number];
@@ -26,18 +27,18 @@ type ObserverDemoProps = {
   run: DemoRun | null;
 };
 
-function getStatus(phase: Phase, result: DiscoveryResult | undefined)
+function getStatus(phase: Phase, result: DiscoveryResult | undefined, language: Language)
 {
   switch (phase)
   {
     case 'checking':
-      return 'The fox checks the path.';
+      return localize(language, 'The fox checks the path.', 'Лиса проверяет путь.');
     case 'sending':
-      return 'Danger ahead! The fox sends the same warning to each subscribed observer.';
+      return localize(language, 'Danger ahead! The fox sends the same warning to each subscribed observer.', 'Впереди опасность! Лиса отправляет одно и то же предупреждение всем подписанным наблюдателям.');
     case 'finished':
       return result?.summary;
     default:
-      return 'Choose what the fox finds. Try switching either bracelet on or off between runs.';
+      return localize(language, 'Choose what the fox finds. Try switching either bracelet on or off between runs.', 'Выберите, что найдёт лиса. Между запусками попробуйте включить или выключить любой браслет.');
   }
 }
 
@@ -68,8 +69,9 @@ function PathControls({ disabled, playing, selection, onRun }: {
   onRun: (danger: boolean) => void;
 })
 {
+  const language = useLanguage();
   return (
-    <div className="observer-paths" role="group" aria-label="What does the fox find?">
+    <div className="observer-paths" role="group" aria-label={localize(language, 'What does the fox find?', 'Что найдёт лиса?')}>
       <button
         type="button"
         data-path="danger"
@@ -78,7 +80,7 @@ function PathControls({ disabled, playing, selection, onRun }: {
         aria-pressed={selection === true}
         onClick={() => onRun(true)}
       >
-        Find danger
+        {localize(language, 'Find danger', 'Найти опасность')}
       </button>
       <button
         type="button"
@@ -88,7 +90,7 @@ function PathControls({ disabled, playing, selection, onRun }: {
         aria-pressed={selection === false}
         onClick={() => onRun(false)}
       >
-        Check a safe path
+        {localize(language, 'Check a safe path', 'Проверить безопасный путь')}
       </button>
     </div>
   );
@@ -96,25 +98,26 @@ function PathControls({ disabled, playing, selection, onRun }: {
 
 function FoxCard({ phase, danger }: { phase: Phase; danger: boolean | undefined })
 {
-  let detail = 'Ready to scout';
+  const language = useLanguage();
+  let detail = localize(language, 'Ready to scout', 'Готова к разведке');
   if (phase === 'checking')
   {
-    detail = 'Checking the path…';
+    detail = localize(language, 'Checking the path…', 'Проверяет путь…');
   }
   else if (phase === 'sending' || (phase === 'finished' && danger))
   {
-    detail = 'Danger ahead!';
+    detail = localize(language, 'Danger ahead!', 'Впереди опасность!');
   }
   else if (phase === 'finished')
   {
-    detail = 'The path is safe';
+    detail = localize(language, 'The path is safe', 'Путь безопасен');
   }
 
   return (
     <article className="observer-fox" data-phase={phase} data-danger={danger}>
       <img src={foxPortrait} alt="" draggable={false} />
       <div>
-        <h3>Fox <span>Subject</span></h3>
+        <h3>{localize(language, 'Fox', 'Лиса')} <span>{localize(language, 'Subject', 'Издатель')}</span></h3>
         <p>{detail}</p>
       </div>
     </article>
@@ -131,15 +134,16 @@ function SubscriberCard({ subscriber, subscribed, delivery, response, disabled, 
   onToggleBracelet: () => void;
 })
 {
+  const language = useLanguage();
   return (
     <article className="observer-person" data-delivery={delivery}>
       <div className="observer-portrait">
         <img src={subscriber.portrait} alt="" draggable={false} />
-        <h3>{subscriber.name}</h3>
+        <h3>{localize(language, subscriber.name, subscriber.nameRu)}</h3>
       </div>
       <div className="observer-person-detail">
         <p className="observer-subscription">
-          {subscribed ? 'Subscribed' : 'Unsubscribed'}
+          {subscribed ? localize(language, 'Subscribed', 'Подписка активна') : localize(language, 'Unsubscribed', 'Подписка отключена')}
         </p>
         <p>{response}</p>
         <button
@@ -150,7 +154,7 @@ function SubscriberCard({ subscriber, subscribed, delivery, response, disabled, 
           aria-pressed={subscribed}
           onClick={onToggleBracelet}
         >
-          {subscriber.name}’s bracelet <span aria-hidden="true">{subscribed ? 'On' : 'Off'}</span>
+          {localize(language, `${subscriber.name}’s bracelet`, subscriber.braceletRu)} <span aria-hidden="true">{subscribed ? localize(language, 'On', 'Вкл.') : localize(language, 'Off', 'Выкл.')}</span>
         </button>
       </div>
     </article>
@@ -159,9 +163,10 @@ function SubscriberCard({ subscriber, subscribed, delivery, response, disabled, 
 
 function DiscoveryTrace({ result }: { result: DiscoveryResult })
 {
+  const language = useLanguage();
   return (
     <details className="observer-trace">
-      <summary>See the method calls</summary>
+      <summary>{localize(language, 'See the method calls', 'Посмотреть вызовы методов')}</summary>
       <ol>
         {result.trace.map(step => <li key={step}>{step}</li>)}
       </ol>
@@ -178,6 +183,7 @@ export function ObserverDemo({
   run,
 }: ObserverDemoProps)
 {
+  const language = useLanguage();
   const [progress, setProgress] = useState<{ run: DemoRun; phase: Phase }>();
   let phase: Phase = 'idle';
   if (run)
@@ -228,7 +234,9 @@ export function ObserverDemo({
     };
   }, [active, phase, run]);
 
-  const result = run?.result;
+  const result = run && language === 'ru'
+    ? describeDiscovery({ danger: run.result.danger, subscriptions }, language)
+    : run?.result;
   const disabled = !ready || !active;
   const playing = phase === 'checking' || phase === 'sending';
 
@@ -250,9 +258,9 @@ export function ObserverDemo({
 
   return (
     <section className="observer-demo" aria-labelledby="observer-demo-heading">
-      <h2 id="observer-demo-heading">Follow the fox’s warning</h2>
-      <p>The fox warns everyone wearing a bracelet when it finds danger.</p>
-      {!ready && <p>Complete the diagram or show the solution to start.</p>}
+      <h2 id="observer-demo-heading">{localize(language, 'Follow the fox’s warning', 'Проследите за предупреждением лисы')}</h2>
+      <p>{localize(language, 'The fox warns everyone wearing a bracelet when it finds danger.', 'Заметив опасность, лиса предупреждает всех, кто носит браслет.')}</p>
+      {!ready && <p>{localize(language, 'Finish your diagram to start.', 'Завершите диаграмму, чтобы начать.')}</p>}
 
       <PathControls disabled={disabled} playing={playing} selection={result?.danger} onRun={choosePath} />
       <div className="observer-scene">
@@ -263,14 +271,14 @@ export function ObserverDemo({
             const subscribed = subscriptions[subscriber.id];
             const receivesMessage = result?.recipients.includes(subscriber.id) ?? false;
             const delivery = getDeliveryState(subscribed, receivesMessage, phase);
-            let response = subscribed ? 'Waiting for a warning.' : 'Bracelet is off.';
+            let response = subscribed ? localize(language, 'Waiting for a warning.', 'Ожидает предупреждения.') : localize(language, 'Bracelet is off.', 'Браслет выключен.');
             if (phase === 'finished' && result)
             {
               response = result.responses[subscriber.id];
             }
             else if (delivery === 'sending')
             {
-              response = 'Warning on the way…';
+              response = localize(language, 'Warning on the way…', 'Предупреждение в пути…');
             }
 
             return (
@@ -293,7 +301,7 @@ export function ObserverDemo({
         </div>
       </div>
 
-      <p className="observer-outcome" role="status">{getStatus(phase, result)}</p>
+      <p className="observer-outcome" role="status">{getStatus(phase, result, language)}</p>
       {phase === 'finished' && result && <DiscoveryTrace result={result} />}
     </section>
   );

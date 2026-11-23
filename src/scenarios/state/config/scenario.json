@@ -4,6 +4,5 @@
   "title": "Hissing under the skin",
   "pattern": "State",
   "intro": "./intro.json",
-  "classes": "./classes.json",
-  "hints": "./hints.json"
+  "classes": "./classes.json"
 }

@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import type { ConfiguredDemoProps } from '../../shared/ConfiguredScenario';
 import type { LessonGraph } from '../../shared/configuredLessonModel';
 import { requireClassArtwork } from '../../shared/classArtwork';
+import { localize, useLanguage, type Language } from '../../shared/language';
 import { config } from '../config/config';
 import dreKaar from '../../shared/resource/portraits/dre-kaar.png?url';
 import latve from '../../shared/resource/portraits/latve-v2.png?url';
 import { createSimulation, type Reaction, type StateId, type StoryEvent, type Transition } from './demoModel';
-import { StateMachine } from './StateMachine';
+import { getStateName, StateMachine } from './StateMachine';
 import './styles.css';
 
 const images = import.meta.glob<string>('../resource/*.png', {
@@ -16,14 +17,22 @@ const images = import.meta.glob<string>('../resource/*.png', {
 });
 
 const events = [
-  { id: 'approach', actor: 'Dre’Kaar', action: 'Approaches', image: dreKaar },
-  { id: 'reassure', actor: 'Latve', action: 'Reassures Jararis', image: latve },
+  { id: 'approach', actor: 'Dre’Kaar', actorRu: 'Дре’Каар', action: 'Approaches', actionRu: 'Приближается', image: dreKaar },
+  { id: 'reassure', actor: 'Latve', actorRu: 'Латве', action: 'Reassures Jararis', actionRu: 'Успокаивает Джарариса', image: latve },
 ] as const;
 
-const reactionText: Record<Reaction, string> = {
-  quiet: 'The snake stays quiet.',
-  hiss: 'The snake gives a warning hiss.',
-  lunge: 'The snake lunges forward.',
+const reactionText = {
+  quiet: { en: 'The snake stays quiet.', ru: 'Змея остаётся спокойной.' },
+  hiss: { en: 'The snake gives a warning hiss.', ru: 'Змея предупреждающе шипит.' },
+  lunge: { en: 'The snake lunges forward.', ru: 'Змея бросается вперёд.' },
+} satisfies Record<Reaction, Record<Language, string>>;
+
+const cardAltRu = {
+  jararis: 'Змея обвилась вокруг плеч Джарариса',
+  snake: 'Змея Джарариса',
+  calm: 'Змея спокойно лежит на плечах Джарариса',
+  wary: 'Змея шипит за спиной настороженного Джарариса у костра',
+  furious: 'Змея с раскрытой пастью бросается вперёд перед разъярённым Джарарисом',
 };
 
 const hopDuration = 420;
@@ -46,14 +55,15 @@ function startSession(graph: LessonGraph): DemoSession
   return { graph, simulation: createSimulation(graph), delivery: null, transition: null, reaction: null };
 }
 
-function getCard(id: 'snake' | 'jararis' | StateId)
+function getCard(id: 'snake' | 'jararis' | StateId, language: Language)
 {
   const card = config.classes.find(entry => entry.id === id);
   if (!card)
   {
     throw new Error(`Missing State class card: ${id}`);
   }
-  return { label: card.label, artwork: requireClassArtwork(card.artwork, card.label) };
+  const artwork = requireClassArtwork(card.artwork, card.label);
+  return { label: card.label, artwork: { ...artwork, alt: localize(language, artwork.alt, cardAltRu[id]) } };
 }
 
 function CallTrace({ event, fromLabel, stateLabel, reaction }: {
@@ -63,22 +73,26 @@ function CallTrace({ event, fromLabel, stateLabel, reaction }: {
   reaction: Reaction | null;
 })
 {
+  const language = useLanguage();
+  const calls = localize(language, 'calls', 'вызывает');
+  const stores = localize(language, 'and stores', 'и сохраняет состояние');
   return (
     <details className="state-trace">
-      <summary>See the method calls</summary>
+      <summary>{localize(language, 'See the method calls', 'Посмотреть вызовы методов')}</summary>
       <ol>
         {event && (
           <>
-            <li><code>Jararis.handle("{event}")</code> calls <code>Snake.handle("{event}")</code>.</li>
+            <li><code>Jararis.handle("{event}")</code> {calls} <code>Snake.handle("{event}")</code>.</li>
             <li>
-              <code>Snake.handle("{event}")</code> asks <code>{fromLabel}.nextState("{event}")</code> and stores <code>{stateLabel}</code>.
+              <code>Snake.handle("{event}")</code> {localize(language, 'asks', 'вызывает')}{' '}
+              <code>{fromLabel}.nextState("{event}")</code> {stores} <code>{stateLabel}</code>.
             </li>
           </>
         )}
         {reaction && (
           <>
-            <li><code>Snake.react()</code> calls <code>{stateLabel}.react()</code>.</li>
-            <li><code>{stateLabel}.react()</code> returns <code>"{reaction}"</code>.</li>
+            <li><code>Snake.react()</code> {calls} <code>{stateLabel}.react()</code>.</li>
+            <li><code>{stateLabel}.react()</code> {localize(language, 'returns', 'возвращает')} <code>"{reaction}"</code>.</li>
           </>
         )}
       </ol>
@@ -93,11 +107,13 @@ function SceneCard({ id, artwork, detail, highlighted }: {
   highlighted: boolean;
 })
 {
+  const language = useLanguage();
+  const caption = localize(language, getCard(id, language).label, id === 'jararis' ? 'Джарарис' : 'Змея');
   return (
     <div className="state-scene-card" data-participant={id} data-highlighted={highlighted}>
       <img src={images[`.${artwork.src}`]} alt={artwork.alt} draggable={false} />
       <span className="state-card-caption">
-        <strong>{getCard(id).label}</strong>
+        <strong>{caption}</strong>
         <span>{detail}</span>
       </span>
     </div>
@@ -106,6 +122,7 @@ function SceneCard({ id, artwork, detail, highlighted }: {
 
 export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 {
+  const language = useLanguage();
   const [savedSession, setSession] = useState(() => startSession(graph));
   let session = savedSession;
   if (savedSession.graph !== graph)
@@ -171,9 +188,10 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
 
   const disabled = !ready || !active;
   const stateId = simulation.snake.stateId;
-  const state = getCard(stateId);
-  const fromLabel = transition ? getCard(transition.from).label : undefined;
-  const snakeArtwork = reaction ? state.artwork : getCard('snake').artwork;
+  const state = getCard(stateId, language);
+  const fromLabel = transition ? getCard(transition.from, language).label : undefined;
+  const stateName = localize(language, state.label, getStateName(stateId, 'ru'));
+  const snakeArtwork = reaction ? state.artwork : getCard('snake', language).artwork;
   const source = events.find(event => event.id === (delivery?.event ?? transition?.event));
 
   function sendEvent(event: StoryEvent)
@@ -192,29 +210,34 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
     }
   }
 
-  let status = 'Choose a character to start.';
+  let status = localize(language, 'Choose a character to start.', 'Выберите персонажа.');
   if (delivery?.phase === 'to-jararis')
   {
-    status = delivery.event === 'approach' ? 'Dre’Kaar approaches Jararis.' : 'Latve reassures Jararis.';
+    status = delivery.event === 'approach'
+      ? localize(language, 'Dre’Kaar approaches Jararis.', 'Дре’Каар подходит к Джарарису.')
+      : localize(language, 'Latve reassures Jararis.', 'Латве успокаивает Джарариса.');
   }
   else if (delivery)
   {
-    status = 'Jararis passes the event to the snake.';
+    status = localize(language, 'Jararis passes the event to the snake.', 'Джарарис передаёт событие змее.');
   }
   else if (transition)
   {
     status = transition.from === transition.to
-      ? `The snake stays in ${state.label}.`
-      : `The snake changes from ${fromLabel} to ${state.label}.`;
+      ? localize(language, `The snake stays in ${state.label}.`, `Змея остаётся в состоянии «${stateName}».`)
+      : localize(language, `The snake changes from ${fromLabel} to ${state.label}.`,
+        `Змея переходит из состояния «${getStateName(transition.from, 'ru')}» в состояние «${stateName}».`);
   }
 
   return (
     <section className="state-demo" aria-labelledby="state-demo-title">
-      <h2 id="state-demo-title">Follow the snake’s bond</h2>
-      <p>Choose a character. Watch their action reach Jararis, then see how the snake’s current state handles it.</p>
+      <h2 id="state-demo-title">{localize(language, 'Follow the snake’s bond', 'Проследите за связью Джарариса и змеи')}</h2>
+      <p>{localize(language,
+        'Choose a character. Watch their action reach Jararis, then see how the snake’s current state handles it.',
+        'Выберите персонажа и посмотрите, как Джарарис передаёт событие змее и как она реагирует в текущем состоянии.')}</p>
 
       <div className="state-scene" data-phase={delivery?.phase}>
-        <div className="state-events" role="group" aria-label="Story events">
+        <div className="state-events" role="group" aria-label={localize(language, 'Story events', 'События истории')}>
           {events.map(event => (
             <button
               key={event.id}
@@ -228,8 +251,8 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
             >
               <img src={event.image} alt="" draggable={false} />
               <span className="state-card-caption">
-                <strong>{event.actor}</strong>
-                <span>{event.action}</span>
+                <strong>{localize(language, event.actor, event.actorRu)}</strong>
+                <span>{localize(language, event.action, event.actionRu)}</span>
               </span>
             </button>
           ))}
@@ -247,22 +270,22 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
         </div>
         <SceneCard
           id="jararis"
-          artwork={getCard('jararis').artwork}
-          detail="Passes the event"
+          artwork={getCard('jararis', language).artwork}
+          detail={localize(language, 'Passes the event', 'Передаёт событие')}
           highlighted={delivery?.phase === 'to-snake'}
         />
         <span className="state-link state-link-snake" data-moving={delivery?.phase === 'to-snake'} aria-hidden="true" />
         <SceneCard
           id="snake"
           artwork={snakeArtwork}
-          detail={state.label}
+          detail={stateName}
           highlighted={Boolean(transition)}
         />
       </div>
 
       <div className="state-outcome" role="status">
         <p>{status}</p>
-        {reaction && <p>{reactionText[reaction]}</p>}
+        {reaction && <p>{reactionText[reaction][language]}</p>}
       </div>
       <StateMachine current={stateId} transition={transition} />
       <div className="state-demo-controls">
@@ -273,7 +296,7 @@ export default function Demo({ graph, ready, active }: ConfiguredDemoProps)
           aria-disabled={Boolean(delivery)}
           onClick={react}
         >
-          Call Snake.react()
+          {localize(language, 'Call Snake.react()', 'Вызвать Snake.react()')}
         </button>
         {(transition || reaction) && (
           <CallTrace event={transition?.event} fromLabel={fromLabel} stateLabel={state.label} reaction={reaction} />

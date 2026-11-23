@@ -1,3 +1,4 @@
+import { localize, useLanguage } from './language';
 import { Panel } from '@xyflow/react';
 import { hasHollowRelationshipMarker, relationshipMarkerId, type RelationshipDefinition } from './relationships';
 
@@ -21,28 +22,29 @@ export function RelationshipTools({
   onSelectRelationship,
 }: RelationshipToolsProps)
 {
-  let drawingStatus = relationships.length ? 'Move cards · choose an arrow to connect' : 'Move cards';
+  const language = useLanguage();
+  let drawingStatus = relationships.length ? localize(language, 'Move cards · choose an arrow to connect', 'Перемещайте карточки или выберите стрелку, чтобы соединить классы') : localize(language, 'Move cards', 'Перемещение карточек');
   if (drawing && connectionSource)
   {
-    drawingStatus = `From ${classLabel(connectionSource)}: click the second class`;
+    drawingStatus = localize(language, `From ${classLabel(connectionSource)}: click the second class`, `Первый класс: ${classLabel(connectionSource)}. Нажмите на второй класс`);
   }
   else if (drawing)
   {
-    drawingStatus = 'Click the first class, then the second class';
+    drawingStatus = localize(language, 'Click the first class, then the second class', 'Нажмите на первый класс, затем на второй');
   }
 
   return (
     <Panel position="bottom-left" className="pattern-arrow-tools nodrag nopan">
-      <div role="group" aria-label="Relationship drawing tools">
-        <button type="button" aria-pressed={!drawing} title="Move cards (Escape)" onClick={onMoveMode}>
-          ↖ <span>Move</span>
+      <div role="group" aria-label={localize(language, 'Relationship drawing tools', 'Инструменты для построения связей')}>
+        <button type="button" aria-pressed={!drawing} title={localize(language, 'Move cards (Escape)', 'Перемещать карточки (Esc)')} onClick={onMoveMode}>
+          ↖ <span>{localize(language, 'Move', 'Перемещение')}</span>
         </button>
         {relationships.map(kind => (
           <button
             key={kind.id}
             type="button"
-            aria-label={`Draw ${kind.label}`}
-            title={`Draw ${kind.label}`}
+            aria-label={localize(language, `Draw ${kind.label}`, `Нарисовать связь «${kind.label}»`)}
+            title={localize(language, `Draw ${kind.label}`, `Нарисовать связь «${kind.label}»`)}
             aria-pressed={drawing && relationship === kind.id}
             onClick={() => onSelectRelationship(kind.id)}
           >

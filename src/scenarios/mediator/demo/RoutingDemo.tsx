@@ -1,3 +1,4 @@
+import { localize, useLanguage, type Language } from '../../shared/language';
 import {
   useEffect,
   useId,
@@ -5,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { classLabel, type CoordinationResult, type RequestKind } from './demoModel';
+import { classLabel, describeCoordination, type CoordinationResult, type RequestKind } from './demoModel';
 import { actorArtwork, type ActorId } from './demoArtwork';
 
 type Phase = 'idle' | 'sending' | 'routing' | 'forwarding' | 'delivered';
@@ -19,13 +20,22 @@ const playbackSteps = [
 ] as const;
 
 const participants = {
-  'dre-kaar': 'Requests cover',
-  faelina: 'Requests shelter',
-  narion: 'Provides covering fire',
-  saerenn: 'Guides the group to shelter',
+  'dre-kaar': { nameRu: 'Дре’Каар', description: { en: 'Requests cover', ru: 'Просит о прикрытии' } },
+  faelina: { nameRu: 'Фаэлина', description: { en: 'Requests shelter', ru: 'Просит об укрытии' } },
+  narion: { nameRu: 'Нарион', description: { en: 'Provides covering fire', ru: 'Прикрывает огнём' } },
+  saerenn: { nameRu: 'Саэренн', description: { en: 'Guides the group to shelter', ru: 'Ведёт отряд в укрытие' } },
 };
 
 type ParticipantId = keyof typeof participants;
+
+function actorName(id: ActorId, language: Language)
+{
+  if (id === 'raven')
+  {
+    return localize(language, 'Raven', 'Ворон');
+  }
+  return localize(language, classLabel(id), participants[id].nameRu);
+}
 
 const senders: ParticipantId[] = ['dre-kaar', 'faelina'];
 
@@ -38,6 +48,7 @@ type MediatorDemoProps = {
 
 export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps)
 {
+  const language = useLanguage();
   const [animationKey, setAnimationKey] = useState(0);
   const [playback, setPlayback] = useState<{ run: number; phase: Phase } | null>(null);
   const [showDirectMesh, setShowDirectMesh] = useState(false);
@@ -59,6 +70,7 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
     return () => motionPreference.removeEventListener('change', updateMotionPreference);
   }, [active]);
 
+  const presentation = result && language === 'ru' ? describeCoordination(result.request, language) : result;
   let phase: Phase = 'idle';
   if (result)
   {
@@ -99,8 +111,8 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
     <section className="med-demo" aria-labelledby="mediator-demo-heading">
       <header className="med-header">
         <div>
-          <h2 id="mediator-demo-heading">Through the raven</h2>
-          <p>Send a thought. Raven decides which companion can help.</p>
+          <h2 id="mediator-demo-heading">{localize(language, 'Through the raven', 'Через Ворона')}</h2>
+          <p>{localize(language, 'Send a thought. Raven decides which companion can help.', 'Отправьте мысленное сообщение. Ворон решит, кто из спутников может помочь.')}</p>
         </div>
         <button
           type="button"
@@ -108,13 +120,13 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
           aria-pressed={showDirectMesh}
           onClick={() => setShowDirectMesh(current => !current)}
         >
-          Direct connections
+          {localize(language, 'Direct connections', 'Прямые связи')}
         </button>
       </header>
 
       {!ready && (
         <p className="med-notice">
-          Complete the diagram, or show the solution, to try both requests.
+          {localize(language, 'Finish your diagram to try both requests.', 'Завершите диаграмму, чтобы попробовать оба запроса.')}
         </p>
       )}
 
@@ -122,11 +134,11 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
         ? <DirectConnectionsScene active={active} />
         : (
           <>
-            <div className="med-actions" role="group" aria-label="Send a request">
+            <div className="med-actions" role="group" aria-label={localize(language, 'Send a request', 'Отправить запрос')}>
               <RequestButton
                 request="cover"
                 sender="dre-kaar"
-                label="Request cover"
+                label={localize(language, 'Request cover', 'Попросить прикрытие')}
                 selected={result?.request === 'cover'}
                 disabled={!ready || !active}
                 onRun={runRequest}
@@ -134,7 +146,7 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
               <RequestButton
                 request="shelter"
                 sender="faelina"
-                label="Request shelter"
+                label={localize(language, 'Request shelter', 'Попросить укрытие')}
                 selected={result?.request === 'shelter'}
                 disabled={!ready || !active}
                 onRun={runRequest}
@@ -142,13 +154,13 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
             </div>
 
             <ActorScene result={result} phase={phase} active={active} animationKey={animationKey} />
-            <DispatchStatus result={result} phase={phase} />
+            <DispatchStatus result={presentation} phase={phase} />
 
             {result && (
               <details className="med-trace">
-                <summary>See the method calls</summary>
+                <summary>{localize(language, 'See the method calls', 'Посмотреть вызовы методов')}</summary>
                 <ol>
-                  {result.trace.map(step => <li key={step}>{step}</li>)}
+                  {result.trace.map((step, index) => <li key={step}>{presentation?.trace[index]}</li>)}
                 </ol>
               </details>
             )}
@@ -156,8 +168,11 @@ export function MediatorDemo({ ready, active, result, onRun }: MediatorDemoProps
         )}
 
       <p className="med-comparison">
-        Observer shares an event with active subscribers. Here, Mediator
-        coordinates a particular request and chooses the recipient.
+        {localize(
+          language,
+          'Observer shares an event with active subscribers. Here, Mediator coordinates a particular request and chooses the recipient.',
+          'Наблюдатель сообщает о событии всем активным подписчикам. Здесь посредник обрабатывает конкретный запрос и выбирает его получателя.',
+        )}
       </p>
     </section>
   );
@@ -172,6 +187,7 @@ function RequestButton({ request, sender, label, selected, disabled, onRun }: {
   onRun: (request: RequestKind) => void;
 })
 {
+  const language = useLanguage();
   return (
     <button
       type="button"
@@ -182,28 +198,50 @@ function RequestButton({ request, sender, label, selected, disabled, onRun }: {
     >
       <img src={actorArtwork(sender).src} alt="" />
       <span>
-        <small>{classLabel(sender)}</small>
+        <small>{actorName(sender, language)}</small>
         <strong>{label}</strong>
       </span>
     </button>
   );
 }
 
+const dispatchSteps = [
+  { en: 'Request sent', ru: 'Запрос отправлен' },
+  { en: 'Raven routes', ru: 'Ворон выбирает адресата' },
+  { en: 'Response delivered', ru: 'Ответ получен' },
+] as const;
+
 function DispatchStatus({ result, phase }: { result: CoordinationResult | null; phase: Phase })
 {
-  let status = 'Choose a request to see who Raven calls on.';
+  const language = useLanguage();
+  let status = localize(language, 'Choose a request to see who Raven calls on.', 'Выберите запрос, чтобы увидеть, к кому обратится Ворон.');
   if (result)
   {
+    const isCover = result.request === 'cover';
+    const requestName = isCover ? 'прикрытие' : 'укрытие';
+    const recipientName = isCover ? 'Нариону' : 'Саэренн';
     switch (phase)
     {
       case 'sending':
-        status = `${classLabel(result.sender)} sends a request for ${result.request}.`;
+        status = localize(
+          language,
+          `${classLabel(result.sender)} sends a request for ${result.request}.`,
+          isCover ? 'Дре’Каар просит Ворона о прикрытии.' : 'Фаэлина просит Ворона найти укрытие.',
+        );
         break;
       case 'routing':
-        status = `Raven checks who can provide ${result.request}.`;
+        status = localize(
+          language,
+          `Raven checks who can provide ${result.request}.`,
+          `Ворон выясняет, кто может обеспечить ${requestName}.`,
+        );
         break;
       case 'forwarding':
-        status = `Raven forwards the request to ${classLabel(result.recipient)}.`;
+        status = localize(
+          language,
+          `Raven forwards the request to ${classLabel(result.recipient)}.`,
+          `Ворон передаёт запрос ${recipientName}.`,
+        );
         break;
       case 'delivered':
         status = result.summary;
@@ -227,14 +265,14 @@ function DispatchStatus({ result, phase }: { result: CoordinationResult | null; 
 
   return (
     <div className="med-dispatch">
-      <ol className="med-dispatch-steps" aria-label="Request progress">
-        {['Request sent', 'Raven routes', 'Response delivered'].map((label, index) => (
+      <ol className="med-dispatch-steps" aria-label={localize(language, 'Request progress', 'Ход запроса')}>
+        {dispatchSteps.map((label, index) => (
           <li
-            key={label}
+            key={label.en}
             aria-current={index === currentStep ? 'step' : undefined}
             data-complete={index < currentStep}
           >
-            {label}
+            {label[language]}
           </li>
         ))}
       </ol>
@@ -254,6 +292,7 @@ const directConnections: [ParticipantId, ParticipantId][] = [
 
 function DirectConnectionsScene({ active }: { active: boolean })
 {
+  const language = useLanguage();
   const arrowMarkerId = useId();
   const sceneRef = useRef<HTMLDivElement>(null);
   const actorRefs = useRef<Record<ParticipantId, HTMLElement | null>>({
@@ -310,7 +349,7 @@ function DirectConnectionsScene({ active }: { active: boolean })
     const resizeObserver = new ResizeObserver(updateLinks);
     resizeObserver.observe(scene);
     return () => resizeObserver.disconnect();
-  }, [active]);
+  }, [active, language]);
 
   return (
     <section
@@ -318,13 +357,13 @@ function DirectConnectionsScene({ active }: { active: boolean })
       aria-labelledby="med-direct-heading"
     >
       <header>
-        <h3 id="med-direct-heading">Everyone must coordinate with everyone</h3>
-        <p>Each companion must coordinate directly with the other three.</p>
+        <h3 id="med-direct-heading">{localize(language, 'Everyone must coordinate with everyone', 'Каждый связывается с каждым')}</h3>
+        <p>{localize(language, 'Each companion must coordinate directly with the other three.', 'Каждому спутнику нужно договариваться напрямую с тремя остальными.')}</p>
       </header>
       <div
         className="med-direct-scene"
         ref={sceneRef}
-        aria-label="Four companions with six bidirectional connections"
+        aria-label={localize(language, 'Four companions with six bidirectional connections', 'Четыре спутника и шесть двусторонних связей между ними')}
       >
         {links.length > 0 && (
           <svg
@@ -356,11 +395,11 @@ function DirectConnectionsScene({ active }: { active: boolean })
             ))}
           </svg>
         )}
-        {Object.entries(participants).map(([id, description]) => (
+        {Object.entries(participants).map(([id, { description }]) => (
           <ActorCard
             key={id}
             id={id as ParticipantId}
-            description={description}
+            description={description[language]}
             actorRef={element =>
             {
               actorRefs.current[id as ParticipantId] = element;
@@ -369,7 +408,7 @@ function DirectConnectionsScene({ active }: { active: boolean })
         ))}
       </div>
       <p className="med-direct-summary" role="status" aria-live="polite">
-        Twelve arrows show the message directions across six direct connections.
+        {localize(language, 'Twelve arrows show the message directions across six direct connections.', 'Двенадцать стрелок показывают направления сообщений по шести прямым связям.')}
       </p>
     </section>
   );
@@ -384,6 +423,7 @@ function ActorScene({ result, phase, active, animationKey }: {
   animationKey: number;
 })
 {
+  const language = useLanguage();
   const markerId = useId();
   const sceneRef = useRef<HTMLDivElement>(null);
   const actorRefs = useRef<Partial<Record<ActorId, HTMLElement | null>>>({});
@@ -456,11 +496,11 @@ function ActorScene({ result, phase, active, animationKey }: {
   return (
     <div className="med-board" data-request={result?.request} data-phase={phase}>
       <div className="med-board-labels" aria-hidden="true">
-        <span>Requests</span>
-        <span>Mediator</span>
-        <span>Responses</span>
+        <span>{localize(language, 'Requests', 'Запросы')}</span>
+        <span>{localize(language, 'Mediator', 'Посредник')}</span>
+        <span>{localize(language, 'Responses', 'Ответы')}</span>
       </div>
-      <div className="med-actor-scene" aria-label="Raven and the four companions" ref={sceneRef}>
+      <div className="med-actor-scene" aria-label={localize(language, 'Raven and the four companions', 'Ворон и четыре спутника')} ref={sceneRef}>
         {geometry && (
           <svg className="med-message-route" viewBox={geometry.viewBox} aria-hidden="true">
             <defs>
@@ -506,7 +546,7 @@ function ActorScene({ result, phase, active, animationKey }: {
             <ActorCard
               key={id}
               id={id}
-              description={participants[id]}
+              description={participants[id].description[language]}
               role={role}
               dimmed={Boolean(result) && id !== result?.sender && id !== result?.recipient}
               actorRef={element => { actorRefs.current[id] = element; }}
@@ -515,7 +555,7 @@ function ActorScene({ result, phase, active, animationKey }: {
         })}
         <ActorCard
           id="raven"
-          description="Chooses who responds"
+          description={localize(language, 'Chooses who responds', 'Выбирает, кто ответит')}
           actorRef={element => { actorRefs.current.raven = element; }}
         />
         {packetVisible && geometry && (
@@ -601,7 +641,8 @@ function ActorCard({ id, description, role, dimmed = false, actorRef }: {
   actorRef: (element: HTMLElement | null) => void;
 })
 {
-  const artwork = actorArtwork(id);
+  const language = useLanguage();
+  const artwork = actorArtwork(id, language);
   const isRaven = id === 'raven';
 
   return (
@@ -613,7 +654,7 @@ function ActorCard({ id, description, role, dimmed = false, actorRef }: {
     >
       <img src={artwork.src} alt={artwork.alt} />
       <div className="med-actor-copy">
-        <h3>{isRaven ? 'Raven' : classLabel(id)}</h3>
+        <h3>{actorName(id, language)}</h3>
         <p>{isRaven ? <code>RavenMediator</code> : description}</p>
         {isRaven && <p>{description}</p>}
       </div>

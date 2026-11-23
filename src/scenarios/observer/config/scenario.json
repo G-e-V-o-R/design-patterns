@@ -5,6 +5,5 @@
   "pattern": "Observer",
   "intro": "./intro.json",
   "classes": "./classes.json",
-  "relationshipTypes": "./relationships.json",
-  "hints": "./hints.json"
+  "relationshipTypes": "./relationships.json"
 }

@@ -1,0 +1,96 @@
+.strategy-demo {
+  margin: 0 8px 20px;
+  padding: clamp(12px, 3vw, 24px);
+  border: 1px solid #829d7055;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at top, #2a4030, #12221b 70%);
+  color: #edf0e6;
+}
+
+.strategy-demo h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.strategy-demo header p {
+  margin: 0 0 18px;
+  color: #c1cfbe;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.strategy-demo .strategy-masks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 510px;
+  margin: 0 auto 16px;
+}
+
+.strategy-demo button {
+  min-height: 44px;
+  border: 1px solid #769483;
+  border-radius: 8px;
+  background: #243a2f;
+  color: #edf4e4;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.strategy-demo button:hover:enabled,
+.strategy-demo button[aria-pressed="true"] {
+  border-color: #f0cf8b;
+  box-shadow: inset 0 0 0 1px #f0cf8b;
+  color: #ffe1a9;
+}
+
+.strategy-demo button:focus-visible {
+  outline: 2px solid #fff1bd;
+  outline-offset: 3px;
+}
+
+.strategy-demo button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.strategy-demo .strategy-masks button {
+  display: grid;
+  gap: 6px;
+  padding: 4px 4px 8px;
+}
+
+.strategy-demo .strategy-masks img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  object-fit: cover;
+  object-position: center 29%;
+}
+
+.strategy-demo .strategy-encounter {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.strategy-demo .strategy-encounter button {
+  padding: 8px 24px;
+  border-color: #b39260;
+  background: #463625;
+  color: #ffe1a9;
+}
+
+.strategy-demo .strategy-encounter p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.strategy-demo .strategy-encounter code {
+  color: #e1c38d;
+  overflow-wrap: anywhere;
+}

@@ -1,13 +1,14 @@
 {
   "paragraphs": [
-    "Faelina opens a bundle of white silk. Inside are three spiders, each marked with a different sign. One senses the blood of orcs. Another recognizes goblin footsteps. The third detects the foul stench of trolls. A harmless traveller should pass without waking the trap.",
-    "She links them with a silk thread. A signal enters the chain, and each spider makes one decision: handle it, or pass it to the next spider. The first match acts and stops the request. If none match, the chain ends quietly. Faelina sends the signal without choosing its handler."
+    "Under Narion’s cover, Saerenn leads the companions out of the ambush. They press on through the forest, but soon hear branches snapping behind them. The orcs have picked up their trail.",
+    "Faelina pauses and holds out her hand. Out of her sleeve crawls the little white spider we’ve seen before. It spins webs along the trail. Faelina has long been friends with spiders. On each web she leaves three venomous spiders and links them with a silk thread. The red-marked spider can smell orc blood, the blue-marked one recognizes goblin footsteps, and the one with the pale round spot knows the stench of trolls.",
+    "With the traps in place, Faelina catches up with the others and they press on. When a creature passes beneath a web, a signal runs along the silk to the first spider. If it recognizes its prey, it stops the signal, lowers itself on a thread, delivers a venomous bite, and climbs back up. Otherwise, it passes the signal to the next spider. If all three let the signal pass, the traveller walks on unharmed.",
+    "When the orcs come down the trail, the red-marked spiders catch the scent of orc blood. They drop from their webs, and the pursuers fall one by one. By the time the forest falls quiet again, the companions are already far ahead."
   ],
   "image": "./resource/intro.png",
   "imageAlt": "Faelina preparing a silk-thread trap with spiders in the forest",
   "caption": "One signal → one chain → the first matching handler",
   "task": "Build IHandler, the EnemyHandler base class, and the three concrete handlers. Connect SilkThread to IHandler with a uses arrow. Then connect the concrete handlers in this order: OrcHandler → GoblinHandler → TrollHandler.",
-  "concept": "A sender passes a request into a chain without choosing its receiver. Each handler either handles the request or forwards it to its next handler. In this example, the first match stops the chain; an unmatched request reaches the end without action.",
   "steps": [
     "Add classes and assign members",
     "Connect class relationships and the request path",
