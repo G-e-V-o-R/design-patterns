@@ -1,19 +1,20 @@
 {
   "paragraphs": [
-    "At dusk, the companions found a dead troll in the village square. Narion knelt beside it. There wasn’t a single wound. A fighter in a bear mask stood nearby.",
+    "The companions finally reached the first settlement on their route at sunset. There was supposed to be a small human village here. The last light fell on caved-in roofs and blackened walls, and the wind swept ash down the empty street.",
+    "In the village square, the companions found a dead troll. Narion knelt beside it. There wasn’t a single wound. A fighter in a bear mask stood nearby.",
     {
-      "text": "“I wore this one when the troll came for me,” he said, lifting a green serpent mask from his belt. “Its shadow coiled around him and stole his breath.”",
+      "text": "“I wore this one when the troll came for me,” he said, lifting a green snake mask from his belt. “Its shadow coiled around him and stole his breath.”",
       "image": "./resource/bear-mask.png",
       "imageFraming": 20
     },
-    "Another troll charged out of the ruined smithy. Still wearing the bear mask, the fighter met the charge head-on. The impact shook loose the roof tiles. Step by step, he drove the troll back into the smithy.",
-    "The troll vanished into the dark. The fighter chose an owl mask and waited in the doorway. When the troll moved again, he spotted an opening and struck.",
+    "Another troll charged out of the ruined smithy. Still wearing the bear mask, the fighter met the charge head-on. The impact shook loose the roof tiles. Step by step, he drove the troll back into the smithy. Before it vanished inside, the troll gashed his shoulder.",
+    "An orc with an axe stepped out of an alley and into the square. With his shoulder wounded, the fighter had little chance in another head-on fight. He feigned a retreat and lured the orc into a dark storehouse. Inside, he swapped the bear mask for the owl mask. The orc felt his way along the wall. The fighter could see his every move. He waited for an opening and struck.",
     "What design pattern lets the same fighter choose a different way to fight simply by swapping masks?"
   ],
-  "image": "./resource/mask-bearer-and-fallen-troll.png",
+  "image": "./resource/mask-warrior-and-fallen-troll.png",
   "imageAlt": "A bear-masked warrior stands beside a fallen troll in a ruined village.",
-  "caption": "The mask bearer in the village square",
-  "task": "Build a class diagram where MaskBearer can equip any CombatStrategy and delegate the same fight action to the equipped mask.",
+  "caption": "The masked warrior in the village square",
+  "task": "Build a class diagram where MaskWarrior can equip any CombatStrategy and delegate the same fight action to the equipped mask.",
   "steps": [
     "Add classes and assign members",
     "Connect the diagram",

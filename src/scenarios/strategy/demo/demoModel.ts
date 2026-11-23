@@ -9,18 +9,18 @@ type CombatStrategy = {
 const masks = {
   bear: {
     fight: language => localize(language,
-      'The bearer meets the charge head-on and drives the troll back.',
+      'The warrior meets the charge head-on and drives the troll back.',
       'Воин встречает тролля лицом к лицу и оттесняет его назад.'),
   },
-  serpent: {
+  snake: {
     fight: language => localize(language,
-      'A serpent-shaped shadow coils around the troll and holds it fast.',
+      'A snake-shaped shadow coils around the troll and holds it fast.',
       'Змеиная тень обвивается вокруг тролля и крепко сковывает его.'),
   },
   owl: {
     fight: language => localize(language,
-      'The bearer tracks the troll in the dark and strikes when its guard drops.',
-      'Воин следит за троллем в темноте и наносит удар, когда тот теряет бдительность.'),
+      'The owl mask lets the warrior see in the dark. He tracks the orc and strikes when its guard drops.',
+      'Совиная маска позволяет воину видеть в темноте. Он следит за орком и бьёт, когда тот открывается.'),
   },
 } satisfies Record<string, CombatStrategy>;
 

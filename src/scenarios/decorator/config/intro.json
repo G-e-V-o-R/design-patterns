@@ -1,18 +1,18 @@
 {
   "category": "STRUCTURAL PATTERN",
   "paragraphs": [
-    "Latve looks down at the old tower.",
+    "The companions follow a path above the sea. Below them, waves break against the rocks at the foot of an old tower. Latve grew up by the sea, and she stops for a moment to watch the water.",
     {
-      "text": "“Will you destroy it?” Dre’Kaar asks.",
+      "text": "Dre’Kaar comes to stand beside her. “I’ve heard about your magic jellyfish. They say you can bring down a tower with your voice, or put someone to sleep, or send them into a trance. How does that work?”",
       "image": "shared/resource/portraits/dre-kaar.png"
     },
     {
-      "text": "“It’ll make my voice louder,” Latve says. “I can use my voice as a weapon.”",
+      "text": "“It starts with the voice,” Latve replies. “I speak as usual. If I have a jellyfish with me, its magic reaches you along with my words.”",
       "image": "shared/resource/portraits/latve-v2.png"
     },
-    "A jellyfish rests on her shoulder. One kind puts listeners to sleep, another hypnotizes them, and a third summons a storm. Latve can layer several jellyfish around the same voice.",
+    "A jellyfish on her shoulder stirs in the sea breeze. Its tentacles give off a faint glow.",
     {
-      "text": "“It starts with the voice. It all depends on what you wrap it in,” says Latve.",
+      "text": "“One kind puts you to sleep, another sends you into a trance, and a third calls up a storm,” Latve explains. “I can wrap my voice in more than one at a time. I say the words once, and each jellyfish adds its own effect.”",
       "image": "shared/resource/portraits/latve-v2.png"
     },
     "How can Latve combine the effects and still speak through the same interface?"

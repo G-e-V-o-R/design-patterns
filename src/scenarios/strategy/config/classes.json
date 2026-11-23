@@ -1,10 +1,10 @@
 [
   {
-    "id": "mask-bearer",
-    "label": "MaskBearer",
+    "id": "mask-warrior",
+    "label": "MaskWarrior",
     "kind": "class",
     "description": "The fighter who chooses a mask at runtime and delegates combat to it.",
-    "image": "./resource/mask-bearer-and-fallen-troll.png",
+    "image": "./resource/mask-warrior-and-fallen-troll.png",
     "imageAlt": "A warrior wearing a bear mask and carrying other masks at his belt.",
     "imageFraming": 23,
     "position": { "x": 0, "y": 0 },
@@ -23,7 +23,7 @@
         "description": "Replace the equipped strategy with the chosen mask."
       },
       {
-        "id": "bearer-fight",
+        "id": "warrior-fight",
         "label": "fight() · delegate",
         "description": "Call fight() on the equipped strategy."
       }
@@ -72,19 +72,19 @@
     ]
   },
   {
-    "id": "serpent-mask",
-    "label": "SerpentMask",
+    "id": "snake-mask",
+    "label": "SnakeMask",
     "kind": "class",
-    "description": "Summons a serpent-shaped shadow to bind the troll.",
-    "image": "./resource/serpent-mask.png",
-    "imageAlt": "A green serpent mask with scales and an open mouth.",
+    "description": "Summons a snake-shaped shadow to bind the troll.",
+    "image": "./resource/snake-mask.png",
+    "imageAlt": "A green snake mask with scales and an open mouth.",
     "imageFraming": 42,
     "position": { "x": 390, "y": 650 },
     "solutionPosition": { "x": 350, "y": 410 },
     "fields": [],
     "methods": [
       {
-        "id": "serpent-fight",
+        "id": "snake-fight",
         "label": "fight() · bind",
         "description": "Summon a shadow that coils around the troll and holds it fast."
       }
@@ -97,7 +97,7 @@
     "id": "owl-mask",
     "label": "OwlMask",
     "kind": "class",
-    "description": "Watches for an opening, even in the dark.",
+    "description": "Lets the fighter see in the dark and wait for an opening.",
     "image": "./resource/owl-mask.png",
     "imageAlt": "A carved owl mask with a long beak and wide eyeholes.",
     "imageFraming": 40,
@@ -108,7 +108,7 @@
       {
         "id": "owl-fight",
         "label": "fight() · watch and strike",
-        "description": "Track the troll’s movements and strike when its guard drops."
+        "description": "Track the orc’s movements in the dark and strike when its guard drops."
       }
     ],
     "relationships": [

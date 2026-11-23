@@ -65,10 +65,164 @@
 .strategy-demo .strategy-masks img {
   display: block;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1.55;
   border-radius: 4px;
   object-fit: cover;
-  object-position: center 29%;
+  object-position: center 35%;
+}
+
+.strategy-demo .strategy-fight-button {
+  display: block;
+  margin: 0 auto 12px;
+  padding: 8px 24px;
+  border-color: #b39260;
+  background: #463625;
+  color: #ffe1a9;
+}
+
+.strategy-demo .strategy-arena {
+  --strategy-accent: #c3af83;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin: 0 auto 16px;
+  border: 1px solid #829d7055;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at 50% 92%, #4b4934, #17221d 56%, #0c1713);
+}
+
+.strategy-demo .strategy-ready-scene {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 25%));
+  align-content: center;
+  justify-content: center;
+  gap: clamp(20px, 10vw, 104px);
+}
+
+.strategy-demo .strategy-arena[data-mask="bear"] {
+  --strategy-accent: #edbd72;
+}
+
+.strategy-demo .strategy-arena[data-mask="snake"] {
+  --strategy-accent: #b8de89;
+}
+
+.strategy-demo .strategy-arena[data-mask="owl"] {
+  --strategy-accent: #bbc9f3;
+  background: radial-gradient(ellipse at 50% 92%, #364153, #151e29 56%, #0c121b);
+}
+
+.strategy-demo .strategy-fighter {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.strategy-demo .strategy-portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--strategy-accent);
+  border-radius: 9px;
+  background: #141813;
+  box-shadow: 0 12px 28px #090c0aac;
+}
+
+.strategy-demo .strategy-opponent .strategy-portrait {
+  border-color: #8c806b;
+}
+
+.strategy-demo .strategy-character {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: center 23%;
+}
+
+.strategy-demo .strategy-equipped-mask {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  width: 34%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center 36%;
+  border: 1px solid var(--strategy-accent);
+  border-radius: 50%;
+  box-shadow: 0 3px 14px #080b09;
+}
+
+.strategy-demo .strategy-fighter figcaption {
+  margin-top: 10px;
+  color: #e4e8dc;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.strategy-demo .strategy-fight-scene {
+  border-color: var(--strategy-accent);
+}
+
+.strategy-demo .strategy-fight-scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.strategy-demo .strategy-fight-scene[data-playing="true"][data-mask="bear"] img {
+  animation: strategy-bear-impact 950ms ease-out;
+}
+
+.strategy-demo .strategy-fight-scene[data-playing="true"][data-mask="snake"] img {
+  animation: strategy-snake-reveal 1150ms ease-out;
+}
+
+.strategy-demo .strategy-fight-scene[data-playing="true"][data-mask="owl"] img {
+  animation: strategy-owl-reveal 950ms ease-out;
+}
+
+@keyframes strategy-bear-impact {
+  0% {
+    opacity: 0.55;
+    transform: scale(1.1) translateX(-1%);
+  }
+
+  20% {
+    transform: scale(1.08) translateX(1%);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1.04) translateX(-0.4%);
+  }
+}
+
+@keyframes strategy-snake-reveal {
+  0% {
+    opacity: 0.45;
+    transform: scale(1.055);
+  }
+
+  55% {
+    opacity: 1;
+  }
+}
+
+@keyframes strategy-owl-reveal {
+  0% {
+    opacity: 0.6;
+    transform: scale(1.07) translateX(-2%);
+  }
+
+  32% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
 }
 
 .strategy-demo .strategy-encounter {
@@ -76,13 +230,6 @@
   justify-items: center;
   gap: 8px;
   text-align: center;
-}
-
-.strategy-demo .strategy-encounter button {
-  padding: 8px 24px;
-  border-color: #b39260;
-  background: #463625;
-  color: #ffe1a9;
 }
 
 .strategy-demo .strategy-encounter p {
@@ -93,4 +240,10 @@
 .strategy-demo .strategy-encounter code {
   color: #e1c38d;
   overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strategy-demo .strategy-fight-scene[data-playing="true"][data-mask] img {
+    animation: none;
+  }
 }
