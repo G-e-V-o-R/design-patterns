@@ -1,0 +1,8 @@
+{
+  "id": "adapter",
+  "number": "15",
+  "title": "Speak and Be Understood",
+  "pattern": "Adapter",
+  "intro": "./intro.json",
+  "classes": "./classes.json"
+}

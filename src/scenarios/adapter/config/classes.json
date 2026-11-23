@@ -1,0 +1,90 @@
+[
+  {
+    "id": "elder",
+    "label": "Elder",
+    "kind": "class",
+    "description": "The listener who expects speech in a language he understands.",
+    "image": "./resource/15.3.png",
+    "imageAlt": "A gray-bearded old man reads from an open book.",
+    "imageFraming": 30,
+    "position": { "x": 0, "y": 0 },
+    "solutionPosition": { "x": 0, "y": 0, "anchorY": "center" },
+    "fields": [],
+    "methods": [
+      {
+        "id": "elder-listen",
+        "label": "listen(speaker: HumanSpeech): string",
+        "description": "Call hear() through the interface and receive the words in the human language."
+      }
+    ],
+    "relationships": [
+      { "type": "uses", "target": "human-speech" }
+    ]
+  },
+  {
+    "id": "human-speech",
+    "label": "HumanSpeech",
+    "kind": "interface",
+    "description": "Defines the operation the elder uses to hear speech he can understand.",
+    "position": { "x": 420, "y": 0 },
+    "solutionPosition": { "x": 400, "y": 0, "anchorY": "center" },
+    "fields": [],
+    "methods": [
+      {
+        "id": "speech-hear",
+        "label": "hear(): string · contract",
+        "description": "Return words in the human language."
+      }
+    ],
+    "relationships": []
+  },
+  {
+    "id": "translation-circlet",
+    "label": "TranslationCirclet",
+    "kind": "class",
+    "description": "Adapts the troll’s speech to the HumanSpeech interface.",
+    "image": "./resource/15.1.png",
+    "imageAlt": "A metal circlet with a glowing blue rune rests on a stone pedestal.",
+    "imageFraming": 65,
+    "position": { "x": 420, "y": 470 },
+    "solutionPosition": { "x": 400, "y": 360, "anchorY": "center" },
+    "fields": [
+      {
+        "id": "circlet-troll",
+        "label": "troll: Troll",
+        "description": "Keep a reference to the troll whose speech the circlet translates."
+      }
+    ],
+    "methods": [
+      {
+        "id": "circlet-hear",
+        "label": "hear(): string · translate",
+        "description": "Call growl() on the troll and translate the reply into the human language."
+      }
+    ],
+    "relationships": [
+      { "type": "implements", "target": "human-speech" },
+      { "type": "uses", "target": "troll" }
+    ]
+  },
+  {
+    "id": "troll",
+    "label": "Troll",
+    "kind": "class",
+    "description": "The prisoner who speaks the language of trolls.",
+    "image": "./resource/15.2.png",
+    "imageAlt": "A troll stands with heavy chains wrapped around his armor.",
+    "imageFraming": 10,
+    "position": { "x": 0, "y": 470 },
+    "solutionPosition": { "x": 0, "y": 360, "anchorY": "center" },
+    "fields": [],
+    "methods": [
+      {
+        "id": "troll-growl",
+        "label": "growl(): string",
+        "description": "Return the troll’s original reply in his own language."
+      }
+    ],
+    "relationships": []
+  }
+]

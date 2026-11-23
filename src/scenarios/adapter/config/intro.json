@@ -1,0 +1,18 @@
+{
+  "category": "STRUCTURAL PATTERN",
+  "paragraphs": [
+    "The companions returned to the smithy and chained the troll that the masked warrior had driven inside. They wanted to find out what the creatures were planning and why orc raids had become so frequent.",
+    "Narion asked the troll who had sent the orcs. The troll stared blankly, then growled something back. It understood no human words, and no one in the party spoke the language of trolls.",
+    "An old man stepped forward and put on a metal circlet. The troll growled again. This time the old man heard the words in his own language. The circlet worked as a translator.",
+    "What do you call a device that converts speech from one language to another while preserving its meaning?"
+  ],
+  "image": "./resource/15.png",
+  "imageAlt": "An old man wearing a glowing metal circlet listens to a chained troll in the smithy.",
+  "caption": "The first words understood in the smithy",
+  "task": "Build a class diagram in which Elder understands the troll through HumanSpeech. Use TranslationCirclet to adapt the troll’s growl() to the hear() operation the elder expects.",
+  "steps": [
+    "Add the class and interface cards",
+    "Assign fields and methods",
+    "Connect the client, interface, adapter, and troll"
+  ]
+}

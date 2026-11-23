@@ -7,7 +7,7 @@ import { emptyConfiguredLesson, getConfiguredLessonIssues, solutionConfiguredLes
 
 const configs = readConfiguredScenarios(resolve('src/scenarios'));
 const russianConfigs = readConfiguredScenarios(resolve('src/scenarios'), 'ru');
-assert.deepEqual(configs.map(config => config.id).sort(), ['chain', 'command', 'decorator', 'mediator', 'observer', 'proxy', 'state', 'strategy', 'template'],
+assert.deepEqual(configs.map(config => config.id).sort(), ['adapter', 'chain', 'command', 'decorator', 'mediator', 'observer', 'proxy', 'state', 'strategy', 'template'],
   'Discover every lesson from its config directory.');
 assert.deepEqual(russianConfigs.map(config => config.id), configs.map(config => config.id));
 for (const config of configs)
